@@ -6,9 +6,27 @@ import { useTranslation } from 'react-i18next'
 
 export default function BarrierFreeBitesPage() {
   const [filter, setFilter] = useState<"all" | "hearing" | "visual" | "wheelchair" | "cognitive">("all")
-  const [copiedPeiGe] = useState(false)
-  const { t } = useTranslation('translation')
-
+  const [copiedPeiGe, setCopiedPeiGe] = useState(false)
+  const { t, i18n } = useTranslation('translation')
+  const handleCopyAddress = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedPeiGe(true)
+      setTimeout(() => setCopiedPeiGe(false), 1500)
+    } catch {
+      const ta = document.createElement('textarea')
+      ta.value = text
+      document.body.appendChild(ta)
+      ta.select()
+      try {
+        document.execCommand('copy')
+        setCopiedPeiGe(true)
+        setTimeout(() => setCopiedPeiGe(false), 1500)
+      } finally {
+        document.body.removeChild(ta)
+      }
+    }
+  }
 
   const openAmapNavigation = (address: string, name?: string) => {
     const keyword = encodeURIComponent(`${name ? name + ' ' : ''}${address}`.trim())

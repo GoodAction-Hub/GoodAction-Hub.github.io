@@ -15,7 +15,9 @@ export function SwitchLanguage() {
     useEffect(() => {
         // i18next may detect a different language on the client; sync it post-mount
         const detected = i18next.language || 'zh-CN'
-        setCurrentLng(prev => (prev !== detected ? detected : prev))
+        if (detected !== currentLng) {
+            setCurrentLng(detected)
+        }
     }, [])
 
     const handleChange = (value: string) => {
