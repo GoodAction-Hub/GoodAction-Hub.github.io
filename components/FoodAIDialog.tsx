@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogClose } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -19,13 +19,24 @@ interface Recommendation {
   description?: string
 }
 
+// 安全翻译组件，避免水合错误
+function SafeTranslation({ tKey, fallback }: { tKey: string; fallback: string }) {
+  const [mounted, setMounted] = useState(false)
+  const { t } = useTranslation('translation')
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  return <>{mounted ? t(tKey) : fallback}</>
+}
+
 export default function FoodAIDialog() {
   const [open, setOpen] = useState(false)
   const [location, setLocation] = useState("")
   const [preferences, setPreferences] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const { t } = useTranslation()
   const [results, setResults] = useState<Recommendation[]>([])
 
   const onSubmit = async () => {
@@ -62,39 +73,39 @@ export default function FoodAIDialog() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button
-            aria-label={t('bites.labels.ai_recommend')}
+            aria-label="AI美食推荐官"
             className="fixed bottom-6 right-6 z-50 shadow-xl"
             onClick={() => setOpen(true)}
           >
             <WandSparkles className="mr-2 h-4 w-4" />
-            {t('bites.labels.ai_recommend')}
+            <SafeTranslation tKey="bites.labels.ai_recommend" fallback="AI美食推荐官" />
           </Button>
         </DialogTrigger>
 
         <DialogContent className="max-w-xl">
           <DialogHeader>
-            <DialogTitle>{t('bites.ai_dialog.title')}</DialogTitle>
-            <DialogDescription>{t('bites.ai_dialog.description')}</DialogDescription>
+            <DialogTitle><SafeTranslation tKey="bites.ai_dialog.title" fallback="AI美食推荐" /></DialogTitle>
+            <DialogDescription><SafeTranslation tKey="bites.ai_dialog.description" fallback="告诉我您的位置和偏好，我将为您推荐合适的无障碍餐厅" /></DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="grid gap-2">
-              <Label htmlFor="bf-location">{t('bites.ai_dialog.labels.location')}</Label>
+              <Label htmlFor="bf-location"><SafeTranslation tKey="bites.ai_dialog.labels.location" fallback="位置" /></Label>
               <Input
                 id="bf-location"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                placeholder={t('bites.ai_dialog.placeholders.location')}
+                placeholder="请输入您的位置"
               />
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="bf-preferences">{t('bites.ai_dialog.labels.preferences')}</Label>
+              <Label htmlFor="bf-preferences"><SafeTranslation tKey="bites.ai_dialog.labels.preferences" fallback="偏好" /></Label>
               <textarea
                 id="bf-preferences"
                 value={preferences}
                 onChange={(e) => setPreferences(e.target.value)}
-                placeholder={t('bites.ai_dialog.placeholders.preferences')}
+                placeholder="请描述您的饮食偏好和无障碍需求"
                 className={cn(
                   "min-h-[90px] rounded-xl border border-white/20 bg-white/80 px-3 py-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
                   "dark:bg-gray-800/80"
@@ -107,19 +118,19 @@ export default function FoodAIDialog() {
               <Button onClick={onSubmit} disabled={loading || !location.trim()}>
                 {loading ? (
                   <>
-                    <Loader2 className="size-4 animate-spin" /> {t('bites.ai_dialog.actions.generating')}
+                    <Loader2 className="size-4 animate-spin" /> <SafeTranslation tKey="bites.ai_dialog.actions.generating" fallback="生成中..." />
                   </>
                 ) : (
-                  <>{t('bites.ai_dialog.actions.generate')}</>
+                  <><SafeTranslation tKey="bites.ai_dialog.actions.generate" fallback="生成推荐" /></>
                 )}
               </Button>
               <DialogClose asChild>
-                <Button variant="secondary">{t('bites.ai_dialog.actions.close')}</Button>
+                <Button variant="secondary"><SafeTranslation tKey="bites.ai_dialog.actions.close" fallback="关闭" /></Button>
               </DialogClose>
             </div>
 
             {error && (
-              <div className="text-sm text-red-600">{t('bites.ai_dialog.errors.generic')}</div>
+              <div className="text-sm text-red-600"><SafeTranslation tKey="bites.ai_dialog.errors.generic" fallback="生成推荐时出错，请重试" /></div>
             )}
 
             {results.length > 0 && (
