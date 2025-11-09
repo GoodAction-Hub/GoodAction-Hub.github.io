@@ -12,6 +12,18 @@
 
 感谢原项目团队的开源贡献，为我们提供了优秀的技术基础和架构设计。
 
+## 核心功能
+
+- 公益慈善活动截止日期（路径：`/deadlines`）
+  - 汇总公益会议、竞赛与活动的关键时间节点，支持时区展示与人类可读日期
+  - 提供「日历添加」与「倒计时」等便捷功能（组件参考：`components/AddToCalendar.tsx`、`components/CountdownTimer.tsx`、`components/TimelineItem.tsx`）
+  - 活动来源数据在 `data/activities.yml`、`data/competitions.yml`、`data/conferences.yml`，通过统一数据模型渲染
+
+- 无障碍友好美食指南（路径：`/Barrier-Free-Bites`）
+  - 聚焦无障碍就餐体验与友好餐饮空间，提供更易获取的线索与导航入口
+  - 建议使用「大小写一致」的路径访问：`/Barrier-Free-Bites`（注意大小写），以保证在不同托管平台上的最佳路由兼容性
+
+
 ## 如何添加活动
 
 我们非常欢迎社区贡献！如果您发现有未收录的公益慈善会议、竞赛及活动，或者信息有误，请通过提交 Pull Request 的方式来帮助我们更新。
@@ -105,6 +117,19 @@
     ```
 
 现在，在浏览器中打开 [http://localhost:3000](http://localhost:3000) 即可看到项目页面。
+
+### 部署与运维
+
+- 推荐平台：Netlify（已集成 `@netlify/plugin-nextjs`）
+  - 构建命令：`npm run build`
+  - 如遇到路由大小写或缓存相关问题，建议在 Netlify 后台执行 “Clear cache and deploy site” 重新构建
+- 也可选择 GitHub Pages 或华为云部署（参考仓库根目录的相关文档与脚本）
+
+### 反馈与支持
+
+- 提交 Issue：用于报告 bug 或提出功能建议
+- 发起讨论：欢迎在 Discussions 分享使用体验与数据来源
+- 路由与无障碍建议：如发现路径大小写或页面访问问题，请附上平台与链接便于排查
 
 ### 技术栈
 
