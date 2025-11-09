@@ -641,9 +641,6 @@ export default function BarrierFreeBitesPage() {
                     >
                       <SafeTranslation tKey="bites.labels.navigate" fallback="导航" />
                     </button>
-                    {copiedPeiGe && (
-                      <span className="ml-2 text-green-600 text-sm align-middle"><SafeTranslation tKey="bites.labels.copied" fallback="已复制" /></span>
-                    )}
                   </div>
                 </div>
               </div>
@@ -686,9 +683,6 @@ export default function BarrierFreeBitesPage() {
                     >
                       <SafeTranslation tKey="bites.labels.navigate" fallback="导航" />
                     </button>
-                    {copiedPeiGe && (
-                      <span className="ml-2 text-green-600 text-sm align-middle"><SafeTranslation tKey="bites.labels.copied" fallback="已复制" /></span>
-                    )}
                   </div>
                 </div>
               </div>
@@ -731,9 +725,6 @@ export default function BarrierFreeBitesPage() {
                     >
                       <SafeTranslation tKey="bites.labels.navigate" fallback="导航" />
                     </button>
-                    {copiedPeiGe && (
-                      <span className="ml-2 text-green-600 text-sm align-middle"><SafeTranslation tKey="bites.labels.copied" fallback="已复制" /></span>
-                    )}
                   </div>
                 </div>
               </div>
@@ -776,9 +767,6 @@ export default function BarrierFreeBitesPage() {
                     >
                       <SafeTranslation tKey="bites.labels.navigate" fallback="导航" />
                     </button>
-                    {copiedPeiGe && (
-                      <span className="ml-2 text-green-600 text-sm align-middle"><SafeTranslation tKey="bites.labels.copied" fallback="已复制" /></span>
-                    )}
                   </div>
                 </div>
               </div>
@@ -825,9 +813,6 @@ export default function BarrierFreeBitesPage() {
                     >
                       <SafeTranslation tKey="bites.labels.navigate" fallback="导航" />
                     </button>
-                    {copiedPeiGe && (
-                      <span className="ml-2 text-green-600 text-sm align-middle"><SafeTranslation tKey="bites.labels.copied" fallback="已复制" /></span>
-                    )}
                   </div>
                 </div>
               </div>
@@ -887,9 +872,6 @@ export default function BarrierFreeBitesPage() {
                         </>
                       )}
                     </button>
-                    {copiedPeiGe && (
-                      <span className="ml-2 text-green-600 text-sm align-middle"><SafeTranslation tKey="bites.labels.copied" fallback="已复制" /></span>
-                    )}
                   </div>
                 </div>
               </div>
