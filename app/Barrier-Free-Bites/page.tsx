@@ -224,9 +224,14 @@ export default function BarrierFreeBitesPage() {
           .info-section { margin-top: auto; padding-top: var(--space-16); border-top: 1px solid var(--color-card-border); }
           .info-item { display: flex; align-items: flex-start; gap: var(--space-8); margin-bottom: var(--space-8); font-size: var(--font-size-sm); color: var(--color-text-secondary); }
           .info-label { font-weight: var(--font-weight-semibold); color: var(--color-text); min-width: 60px; }
-          .about-section { background: var(--color-surface); border: 1px solid var(--color-card-border); border-radius: var(--radius-lg); padding: var(--space-24); margin-top: var(--space-32); }
-          .about-title { font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); margin-bottom: var(--space-16); color: var(--color-text); }
-          .about-content { font-size: var(--font-size-base); color: var(--color-text-secondary); line-height: 1.8; }
+          .about-section { position: relative; overflow: hidden; background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(255,255,255,0.96)); border: 1px solid var(--color-card-border); border-radius: var(--radius-lg); padding: var(--space-24); margin-top: var(--space-32); box-shadow: 0 12px 28px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04); }
+          .about-section::before { content: ""; position: absolute; inset: -40px -40px; background: radial-gradient(1200px 1200px at 10% 10%, rgba(236,72,153,0.18), transparent 60%), radial-gradient(1000px 1000px at 90% 20%, rgba(168,85,247,0.15), transparent 55%), radial-gradient(800px 800px at 50% 100%, rgba(6,182,212,0.14), transparent 60%); pointer-events: none; filter: blur(40px); }
+          .about-header { position: relative; display: flex; align-items: center; gap: var(--space-12); margin-bottom: var(--space-12); }
+          .about-icon { flex: 0 0 auto; width: 36px; height: 36px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-white); background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 50%, var(--color-secondary) 100%); box-shadow: 0 6px 14px rgba(168,85,247,0.3), 0 2px 6px rgba(236,72,153,0.25); font-size: var(--font-size-lg); }
+          .about-title { font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--color-text); letter-spacing: 0.2px; }
+          .about-content { position: relative; font-size: var(--font-size-base); color: var(--color-text-secondary); line-height: 1.85; }
+          .about-content p { margin-bottom: var(--space-12); }
+          @media (max-width: 768px) { .about-section { padding: var(--space-20); } .about-icon { width: 32px; height: 32px; } .about-title { font-size: var(--font-size-xl); } }
           .icon { font-size: var(--font-size-lg); }
           @media (max-width: 768px) {
             .restaurants-grid { grid-template-columns: 1fr; }
@@ -881,13 +886,18 @@ export default function BarrierFreeBitesPage() {
 
         {/* 关于部分 */}
         <div className="about-section">
-          <h2 className="about-title"><SafeTranslation tKey="bites.about.title" fallback="关于无障碍美食" /></h2>
-          <p>
-            <SafeTranslation tKey="bites.about.p1" fallback="无障碍美食致力于为残障人士提供平等的用餐体验。我们精选了北京及周边地区的无障碍友好餐厅，涵盖听障、视障、轮椅使用者和认知障碍人士的需求。" />
-          </p>
-          <p>
-            <SafeTranslation tKey="bites.about.p2" fallback="每家餐厅都经过实地考察，确保提供真正的无障碍服务。我们希望通过这个平台，让更多人了解和支持无障碍餐饮，共同创造一个更包容的社会。" />
-          </p>
+          <div className="about-header">
+            <span className="about-icon" aria-hidden="true">🍽️</span>
+            <h2 className="about-title"><SafeTranslation tKey="bites.about.title" fallback="关于无障碍美食" /></h2>
+          </div>
+          <div className="about-content">
+            <p>
+              <SafeTranslation tKey="bites.about.p1" fallback="无障碍美食致力于为残障人士提供平等的用餐体验。我们精选了北京及周边地区的无障碍友好餐厅，涵盖听障、视障、轮椅使用者和认知障碍人士的需求。" />
+            </p>
+            <p>
+              <SafeTranslation tKey="bites.about.p2" fallback="每家餐厅都经过实地考察，确保提供真正的无障碍服务。我们希望通过这个平台，让更多人了解和支持无障碍餐饮，共同创造一个更包容的社会。" />
+            </p>
+          </div>
         </div>
 
         </div>
