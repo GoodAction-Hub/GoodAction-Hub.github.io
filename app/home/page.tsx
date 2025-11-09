@@ -19,7 +19,7 @@ export default function HomeSelector() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* 公益慈善活动截止日期 */}
-          <Link href="/" className="group">
+          <Link href="/deadlines" className="group">
             <Card className="overflow-hidden border-pink-200 hover:border-pink-400 transition-colors">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
