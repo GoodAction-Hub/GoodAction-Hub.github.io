@@ -17,11 +17,11 @@ export default function HomeSelector() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
           {/* 公益慈善活动截止日期 */}
-          <Link href="/deadlines" className="group">
-            <Card className="overflow-hidden border-pink-200 hover:border-pink-400 transition-colors">
-              <CardContent className="p-6">
+          <Link href="/deadlines" className="group block h-full">
+            <Card className="h-full min-h-[200px] overflow-hidden border-pink-200 hover:border-pink-400 transition-colors">
+              <CardContent className="p-6 h-full">
                 <div className="flex items-center gap-4">
                   <div className="rounded-xl bg-pink-100 text-pink-600 p-3 group-hover:bg-pink-200 transition-colors">
                     <Calendar className="w-7 h-7" />
@@ -40,9 +40,9 @@ export default function HomeSelector() {
           </Link>
 
           {/* 无障碍友好美食指南 */}
-          <Link href="/Barrier-Free-Bites" className="group">
-            <Card className="overflow-hidden border-purple-200 hover:border-purple-400 transition-colors">
-              <CardContent className="p-6">
+          <Link href="/Barrier-Free-Bites" className="group block h-full">
+            <Card className="h-full min-h-[200px] overflow-hidden border-purple-200 hover:border-purple-400 transition-colors">
+              <CardContent className="p-6 h-full">
                 <div className="flex items-center gap-4">
                   <div className="rounded-xl bg-purple-100 text-purple-600 p-3 group-hover:bg-purple-200 transition-colors">
                     <Utensils className="w-7 h-7" />
