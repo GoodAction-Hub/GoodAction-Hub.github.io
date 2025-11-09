@@ -18,6 +18,8 @@ function SafeTranslation({ tKey, fallback }: { tKey: string; fallback: string })
 
 export default function BarrierFreeBitesPage() {
   const [filter, setFilter] = useState<"all" | "hearing" | "visual" | "wheelchair" | "cognitive">("all")
+  // 定义复制提示状态，避免构建期出现 "Cannot find name 'copiedPeiGe'"
+  const [copiedPeiGe] = useState(false)
   // const [copiedPeiGe, setCopiedPeiGe] = useState(false)
   
   // const handleCopyAddress = async (text: string) => {
