@@ -248,9 +248,43 @@
           comment: '比赛开始时间'
         - deadline: '2025-10-15T18:00:00'
           comment: '颁奖仪式'
+
+- title: 2025「卡赢杯」开源游戏开发大赛
+  description: 本届大赛由原子游创社与罕见病公益社区共同发起，七大高校社团联合承办，鼓励在校大学生与公益社区成员共同使用开源非商业游戏引擎（如 Dora SSR、Godot/Redot、Cocos2d-x 等）或纯编程语言创作兼容 PC（Windows 10/11）的原创游戏；倡导开源协作与公益主题传播，支持 AI 创作并需明确声明工具与素材来源。
+  category: competition
+  tags:
+    - 开源
+    - 游戏开发
+    - 公益
+    - 高校竞赛
+    - AI创作
+    - 开源引擎
+  events:
+    - year: 2025
+      id: kaiying-cup-open-source-game-2025
+      link: https://2025gamejam.osgame.org/
+      timeline:
+        - deadline: '2025-11-15T00:00:00'
+          comment: '比赛官网报名开始'
+        - deadline: '2025-11-21T23:59:59'
+          comment: '比赛官网报名截止'
+        - deadline: '2025-11-22T12:00:00'
+          comment: '公布大赛主题，开始16天开发'
+        - deadline: '2025-12-07T23:59:59'
+          comment: '开发结束（16天）'
+        - deadline: '2025-12-08T00:00:00'
+          comment: '评分开始（专家评审与参赛者互评）'
+        - deadline: '2025-12-21T23:59:59'
+          comment: '评分结束'
+        - deadline: '2025-12-22T00:00:00'
+          comment: '公布获奖名单，开放举报渠道'
+        - deadline: '2025-12-29T00:00:00'
+          comment: '线上颁奖典礼开始'
+        - deadline: '2026-01-04T23:59:59'
+          comment: '线上颁奖典礼结束'
       timezone: Asia/Shanghai
-      date: 2025 年 8 月 1 日 - 10 月 15 日
-      place: 全国各地（多城市联动）
+      date: 2025年11月15日-12月29日
+      place: 线上
 
 - title: 2025中国公益慈善项目大赛
   description: 由中国慈善联合会主办的全国性公益慈善项目竞赛，旨在发现和培育优秀的公益慈善项目，推动公益事业发展。

@@ -52,7 +52,7 @@
         "generic": "AI 推荐失败，请稍后再试"
       }
     },
-    "restaurants": {
+  "restaurants": {
       "peige": {
         "name": "培哥烟囱面包",
         "description": "一家致力于为听障人士提供温暖服务的特色面包店，以其独特的烟囱面包和无障碍沟通环境闻名。店内配备专业手语服务，让每一位顾客都能轻松点餐。",
@@ -206,5 +206,14 @@
         "address": "美国华盛顿特区 联合市场（星巴克无障碍店）"
       }
     }
+  }
+  ,
+  "calendar": {
+    "title": "日历",
+    "download": "下载 .ics",
+    "google": "谷歌日历",
+    "outlook": "Outlook日历",
+    "yahoo": "雅虎日历",
+    "apple": "苹果日历"
   }
 }
