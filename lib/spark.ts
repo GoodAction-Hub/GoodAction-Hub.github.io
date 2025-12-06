@@ -7,7 +7,7 @@ const PATH = "/v3.5/chat"
 const APP_ID = process.env.IFLYTEK_APP_ID || ""
 const API_KEY = process.env.IFLYTEK_API_KEY || ""
 const API_SECRET = process.env.IFLYTEK_API_SECRET || ""
-const SPARK_API_PASSWORD = process.env.SPARK_API_PASSWORD || "vCUmQFjNoriAMAjSemdz:hKIcfQtfAJusmizQGdtU"
+const SPARK_API_PASSWORD = process.env.SPARK_API_PASSWORD || ""
 
 export interface SparkMessage {
   role: "system" | "user" | "assistant"

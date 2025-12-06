@@ -19,7 +19,28 @@
           comment: '学术年会结束'
       timezone: Asia/Shanghai
       date: 2025年11月15日-11月16日
-      place: 中国，北京
+  place: 中国，北京
+
+- title: COSCon'25 女性开源论坛
+  description: 作为中国开源年会的“元老级”分论坛，女性开源论坛以看见女性力量、赋能女性成长为使命，聚焦 AI 与开源的深度融合，邀请来自投资、技术、运营领域的女性先锋进行价值重塑、开放思考与实践路径的分享，并以圆桌讨论探索多元贡献者的成长指南。
+  category: conference
+  tags:
+    - 开源
+    - 女性
+    - 开源社区
+    - AI与开源
+  events:
+    - year: 2025
+      id: coscon25-women-open-source-forum-2025
+      link: https://mp.weixin.qq.com/s/bN97NkulyDa9-GasCEn8CQ
+      timeline:
+        - deadline: '2025-12-06T09:00:00'
+          comment: '论坛开始'
+        - deadline: '2025-12-06T18:00:00'
+          comment: '论坛结束'
+      timezone: Asia/Shanghai
+      date: 2025年12月6日
+      place: 中国，北京，海淀区 · 丽亭华苑酒店
 
 - title: COSCon'25 第十届中国开源年会 OpenGood 开源公益论坛
   description: 当乡村振兴需要更透明的协作方式，当视障者渴望平等触摸数字世界，当罕见病患者期待打破信息孤岛 —— 这些藏在生活里的微小期待，正被开源技术悄悄点亮。开源不再只是代码的共享，更成为传递善意的桥梁，它突破产业边界，走进乡村、残障支持、罕见病帮扶、可持续生活等公益领域，让 "技术向善" 从抽象理念，变成能让普通人感受到温度的落地方案。

@@ -90,6 +90,25 @@ function enforceCatalog(recs: any[], location: string, accessibility: { deafFrie
   return uniq
 }
 
+function safeParseJson(input: string): any {
+  const cleaned = (input || "")
+    .trim()
+    .replace(/^```json/gi, "")
+    .replace(/^```/gi, "")
+    .replace(/```$/gi, "")
+  try {
+    return JSON.parse(cleaned)
+  } catch {
+    const match = cleaned.match(/\{[\s\S]*\}|\[[\s\S]*\]/)
+    if (match) {
+      try {
+        return JSON.parse(match[0])
+      } catch {}
+    }
+    return null
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json()
@@ -106,7 +125,8 @@ export async function POST(req: Request) {
         "你的数据来源仅限于下列候选餐厅（来自页面 Barrier-Free-Bites 的静态内容），不可调用任何联网搜索或外部知识：",
         JSON.stringify(CATALOG),
         "严格只从上述候选中进行筛选与排序，不要发明新的餐厅。",
-        "返回字段严格为 { recommendations: [{ name, address, city, tags, description }] }，按匹配度高到低排序，最多5条。",
+        "只返回合法JSON字符串，不要任何说明、注释或代码块，不要使用中文标点。",
+        "字段名与示例完全一致：{ recommendations: [{ name, address, city, tags, description }] }，按匹配度高到低排序，最多5条。",
       ].join("\n"),
     }
 
@@ -117,19 +137,7 @@ export async function POST(req: Request) {
 
     const text = await chatSpark({ messages: [system, user], temperature: 0.3, maxTokens: 1200 })
 
-    const cleaned = text
-      .trim()
-      .replace(/^```json/gi, "")
-      .replace(/^```/gi, "")
-      .replace(/```$/gi, "")
-
-    let parsed: any
-    try {
-      parsed = JSON.parse(cleaned)
-    } catch {
-      // 如果模型未能返回JSON，降级为基于候选的本地筛选
-      parsed = { recommendations: filterCatalog(location, accessibility) }
-    }
+    const parsed = safeParseJson(text) || { recommendations: filterCatalog(location, accessibility) }
 
     const recommendations = Array.isArray(parsed?.recommendations) ? parsed.recommendations : []
 
