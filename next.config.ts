@@ -1,16 +1,13 @@
-import type { NextConfig } from "next";
-
-const isDev = process.env.NODE_ENV === 'development';
+import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
-  output: 'export',
+  ...(process.env.NEXT_OUTPUT === "export" ? { output: "export" } : {}),
   trailingSlash: true,
   skipTrailingSlashRedirect: true,
   images: {
-    unoptimized: true
+    unoptimized: true,
   },
-  experimental: {
-  }
-};
+  experimental: {},
+}
 
-export default nextConfig;
+export default nextConfig
