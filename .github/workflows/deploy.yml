@@ -32,7 +32,7 @@ jobs:
         with:
           path: |
             .next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lockb', '**/package-lock.json') }}
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock', '**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-nextjs-
 
