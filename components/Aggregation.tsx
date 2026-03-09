@@ -15,7 +15,6 @@ export function Aggregation() {
   }
 
   return (
-
     <div className="w-full">
       {/* Search bar — large, rounded, translucent */}
       <div className="mt-50 w-full bg-black/40 backdrop-blur-md rounded-full px-4 py-3 shadow-2xl flex items-center">
@@ -48,4 +47,3 @@ export function Aggregation() {
     </div>
   )
 }
-

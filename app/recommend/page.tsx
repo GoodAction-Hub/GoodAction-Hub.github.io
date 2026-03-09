@@ -56,8 +56,6 @@ function RecommendPageContent() {
   // Fetch data once on mount
   useEffect(() => {
     const ac = new AbortController()
-    setLoading(true)
-    setError(null)
 
     getData()
       .then((data) => {
@@ -80,23 +78,30 @@ function RecommendPageContent() {
     }
   }, [])
 
-
   // Compute flat events
-  const flatEvents: FlatEvent[] = useMemo(() => allDeadlines.flatMap(item =>
-    item.events.map(event => {
-      const now = DateTime.now().setZone("Asia/Shanghai")
-      const upcomingDeadlines = event.timeline
-        .map(t => DateTime.fromISO(t.deadline, { zone: event.timezone }))
-        .filter(d => d > now)
-        .sort((a, b) => a.toMillis() - b.toMillis())
+  const flatEvents: FlatEvent[] = useMemo(
+    () =>
+      allDeadlines.flatMap((item) =>
+        item.events.map((event) => {
+          const now = DateTime.now().setZone('Asia/Shanghai')
+          const upcomingDeadlines = event.timeline
+            .map((t) => DateTime.fromISO(t.deadline, { zone: event.timezone }))
+            .filter((d) => d > now)
+            .sort((a, b) => a.toMillis() - b.toMillis())
 
-      const nextDeadline = upcomingDeadlines[0] ||
-        DateTime.fromISO(event.timeline[event.timeline.length - 1].deadline, { zone: event.timezone })
-      const timeRemaining = nextDeadline.toMillis() - now.toMillis()
+          const nextDeadline =
+            upcomingDeadlines[0] ||
+            DateTime.fromISO(
+              event.timeline[event.timeline.length - 1].deadline,
+              { zone: event.timezone },
+            )
+          const timeRemaining = nextDeadline.toMillis() - now.toMillis()
 
-      return { item, event, nextDeadline, timeRemaining }
-    })
-  ), [allDeadlines])
+          return { item, event, nextDeadline, timeRemaining }
+        }),
+      ),
+    [allDeadlines],
+  )
 
   // Fuse for fuzzy search
   const fuse = useMemo(() => {
@@ -111,22 +116,21 @@ function RecommendPageContent() {
     let results: FlatEvent[]
 
     if (query.trim() && fuse) {
-      results = fuse.search(query.trim()).map(result => result.item)
+      results = fuse.search(query.trim()).map((result) => result.item)
     } else {
       results = flatEvents
     }
 
-    return results
-      .sort((a, b) => {
-        const aEnded = a.timeRemaining < 0
-        const bEnded = b.timeRemaining < 0
+    return results.sort((a, b) => {
+      const aEnded = a.timeRemaining < 0
+      const bEnded = b.timeRemaining < 0
 
-        if (aEnded && !bEnded) return 1
-        if (!aEnded && bEnded) return -1
-        if (aEnded && bEnded) return b.timeRemaining - a.timeRemaining
+      if (aEnded && !bEnded) return 1
+      if (!aEnded && bEnded) return -1
+      if (aEnded && bEnded) return b.timeRemaining - a.timeRemaining
 
-        return a.timeRemaining - b.timeRemaining
-      })
+      return a.timeRemaining - b.timeRemaining
+    })
   }, [flatEvents, query, fuse])
 
   if (loading) {
@@ -134,7 +138,7 @@ function RecommendPageContent() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">{"events.loading"}</p>
+          <p className="text-slate-600">{'events.loading'}</p>
         </div>
       </div>
     )
@@ -154,24 +158,19 @@ function RecommendPageContent() {
         {/* Recommendations List */}
         <div className="bg-transparent space-y-4">
           {recommendations.map(({ item, event }) => (
-            <EventCard
-              key={`${event.id}`}
-              item={item}
-              event={event}
-            />
+            <EventCard key={`${event.id}`} item={item} event={event} />
           ))}
         </div>
 
         {recommendations.length === 0 && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-slate-900 mb-2">{"events.notFound"}</h3>
-            <p className="text-slate-600">
-              {"events.hint"}
-            </p>
+            <h3 className="text-xl font-semibold text-slate-900 mb-2">
+              {'events.notFound'}
+            </h3>
+            <p className="text-slate-600">{'events.hint'}</p>
           </div>
         )}
-
       </div>
     </div>
   )

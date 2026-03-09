@@ -1,37 +1,52 @@
-"use client"
+'use client'
 
-import { useState, useEffect } from "react"
-import FoodAIDialog from "@/components/FoodAIDialog"
+import { useState } from 'react'
+import FoodAIDialog from '@/components/FoodAIDialog'
 import { useTranslation } from 'react-i18next'
 
 // 安全翻译组件，避免水合错误
-function SafeTranslation({ tKey, fallback }: { tKey: string; fallback: string }) {
-  const [mounted, setMounted] = useState(false)
-  const { t } = useTranslation('translation')
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  return <>{mounted ? t(tKey) : fallback}</>
+function SafeTranslation({
+  tKey,
+  fallback,
+}: {
+  tKey: string
+  fallback: string
+}) {
+  const { t, ready } = useTranslation('translation')
+  return <>{ready ? t(tKey) : fallback}</>
 }
 
 export default function BarrierFreeBitesPage() {
-  const [filter, setFilter] = useState<"all" | "hearing" | "visual" | "wheelchair" | "cognitive">("all")
+  const [filter, setFilter] = useState<
+    'all' | 'hearing' | 'visual' | 'wheelchair' | 'cognitive'
+  >('all')
 
   // 餐厅坐标信息
   const restaurantCoords = {
     // 更新：培哥烟囱面包（合肥庐阳区），与翻译文案一致
-    peige: { lat: 31.863, lng: 117.281, address: "安徽省合肥市庐阳区含山路29号105-3室" },
-    muma: { lat: 39.9365, lng: 116.4477, address: "北京市朝阳区工体北路" },
-    starbucks: { lat: 23.1291, lng: 113.2644, address: "广州市天河区" },
+    peige: {
+      lat: 31.863,
+      lng: 117.281,
+      address: '安徽省合肥市庐阳区含山路29号105-3室',
+    },
+    muma: { lat: 39.9365, lng: 116.4477, address: '北京市朝阳区工体北路' },
+    starbucks: { lat: 23.1291, lng: 113.2644, address: '广州市天河区' },
     // 更新：星巴克东方文德手语门店（广州越秀 文德北路68号 东方文德广场一层），用于页面中的 'starbucks_wende' key
-    starbucks_wende: { lat: 23.129, lng: 113.264, address: "广州市越秀区文德北路68号东方文德广场一层" }
+    starbucks_wende: {
+      lat: 23.129,
+      lng: 113.264,
+      address: '广州市越秀区文德北路68号东方文德广场一层',
+    },
   }
 
-  const [navigationLoading, setNavigationLoading] = useState<string | null>(null)
-  const openAmapNavigation = (place: keyof typeof restaurantCoords | string, name?: string) => {
-    const isKnownKey = typeof place === 'string' && (place in restaurantCoords)
+  const [navigationLoading, setNavigationLoading] = useState<string | null>(
+    null,
+  )
+  const openAmapNavigation = (
+    place: keyof typeof restaurantCoords | string,
+    name?: string,
+  ) => {
+    const isKnownKey = typeof place === 'string' && place in restaurantCoords
     const restaurant = isKnownKey
       ? restaurantCoords[place as keyof typeof restaurantCoords]
       : typeof place !== 'string'
@@ -43,7 +58,7 @@ export default function BarrierFreeBitesPage() {
 
     if (!restaurant) {
       // 未预设坐标：使用网页版标记链接进行导航/定位
-      const address = typeof place === 'string' ? place : (name || '')
+      const address = typeof place === 'string' ? place : name || ''
       const markerUrl = `https://uri.amap.com/marker?address=${encodeURIComponent(address)}&name=${encodeURIComponent(name || address)}`
       window.open(markerUrl, '_blank', 'noopener,noreferrer')
       setNavigationLoading(null)
@@ -75,7 +90,10 @@ export default function BarrierFreeBitesPage() {
         if (document.hidden) {
           clearTimeout(timeout)
           document.body.removeChild(iframe)
-          document.removeEventListener('visibilitychange', handleVisibilityChange)
+          document.removeEventListener(
+            'visibilitychange',
+            handleVisibilityChange,
+          )
           setNavigationLoading(null)
         }
       }
@@ -88,7 +106,10 @@ export default function BarrierFreeBitesPage() {
           if (iframe.parentNode) {
             document.body.removeChild(iframe)
           }
-          document.removeEventListener('visibilitychange', handleVisibilityChange)
+          document.removeEventListener(
+            'visibilitychange',
+            handleVisibilityChange,
+          )
         } catch {
           // 忽略清理错误
         }
@@ -96,7 +117,10 @@ export default function BarrierFreeBitesPage() {
     }
 
     // 检测是否为移动设备
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent,
+      )
 
     if (isMobile) {
       tryOpenApp()
@@ -106,10 +130,14 @@ export default function BarrierFreeBitesPage() {
       setNavigationLoading(null)
     }
   }
-  const isVisible = (type: ("hearing" | "visual" | "wheelchair" | "cognitive") | Array<"hearing" | "visual" | "wheelchair" | "cognitive">) => {
-    if (filter === "all") return true;
-    const types = Array.isArray(type) ? type : [type];
-    return types.includes(filter);
+  const isVisible = (
+    type:
+      | ('hearing' | 'visual' | 'wheelchair' | 'cognitive')
+      | Array<'hearing' | 'visual' | 'wheelchair' | 'cognitive'>,
+  ) => {
+    if (filter === 'all') return true
+    const types = Array.isArray(type) ? type : [type]
+    return types.includes(filter)
   }
 
   const renderFeatures = (key: string, fallbackItems: string[]) => {
@@ -117,7 +145,7 @@ export default function BarrierFreeBitesPage() {
       <li key={idx}>
         <SafeTranslation tKey={`${key}.${idx}`} fallback={fallback} />
       </li>
-    ));
+    ))
   }
 
   return (
@@ -243,9 +271,18 @@ export default function BarrierFreeBitesPage() {
 
           <header className="header">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 bg-clip-text text-transparent mb-3">
-              🌟 <SafeTranslation tKey="bites.title" fallback="无障碍友好美食指南" />
+              🌟{' '}
+              <SafeTranslation
+                tKey="bites.title"
+                fallback="无障碍友好美食指南"
+              />
             </h1>
-            <p className="subtitle"><SafeTranslation tKey="bites.subtitle" fallback="发现包容性餐饮体验" /></p>
+            <p className="subtitle">
+              <SafeTranslation
+                tKey="bites.subtitle"
+                fallback="发现包容性餐饮体验"
+              />
+            </p>
           </header>
 
           <div className="filter-section">
@@ -259,81 +296,186 @@ export default function BarrierFreeBitesPage() {
               className={`filter-btn ${filter === 'hearing' ? 'active' : ''}`}
               onClick={() => setFilter('hearing')}
             >
-              <SafeTranslation tKey="bites.filters.hearing" fallback="听障友好" />
+              <SafeTranslation
+                tKey="bites.filters.hearing"
+                fallback="听障友好"
+              />
             </button>
             <button
               className={`filter-btn ${filter === 'visual' ? 'active' : ''}`}
               onClick={() => setFilter('visual')}
             >
-              <SafeTranslation tKey="bites.filters.visual" fallback="视障友好" />
+              <SafeTranslation
+                tKey="bites.filters.visual"
+                fallback="视障友好"
+              />
             </button>
             <button
               className={`filter-btn ${filter === 'wheelchair' ? 'active' : ''}`}
               onClick={() => setFilter('wheelchair')}
             >
-              <SafeTranslation tKey="bites.filters.wheelchair" fallback="轮椅友好" />
+              <SafeTranslation
+                tKey="bites.filters.wheelchair"
+                fallback="轮椅友好"
+              />
             </button>
             <button
               className={`filter-btn ${filter === 'cognitive' ? 'active' : ''}`}
               onClick={() => setFilter('cognitive')}
             >
-              <SafeTranslation tKey="bites.filters.cognitive" fallback="认知友好" />
+              <SafeTranslation
+                tKey="bites.filters.cognitive"
+                fallback="认知友好"
+              />
             </button>
           </div>
 
           <div className="restaurants-grid">
             {/* 培哥烟囱面包 */}
-            <div className={`restaurant-card ${isVisible('hearing') ? '' : 'hidden'}`} data-accessibility="hearing">
+            <div
+              className={`restaurant-card ${isVisible('hearing') ? '' : 'hidden'}`}
+              data-accessibility="hearing"
+            >
               <div className="card-header">
-                <h2 className="restaurant-name"><SafeTranslation tKey="bites.restaurants.peige.name" fallback="培哥烟囱面包" /></h2>
+                <h2 className="restaurant-name">
+                  <SafeTranslation
+                    tKey="bites.restaurants.peige.name"
+                    fallback="培哥烟囱面包"
+                  />
+                </h2>
                 <div className="accessibility-tags">
                   <span className="tag">
                     <span className="icon">👂</span>
-                    <SafeTranslation tKey="bites.tags.hearing" fallback="听障友好" />
+                    <SafeTranslation
+                      tKey="bites.tags.hearing"
+                      fallback="听障友好"
+                    />
                   </span>
                 </div>
               </div>
               <div className="card-body">
-                <p className="description"><SafeTranslation tKey="bites.restaurants.peige.description" fallback="专为听障人士设计的温馨面包店" /></p>
+                <p className="description">
+                  <SafeTranslation
+                    tKey="bites.restaurants.peige.description"
+                    fallback="专为听障人士设计的温馨面包店"
+                  />
+                </p>
                 <div className="features">
-                  <h3 className="features-title"><SafeTranslation tKey="bites.labels.features" fallback="特色服务" /></h3>
+                  <h3 className="features-title">
+                    <SafeTranslation
+                      tKey="bites.labels.features"
+                      fallback="特色服务"
+                    />
+                  </h3>
                   <ul className="features-list">
-                    {renderFeatures('bites.restaurants.peige.features', ['手语服务', '视觉菜单', '无障碍设施'])}
+                    {renderFeatures('bites.restaurants.peige.features', [
+                      '手语服务',
+                      '视觉菜单',
+                      '无障碍设施',
+                    ])}
                   </ul>
                 </div>
                 <div className="info-section">
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.food" fallback="美食类型" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.peige.food" fallback="面包、咖啡" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.food"
+                        fallback="美食类型"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.peige.food"
+                        fallback="面包、咖啡"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.value" fallback="人均消费" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.peige.value" fallback="¥30-50" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.value"
+                        fallback="人均消费"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.peige.value"
+                        fallback="¥30-50"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.address" fallback="地址" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.peige.address" fallback="安徽省合肥市庐阳区含山路29号105-3室" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.address"
+                        fallback="地址"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.peige.address"
+                        fallback="安徽省合肥市庐阳区含山路29号105-3室"
+                      />
+                    </span>
                     <button
                       aria-label="导航"
-            className="ml-2 px-3 py-1 rounded-md text-white bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 hover:brightness-110 text-xs align-middle transition-all duration-200 flex items-center gap-1 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => openAmapNavigation('peige', '培哥烟囱面包')}
+                      className="ml-2 px-3 py-1 rounded-md text-white bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 hover:brightness-110 text-xs align-middle transition-all duration-200 flex items-center gap-1 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() =>
+                        openAmapNavigation('peige', '培哥烟囱面包')
+                      }
                       disabled={navigationLoading === 'peige'}
                     >
                       {navigationLoading === 'peige' ? (
                         <>
-                          <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          <svg
+                            className="animate-spin h-3 w-3"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              fill="none"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
                           </svg>
-                          <SafeTranslation tKey="bites.labels.navigating" fallback="导航中..." />
+                          <SafeTranslation
+                            tKey="bites.labels.navigating"
+                            fallback="导航中..."
+                          />
                         </>
                       ) : (
                         <>
-                          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <svg
+                            className="h-3 w-3"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
                           </svg>
-                          <SafeTranslation tKey="bites.labels.navigate" fallback="导航" />
+                          <SafeTranslation
+                            tKey="bites.labels.navigate"
+                            fallback="导航"
+                          />
                         </>
                       )}
                     </button>
@@ -343,61 +485,162 @@ export default function BarrierFreeBitesPage() {
             </div>
 
             {/* 木马童话黑暗餐厅 */}
-            <div className={`restaurant-card ${isVisible('visual') ? '' : 'hidden'}`} data-accessibility="visual">
+            <div
+              className={`restaurant-card ${isVisible('visual') ? '' : 'hidden'}`}
+              data-accessibility="visual"
+            >
               <div className="card-header">
-                <h2 className="restaurant-name"><SafeTranslation tKey="bites.restaurants.muma_dark.name" fallback="木马黑暗餐厅" /></h2>
+                <h2 className="restaurant-name">
+                  <SafeTranslation
+                    tKey="bites.restaurants.muma_dark.name"
+                    fallback="木马黑暗餐厅"
+                  />
+                </h2>
                 <div className="accessibility-tags">
                   <span className="tag">
                     <span className="icon">👁️</span>
-                    <SafeTranslation tKey="bites.tags.visual" fallback="视障友好" />
+                    <SafeTranslation
+                      tKey="bites.tags.visual"
+                      fallback="视障友好"
+                    />
                   </span>
                 </div>
               </div>
               <div className="card-body">
-                <p className="description"><SafeTranslation tKey="bites.restaurants.muma_dark.description" fallback="在黑暗中用心感受美食的独特体验" /></p>
+                <p className="description">
+                  <SafeTranslation
+                    tKey="bites.restaurants.muma_dark.description"
+                    fallback="在黑暗中用心感受美食的独特体验"
+                  />
+                </p>
                 <div className="features">
-                  <h3 className="features-title"><SafeTranslation tKey="bites.labels.features" fallback="特色服务" /></h3>
+                  <h3 className="features-title">
+                    <SafeTranslation
+                      tKey="bites.labels.features"
+                      fallback="特色服务"
+                    />
+                  </h3>
                   <ul className="features-list">
-                    {renderFeatures('bites.restaurants.muma_dark.features', ['黑暗用餐体验', '专业引导服务', '感官训练'])}
+                    {renderFeatures('bites.restaurants.muma_dark.features', [
+                      '黑暗用餐体验',
+                      '专业引导服务',
+                      '感官训练',
+                    ])}
                   </ul>
                 </div>
                 <div className="info-section">
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.food" fallback="主要菜品" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.muma_dark.food" fallback="西式料理、创意菜品" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.food"
+                        fallback="主要菜品"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.muma_dark.food"
+                        fallback="西式料理、创意菜品"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.experience" fallback="体验特色" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.muma_dark.experience" fallback="黑暗中的感官盛宴" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.experience"
+                        fallback="体验特色"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.muma_dark.experience"
+                        fallback="黑暗中的感官盛宴"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.value" fallback="人均消费" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.muma_dark.value" fallback="¥150-200" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.value"
+                        fallback="人均消费"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.muma_dark.value"
+                        fallback="¥150-200"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.address" fallback="地址" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.muma_dark.address" fallback="北京市朝阳区工体北路" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.address"
+                        fallback="地址"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.muma_dark.address"
+                        fallback="北京市朝阳区工体北路"
+                      />
+                    </span>
                     <button
                       aria-label="导航"
-            className="ml-2 px-3 py-1 rounded-md text-white bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 hover:brightness-110 text-xs align-middle transition-all duration-200 flex items-center gap-1 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="ml-2 px-3 py-1 rounded-md text-white bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 hover:brightness-110 text-xs align-middle transition-all duration-200 flex items-center gap-1 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={() => openAmapNavigation('muma', '木马黑暗餐厅')}
                       disabled={navigationLoading === 'muma'}
                     >
                       {navigationLoading === 'muma' ? (
                         <>
-                          <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          <svg
+                            className="animate-spin h-3 w-3"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              fill="none"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
                           </svg>
-                          <SafeTranslation tKey="bites.labels.navigating" fallback="导航中..." />
+                          <SafeTranslation
+                            tKey="bites.labels.navigating"
+                            fallback="导航中..."
+                          />
                         </>
                       ) : (
                         <>
-                          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <svg
+                            className="h-3 w-3"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
                           </svg>
-                          <SafeTranslation tKey="bites.labels.navigate" fallback="导航" />
+                          <SafeTranslation
+                            tKey="bites.labels.navigate"
+                            fallback="导航"
+                          />
                         </>
                       )}
                     </button>
@@ -407,13 +650,24 @@ export default function BarrierFreeBitesPage() {
             </div>
 
             {/* 星巴克东方文德手语门店（广州） */}
-            <div className={`restaurant-card ${isVisible('hearing') ? '' : 'hidden'}`} data-accessibility="hearing">
+            <div
+              className={`restaurant-card ${isVisible('hearing') ? '' : 'hidden'}`}
+              data-accessibility="hearing"
+            >
               <div className="card-header">
-                <h2 className="restaurant-name"><SafeTranslation tKey="bites.restaurants.starbucks_wende.name" fallback="星巴克文德店" /></h2>
+                <h2 className="restaurant-name">
+                  <SafeTranslation
+                    tKey="bites.restaurants.starbucks_wende.name"
+                    fallback="星巴克文德店"
+                  />
+                </h2>
                 <div className="accessibility-tags">
                   <span className="tag">
                     <span className="icon">👂</span>
-                    <SafeTranslation tKey="bites.tags.hearing" fallback="听障友好" />
+                    <SafeTranslation
+                      tKey="bites.tags.hearing"
+                      fallback="听障友好"
+                    />
                   </span>
                   <span className="tag">
                     <span className="icon">☕</span>
@@ -422,46 +676,127 @@ export default function BarrierFreeBitesPage() {
                 </div>
               </div>
               <div className="card-body">
-                <p className="description"><SafeTranslation tKey="bites.restaurants.starbucks_wende.description" fallback="提供手语服务的温馨咖啡店" /></p>
+                <p className="description">
+                  <SafeTranslation
+                    tKey="bites.restaurants.starbucks_wende.description"
+                    fallback="提供手语服务的温馨咖啡店"
+                  />
+                </p>
                 <div className="features">
-                  <h3 className="features-title"><SafeTranslation tKey="bites.labels.features" fallback="特色服务" /></h3>
+                  <h3 className="features-title">
+                    <SafeTranslation
+                      tKey="bites.labels.features"
+                      fallback="特色服务"
+                    />
+                  </h3>
                   <ul className="features-list">
-                    {renderFeatures('bites.restaurants.starbucks_wende.features', ['手语服务', '写字板沟通', '视觉菜单'])}
+                    {renderFeatures(
+                      'bites.restaurants.starbucks_wende.features',
+                      ['手语服务', '写字板沟通', '视觉菜单'],
+                    )}
                   </ul>
                 </div>
                 <div className="info-section">
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.food" fallback="主要菜品" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.starbucks_wende.food" fallback="咖啡、轻食、甜品" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.food"
+                        fallback="主要菜品"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.starbucks_wende.food"
+                        fallback="咖啡、轻食、甜品"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.value" fallback="人均消费" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.starbucks_wende.value" fallback="¥40-60" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.value"
+                        fallback="人均消费"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.starbucks_wende.value"
+                        fallback="¥40-60"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.address" fallback="地址" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.starbucks_wende.address" fallback="广州市越秀区文德北路68号东方文德广场一层" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.address"
+                        fallback="地址"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.starbucks_wende.address"
+                        fallback="广州市越秀区文德北路68号东方文德广场一层"
+                      />
+                    </span>
                     <button
                       aria-label="导航"
-            className="ml-2 px-3 py-1 rounded-md text-white bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 hover:brightness-110 text-xs align-middle transition-all duration-200 flex items-center gap-1 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => openAmapNavigation('starbucks_wende', '星巴克文德店')}
+                      className="ml-2 px-3 py-1 rounded-md text-white bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 hover:brightness-110 text-xs align-middle transition-all duration-200 flex items-center gap-1 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() =>
+                        openAmapNavigation('starbucks_wende', '星巴克文德店')
+                      }
                       disabled={navigationLoading === 'starbucks_wende'}
                     >
                       {navigationLoading === 'starbucks_wende' ? (
                         <>
-                          <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          <svg
+                            className="animate-spin h-3 w-3"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              fill="none"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
                           </svg>
-                          <SafeTranslation tKey="bites.labels.navigating" fallback="导航中..." />
+                          <SafeTranslation
+                            tKey="bites.labels.navigating"
+                            fallback="导航中..."
+                          />
                         </>
                       ) : (
                         <>
-                          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <svg
+                            className="h-3 w-3"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
                           </svg>
-                          <SafeTranslation tKey="bites.labels.navigate" fallback="导航" />
+                          <SafeTranslation
+                            tKey="bites.labels.navigate"
+                            fallback="导航"
+                          />
                         </>
                       )}
                     </button>
@@ -471,46 +806,123 @@ export default function BarrierFreeBitesPage() {
             </div>
 
             {/* 全聚德前门店（北京） */}
-            <div className={`restaurant-card ${isVisible('visual') ? '' : 'hidden'}`} data-accessibility="visual">
+            <div
+              className={`restaurant-card ${isVisible('visual') ? '' : 'hidden'}`}
+              data-accessibility="visual"
+            >
               <div className="card-header">
-                <h2 className="restaurant-name"><SafeTranslation tKey="bites.restaurants.quanjude_qianmen.name" fallback="全聚德前门店" /></h2>
+                <h2 className="restaurant-name">
+                  <SafeTranslation
+                    tKey="bites.restaurants.quanjude_qianmen.name"
+                    fallback="全聚德前门店"
+                  />
+                </h2>
                 <div className="accessibility-tags">
                   <span className="tag">
                     <span className="icon">👁️</span>
-                    <SafeTranslation tKey="bites.tags.visual" fallback="视障友好" />
+                    <SafeTranslation
+                      tKey="bites.tags.visual"
+                      fallback="视障友好"
+                    />
                   </span>
                 </div>
               </div>
               <div className="card-body">
-                <p className="description"><SafeTranslation tKey="bites.restaurants.quanjude_qianmen.description" fallback="百年老字号，提供视障友好服务" /></p>
+                <p className="description">
+                  <SafeTranslation
+                    tKey="bites.restaurants.quanjude_qianmen.description"
+                    fallback="百年老字号，提供视障友好服务"
+                  />
+                </p>
                 <div className="features">
-                  <h3 className="features-title"><SafeTranslation tKey="bites.labels.features" fallback="特色服务" /></h3>
+                  <h3 className="features-title">
+                    <SafeTranslation
+                      tKey="bites.labels.features"
+                      fallback="特色服务"
+                    />
+                  </h3>
                   <ul className="features-list">
-                    {renderFeatures('bites.restaurants.quanjude_qianmen.features', ['语音菜单', '服务员引导', '触觉辅助'])}
+                    {renderFeatures(
+                      'bites.restaurants.quanjude_qianmen.features',
+                      ['语音菜单', '服务员引导', '触觉辅助'],
+                    )}
                   </ul>
                 </div>
                 <div className="info-section">
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.food" fallback="主要菜品" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.quanjude_qianmen.food" fallback="北京烤鸭、传统京菜" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.food"
+                        fallback="主要菜品"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.quanjude_qianmen.food"
+                        fallback="北京烤鸭、传统京菜"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.value" fallback="人均消费" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.quanjude_qianmen.value" fallback="¥200-300" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.value"
+                        fallback="人均消费"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.quanjude_qianmen.value"
+                        fallback="¥200-300"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.address" fallback="地址" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.quanjude_qianmen.address" fallback="北京市东城区前门大街" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.address"
+                        fallback="地址"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.quanjude_qianmen.address"
+                        fallback="北京市东城区前门大街"
+                      />
+                    </span>
                     <button
                       aria-label="导航"
                       className="ml-2 px-3 py-1 rounded-md text-white bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 hover:brightness-110 text-xs align-middle transition-all duration-200 flex items-center gap-1 shadow-sm hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => openAmapNavigation('北京市东城区前门大街', '全聚德前门店')}
+                      onClick={() =>
+                        openAmapNavigation(
+                          '北京市东城区前门大街',
+                          '全聚德前门店',
+                        )
+                      }
                     >
-                      <svg className="h-3 w-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <svg
+                        className="h-3 w-3 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
                       </svg>
-                      <SafeTranslation tKey="bites.labels.navigate" fallback="导航" />
+                      <SafeTranslation
+                        tKey="bites.labels.navigate"
+                        fallback="导航"
+                      />
                     </button>
                   </div>
                 </div>
@@ -521,46 +933,117 @@ export default function BarrierFreeBitesPage() {
           {/* 并排展示 那伽树 与 无声饭店 */}
           <div className="card-row">
             {/* 那伽树无障碍咖啡披萨集合店（北京大栅栏） */}
-            <div className={`restaurant-card ${isVisible(['visual','wheelchair']) ? '' : 'hidden'}`} data-accessibility="visual wheelchair">
+            <div
+              className={`restaurant-card ${isVisible(['visual', 'wheelchair']) ? '' : 'hidden'}`}
+              data-accessibility="visual wheelchair"
+            >
               <div className="card-header">
-                <h2 className="restaurant-name"><SafeTranslation tKey="bites.restaurants.naga_tree.name" fallback="那伽树无障碍咖啡披萨集合店" /></h2>
+                <h2 className="restaurant-name">
+                  <SafeTranslation
+                    tKey="bites.restaurants.naga_tree.name"
+                    fallback="那伽树无障碍咖啡披萨集合店"
+                  />
+                </h2>
                 <div className="accessibility-tags">
                   <span className="tag">
                     <span className="icon">👁️</span>
-                    <SafeTranslation tKey="bites.tags.visual" fallback="视障友好" />
+                    <SafeTranslation
+                      tKey="bites.tags.visual"
+                      fallback="视障友好"
+                    />
                   </span>
                   <span className="tag">
                     <span className="icon">♿</span>
-                    <SafeTranslation tKey="bites.tags.wheelchair" fallback="轮椅友好" />
+                    <SafeTranslation
+                      tKey="bites.tags.wheelchair"
+                      fallback="轮椅友好"
+                    />
                   </span>
                 </div>
               </div>
               <div className="card-body">
-                <p className="description"><SafeTranslation tKey="bites.restaurants.naga_tree.description" fallback="专为残障人士设计的无障碍餐厅" /></p>
+                <p className="description">
+                  <SafeTranslation
+                    tKey="bites.restaurants.naga_tree.description"
+                    fallback="专为残障人士设计的无障碍餐厅"
+                  />
+                </p>
                 <div className="features">
-                  <h3 className="features-title"><SafeTranslation tKey="bites.labels.features" fallback="特色服务" /></h3>
+                  <h3 className="features-title">
+                    <SafeTranslation
+                      tKey="bites.labels.features"
+                      fallback="特色服务"
+                    />
+                  </h3>
                   <ul className="features-list">
-                    {renderFeatures('bites.restaurants.naga_tree.features', ['无障碍通道', '盲文菜单', '轮椅友好'])}
+                    {renderFeatures('bites.restaurants.naga_tree.features', [
+                      '无障碍通道',
+                      '盲文菜单',
+                      '轮椅友好',
+                    ])}
                   </ul>
                 </div>
                 <div className="info-section">
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.highlights" fallback="特色亮点" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.naga_tree.highlights" fallback="咖啡、披萨、无障碍设施" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.highlights"
+                        fallback="特色亮点"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.naga_tree.highlights"
+                        fallback="咖啡、披萨、无障碍设施"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.address" fallback="地址" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.naga_tree.address" fallback="北京市西城区大栅栏" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.address"
+                        fallback="地址"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.naga_tree.address"
+                        fallback="北京市西城区大栅栏"
+                      />
+                    </span>
                     <button
                       aria-label="导航"
                       className="ml-2 px-3 py-1 rounded-md text-white bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 hover:brightness-110 text-xs align-middle transition-all duration-200 flex items-center gap-1 shadow-sm hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => openAmapNavigation('北京市西城区大栅栏', '那伽树无障碍咖啡披萨集合店')}
+                      onClick={() =>
+                        openAmapNavigation(
+                          '北京市西城区大栅栏',
+                          '那伽树无障碍咖啡披萨集合店',
+                        )
+                      }
                     >
-                      <svg className="h-3 w-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <svg
+                        className="h-3 w-3 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
                       </svg>
-                      <SafeTranslation tKey="bites.labels.navigate" fallback="导航" />
+                      <SafeTranslation
+                        tKey="bites.labels.navigate"
+                        fallback="导航"
+                      />
                     </button>
                   </div>
                 </div>
@@ -568,47 +1051,122 @@ export default function BarrierFreeBitesPage() {
             </div>
 
             {/* 无声饭店（云南玉溪） */}
-            <div className={`restaurant-card ${isVisible('hearing') ? '' : 'hidden'}`} data-accessibility="hearing">
+            <div
+              className={`restaurant-card ${isVisible('hearing') ? '' : 'hidden'}`}
+              data-accessibility="hearing"
+            >
               <div className="card-header">
-                  <h2 className="restaurant-name"><SafeTranslation tKey="bites.restaurants.silent_yuxi.name" fallback="无声饭店" /></h2>
-                  <div className="accessibility-tags">
-                    <span className="tag">
-                      <span className="icon">👂</span>
-                      <SafeTranslation tKey="bites.tags.hearing" fallback="听障友好" />
-                    </span>
-                    {/* 移除认知友好标签 */}
-                  </div>
+                <h2 className="restaurant-name">
+                  <SafeTranslation
+                    tKey="bites.restaurants.silent_yuxi.name"
+                    fallback="无声饭店"
+                  />
+                </h2>
+                <div className="accessibility-tags">
+                  <span className="tag">
+                    <span className="icon">👂</span>
+                    <SafeTranslation
+                      tKey="bites.tags.hearing"
+                      fallback="听障友好"
+                    />
+                  </span>
+                  {/* 移除认知友好标签 */}
                 </div>
+              </div>
               <div className="card-body">
-                <p className="description"><SafeTranslation tKey="bites.restaurants.silent_yuxi.description" fallback="专为听障和认知障碍人士服务的餐厅" /></p>
+                <p className="description">
+                  <SafeTranslation
+                    tKey="bites.restaurants.silent_yuxi.description"
+                    fallback="专为听障和认知障碍人士服务的餐厅"
+                  />
+                </p>
                 <div className="features">
-                  <h3 className="features-title"><SafeTranslation tKey="bites.labels.features" fallback="特色服务" /></h3>
+                  <h3 className="features-title">
+                    <SafeTranslation
+                      tKey="bites.labels.features"
+                      fallback="特色服务"
+                    />
+                  </h3>
                   <ul className="features-list">
-                    {renderFeatures('bites.restaurants.silent_yuxi.features', ['手语服务', '图片菜单', '耐心服务'])}
+                    {renderFeatures('bites.restaurants.silent_yuxi.features', [
+                      '手语服务',
+                      '图片菜单',
+                      '耐心服务',
+                    ])}
                   </ul>
                 </div>
                 <div className="info-section">
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.food" fallback="主要菜品" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.silent_yuxi.food" fallback="云南菜、米线、过桥米线" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.food"
+                        fallback="主要菜品"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.silent_yuxi.food"
+                        fallback="云南菜、米线、过桥米线"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.value" fallback="人均消费" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.silent_yuxi.value" fallback="¥25-40" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.value"
+                        fallback="人均消费"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.silent_yuxi.value"
+                        fallback="¥25-40"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.address" fallback="地址" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.silent_yuxi.address" fallback="云南省玉溪市红塔区" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.address"
+                        fallback="地址"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.silent_yuxi.address"
+                        fallback="云南省玉溪市红塔区"
+                      />
+                    </span>
                     <button
                       aria-label="导航"
                       className="ml-2 px-3 py-1 rounded-md text-white bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 hover:brightness-110 text-xs align-middle transition-all duration-200 flex items-center gap-1 shadow-sm hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => openAmapNavigation('云南省玉溪市红塔区', '无声饭店')}
+                      onClick={() =>
+                        openAmapNavigation('云南省玉溪市红塔区', '无声饭店')
+                      }
                     >
-                      <svg className="h-3 w-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <svg
+                        className="h-3 w-3 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
                       </svg>
-                      <SafeTranslation tKey="bites.labels.navigate" fallback="导航" />
+                      <SafeTranslation
+                        tKey="bites.labels.navigate"
+                        fallback="导航"
+                      />
                     </button>
                   </div>
                 </div>
@@ -619,184 +1177,480 @@ export default function BarrierFreeBitesPage() {
           {/* 并排展示 圆亮798 与 彩虹天使 */}
           <div className="card-row">
             {/* 圆亮798（北京） */}
-            <div className={`restaurant-card ${isVisible('hearing') ? '' : 'hidden'}`} data-accessibility="hearing">
+            <div
+              className={`restaurant-card ${isVisible('hearing') ? '' : 'hidden'}`}
+              data-accessibility="hearing"
+            >
               <div className="card-header">
-                <h2 className="restaurant-name"><SafeTranslation tKey="bites.restaurants.yuanliang_798.name" fallback="圆亮798" /></h2>
-                  <div className="accessibility-tags">
-                    <span className="tag">
-                      <span className="icon">👂</span>
-                      <SafeTranslation tKey="bites.tags.hearing" fallback="听障友好" />
-                    </span>
-                  </div>
+                <h2 className="restaurant-name">
+                  <SafeTranslation
+                    tKey="bites.restaurants.yuanliang_798.name"
+                    fallback="圆亮798"
+                  />
+                </h2>
+                <div className="accessibility-tags">
+                  <span className="tag">
+                    <span className="icon">👂</span>
+                    <SafeTranslation
+                      tKey="bites.tags.hearing"
+                      fallback="听障友好"
+                    />
+                  </span>
                 </div>
+              </div>
               <div className="card-body">
-                <p className="description"><SafeTranslation tKey="bites.restaurants.yuanliang_798.description" fallback="798艺术区内的听障友好餐厅" /></p>
+                <p className="description">
+                  <SafeTranslation
+                    tKey="bites.restaurants.yuanliang_798.description"
+                    fallback="798艺术区内的听障友好餐厅"
+                  />
+                </p>
                 <div className="features">
-                  <h3 className="features-title"><SafeTranslation tKey="bites.labels.features" fallback="特色服务" /></h3>
+                  <h3 className="features-title">
+                    <SafeTranslation
+                      tKey="bites.labels.features"
+                      fallback="特色服务"
+                    />
+                  </h3>
                   <ul className="features-list">
-                    {renderFeatures('bites.restaurants.yuanliang_798.features', ['手语服务', '艺术氛围', '创意菜品'])}
+                    {renderFeatures(
+                      'bites.restaurants.yuanliang_798.features',
+                      ['手语服务', '艺术氛围', '创意菜品'],
+                    )}
                   </ul>
                 </div>
                 <div className="info-section">
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.food" fallback="主要菜品" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.yuanliang_798.food" fallback="创意菜、咖啡、轻食" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.food"
+                        fallback="主要菜品"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.yuanliang_798.food"
+                        fallback="创意菜、咖啡、轻食"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.value" fallback="人均消费" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.yuanliang_798.value" fallback="¥80-120" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.value"
+                        fallback="人均消费"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.yuanliang_798.value"
+                        fallback="¥80-120"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.address" fallback="地址" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.yuanliang_798.address" fallback="北京市朝阳区798艺术区" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.address"
+                        fallback="地址"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.yuanliang_798.address"
+                        fallback="北京市朝阳区798艺术区"
+                      />
+                    </span>
                     <button
                       aria-label="导航"
                       className="ml-2 px-3 py-1 rounded-md text-white bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 hover:brightness-110 text-xs align-middle transition-all duration-200 flex items-center gap-1 shadow-sm hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => openAmapNavigation('北京市朝阳区798艺术区', '圆亮798')}
+                      onClick={() =>
+                        openAmapNavigation('北京市朝阳区798艺术区', '圆亮798')
+                      }
                     >
-                      <svg className="h-3 w-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <svg
+                        className="h-3 w-3 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
                       </svg>
-                      <SafeTranslation tKey="bites.labels.navigate" fallback="导航" />
+                      <SafeTranslation
+                        tKey="bites.labels.navigate"
+                        fallback="导航"
+                      />
                     </button>
                   </div>
                 </div>
               </div>
             </div>
             {/* 彩虹天使咖啡屋（北京昌平辛庄村） */}
-            <div className={`restaurant-card ${isVisible('hearing') ? '' : 'hidden'}`} data-accessibility="hearing">
+            <div
+              className={`restaurant-card ${isVisible('hearing') ? '' : 'hidden'}`}
+              data-accessibility="hearing"
+            >
               <div className="card-header">
-                  <h2 className="restaurant-name"><SafeTranslation tKey="bites.restaurants.rainbow_angel.name" fallback="彩虹天使" /></h2>
-                  <div className="accessibility-tags">
-                    <span className="tag">
-                      <span className="icon">👂</span>
-                      <SafeTranslation tKey="bites.tags.hearing" fallback="听障友好" />
-                    </span>
-                  </div>
+                <h2 className="restaurant-name">
+                  <SafeTranslation
+                    tKey="bites.restaurants.rainbow_angel.name"
+                    fallback="彩虹天使"
+                  />
+                </h2>
+                <div className="accessibility-tags">
+                  <span className="tag">
+                    <span className="icon">👂</span>
+                    <SafeTranslation
+                      tKey="bites.tags.hearing"
+                      fallback="听障友好"
+                    />
+                  </span>
                 </div>
+              </div>
               <div className="card-body">
-                <p className="description"><SafeTranslation tKey="bites.restaurants.rainbow_angel.description" fallback="温馨的听障友好餐厅" /></p>
+                <p className="description">
+                  <SafeTranslation
+                    tKey="bites.restaurants.rainbow_angel.description"
+                    fallback="温馨的听障友好餐厅"
+                  />
+                </p>
                 <div className="features">
-                  <h3 className="features-title"><SafeTranslation tKey="bites.labels.features" fallback="特色服务" /></h3>
+                  <h3 className="features-title">
+                    <SafeTranslation
+                      tKey="bites.labels.features"
+                      fallback="特色服务"
+                    />
+                  </h3>
                   <ul className="features-list">
-                    {renderFeatures('bites.restaurants.rainbow_angel.features', ['手语服务', '温馨环境', '贴心服务'])}
+                    {renderFeatures(
+                      'bites.restaurants.rainbow_angel.features',
+                      ['手语服务', '温馨环境', '贴心服务'],
+                    )}
                   </ul>
                 </div>
                 <div className="info-section">
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.food" fallback="主要菜品" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.rainbow_angel.food" fallback="家常菜、汤品、小食" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.food"
+                        fallback="主要菜品"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.rainbow_angel.food"
+                        fallback="家常菜、汤品、小食"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.value" fallback="人均消费" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.rainbow_angel.value" fallback="¥35-55" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.value"
+                        fallback="人均消费"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.rainbow_angel.value"
+                        fallback="¥35-55"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.address" fallback="地址" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.rainbow_angel.address" fallback="北京市海淀区中关村" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.address"
+                        fallback="地址"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.rainbow_angel.address"
+                        fallback="北京市海淀区中关村"
+                      />
+                    </span>
                     <button
                       aria-label="导航"
                       className="ml-2 px-3 py-1 rounded-md text-white bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 hover:brightness-110 text-xs align-middle transition-all duration-200 flex items-center gap-1 shadow-sm hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => openAmapNavigation('北京市海淀区中关村', '彩虹天使')}
+                      onClick={() =>
+                        openAmapNavigation('北京市海淀区中关村', '彩虹天使')
+                      }
                     >
-                      <svg className="h-3 w-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <svg
+                        className="h-3 w-3 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
                       </svg>
-                      <SafeTranslation tKey="bites.labels.navigate" fallback="导航" />
+                      <SafeTranslation
+                        tKey="bites.labels.navigate"
+                        fallback="导航"
+                      />
                     </button>
                   </div>
                 </div>
               </div>
             </div>
             {/* 米娜餐厅（北京通州） */}
-            <div className={`restaurant-card ${isVisible('hearing') ? '' : 'hidden'}`} data-accessibility="hearing">
+            <div
+              className={`restaurant-card ${isVisible('hearing') ? '' : 'hidden'}`}
+              data-accessibility="hearing"
+            >
               <div className="card-header">
-                  <h2 className="restaurant-name"><SafeTranslation tKey="bites.restaurants.mina_tongzhou.name" fallback="米娜通州店" /></h2>
-                  <div className="accessibility-tags">
-                    <span className="tag">
-                      <span className="icon">👂</span>
-                      <SafeTranslation tKey="bites.tags.hearing" fallback="听障友好" />
-                    </span>
-                  </div>
+                <h2 className="restaurant-name">
+                  <SafeTranslation
+                    tKey="bites.restaurants.mina_tongzhou.name"
+                    fallback="米娜通州店"
+                  />
+                </h2>
+                <div className="accessibility-tags">
+                  <span className="tag">
+                    <span className="icon">👂</span>
+                    <SafeTranslation
+                      tKey="bites.tags.hearing"
+                      fallback="听障友好"
+                    />
+                  </span>
                 </div>
+              </div>
               <div className="card-body">
-                <p className="description"><SafeTranslation tKey="bites.restaurants.mina_tongzhou.description" fallback="通州区的听障友好餐厅" /></p>
+                <p className="description">
+                  <SafeTranslation
+                    tKey="bites.restaurants.mina_tongzhou.description"
+                    fallback="通州区的听障友好餐厅"
+                  />
+                </p>
                 <div className="features">
-                  <h3 className="features-title"><SafeTranslation tKey="bites.labels.features" fallback="特色服务" /></h3>
+                  <h3 className="features-title">
+                    <SafeTranslation
+                      tKey="bites.labels.features"
+                      fallback="特色服务"
+                    />
+                  </h3>
                   <ul className="features-list">
-                    {renderFeatures('bites.restaurants.mina_tongzhou.features', ['手语服务', '写字板沟通', '耐心服务'])}
+                    {renderFeatures(
+                      'bites.restaurants.mina_tongzhou.features',
+                      ['手语服务', '写字板沟通', '耐心服务'],
+                    )}
                   </ul>
                 </div>
                 <div className="info-section">
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.food" fallback="主要菜品" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.mina_tongzhou.food" fallback="川菜、火锅、小炒" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.food"
+                        fallback="主要菜品"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.mina_tongzhou.food"
+                        fallback="川菜、火锅、小炒"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.value" fallback="人均消费" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.mina_tongzhou.value" fallback="¥45-70" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.value"
+                        fallback="人均消费"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.mina_tongzhou.value"
+                        fallback="¥45-70"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.address" fallback="地址" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.mina_tongzhou.address" fallback="北京市通州区万达广场" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.address"
+                        fallback="地址"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.mina_tongzhou.address"
+                        fallback="北京市通州区万达广场"
+                      />
+                    </span>
                     <button
                       aria-label="导航"
                       className="ml-2 px-3 py-1 rounded-md text-white bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 hover:brightness-110 text-xs align-middle transition-all duration-200 flex items-center gap-1 shadow-sm hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => openAmapNavigation('北京市通州区万达广场', '米娜通州店')}
+                      onClick={() =>
+                        openAmapNavigation('北京市通州区万达广场', '米娜通州店')
+                      }
                     >
-                      <svg className="h-3 w-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <svg
+                        className="h-3 w-3 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
                       </svg>
-                      <SafeTranslation tKey="bites.labels.navigate" fallback="导航" />
+                      <SafeTranslation
+                        tKey="bites.labels.navigate"
+                        fallback="导航"
+                      />
                     </button>
                   </div>
                 </div>
               </div>
             </div>
             {/* 无声火锅（北京） */}
-            <div className={`restaurant-card ${isVisible('hearing') ? '' : 'hidden'}`} data-accessibility="hearing">
+            <div
+              className={`restaurant-card ${isVisible('hearing') ? '' : 'hidden'}`}
+              data-accessibility="hearing"
+            >
               <div className="card-header">
-                <h2 className="restaurant-name"><SafeTranslation tKey="bites.restaurants.silent_hotpot.name" fallback="无声火锅" /></h2>
+                <h2 className="restaurant-name">
+                  <SafeTranslation
+                    tKey="bites.restaurants.silent_hotpot.name"
+                    fallback="无声火锅"
+                  />
+                </h2>
                 <div className="accessibility-tags">
                   <span className="tag">
                     <span className="icon">👂</span>
-                    <SafeTranslation tKey="bites.tags.hearing" fallback="听障友好" />
+                    <SafeTranslation
+                      tKey="bites.tags.hearing"
+                      fallback="听障友好"
+                    />
                   </span>
                 </div>
               </div>
               <div className="card-body">
-                <p className="description"><SafeTranslation tKey="bites.restaurants.silent_hotpot.description" fallback="专为听障人士设计的火锅店" /></p>
+                <p className="description">
+                  <SafeTranslation
+                    tKey="bites.restaurants.silent_hotpot.description"
+                    fallback="专为听障人士设计的火锅店"
+                  />
+                </p>
                 <div className="features">
-                  <h3 className="features-title"><SafeTranslation tKey="bites.labels.features" fallback="特色服务" /></h3>
+                  <h3 className="features-title">
+                    <SafeTranslation
+                      tKey="bites.labels.features"
+                      fallback="特色服务"
+                    />
+                  </h3>
                   <ul className="features-list">
-                    {renderFeatures('bites.restaurants.silent_hotpot.features', ['手语服务', '图片菜单', '无声点餐'])}
+                    {renderFeatures(
+                      'bites.restaurants.silent_hotpot.features',
+                      ['手语服务', '图片菜单', '无声点餐'],
+                    )}
                   </ul>
                 </div>
                 <div className="info-section">
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.food" fallback="主要菜品" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.silent_hotpot.food" fallback="火锅、涮菜、调料" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.food"
+                        fallback="主要菜品"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.silent_hotpot.food"
+                        fallback="火锅、涮菜、调料"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.value" fallback="人均消费" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.silent_hotpot.value" fallback="¥60-90" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.value"
+                        fallback="人均消费"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.silent_hotpot.value"
+                        fallback="¥60-90"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.address" fallback="地址" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.silent_hotpot.address" fallback="北京市丰台区方庄" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.address"
+                        fallback="地址"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.silent_hotpot.address"
+                        fallback="北京市丰台区方庄"
+                      />
+                    </span>
                     <button
                       aria-label="导航"
                       className="ml-2 px-3 py-1 rounded-md text-white bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 hover:brightness-110 text-xs align-middle transition-all duration-200 flex items-center gap-1 shadow-sm hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => openAmapNavigation('北京市丰台区方庄', '无声火锅')}
+                      onClick={() =>
+                        openAmapNavigation('北京市丰台区方庄', '无声火锅')
+                      }
                     >
-                      <svg className="h-3 w-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <svg
+                        className="h-3 w-3 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
                       </svg>
-                      <SafeTranslation tKey="bites.labels.navigate" fallback="导航" />
+                      <SafeTranslation
+                        tKey="bites.labels.navigate"
+                        fallback="导航"
+                      />
                     </button>
                   </div>
                 </div>
@@ -807,129 +1661,308 @@ export default function BarrierFreeBitesPage() {
           {/* 并排展示 春厨 与 星巴克DC店 */}
           <div className="card-row">
             {/* 春厨（北京） */}
-            <div className={`restaurant-card ${isVisible('cognitive') ? '' : 'hidden'}`} data-accessibility="cognitive">
+            <div
+              className={`restaurant-card ${isVisible('cognitive') ? '' : 'hidden'}`}
+              data-accessibility="cognitive"
+            >
               <div className="card-header">
-                <h2 className="restaurant-name"><SafeTranslation tKey="bites.restaurants.chunchu.name" fallback="春厨" /></h2>
+                <h2 className="restaurant-name">
+                  <SafeTranslation
+                    tKey="bites.restaurants.chunchu.name"
+                    fallback="春厨"
+                  />
+                </h2>
                 <div className="accessibility-tags">
                   <span className="tag">
                     <span className="icon">🧠</span>
-                    <SafeTranslation tKey="bites.tags.cognitive" fallback="认知友好" />
+                    <SafeTranslation
+                      tKey="bites.tags.cognitive"
+                      fallback="认知友好"
+                    />
                   </span>
                 </div>
               </div>
               <div className="card-body">
-                <p className="description"><SafeTranslation tKey="bites.restaurants.chunchu.description" fallback="专为认知障碍人士设计的餐厅" /></p>
+                <p className="description">
+                  <SafeTranslation
+                    tKey="bites.restaurants.chunchu.description"
+                    fallback="专为认知障碍人士设计的餐厅"
+                  />
+                </p>
                 <div className="features">
-                  <h3 className="features-title"><SafeTranslation tKey="bites.labels.features" fallback="特色服务" /></h3>
+                  <h3 className="features-title">
+                    <SafeTranslation
+                      tKey="bites.labels.features"
+                      fallback="特色服务"
+                    />
+                  </h3>
                   <ul className="features-list">
-                    {renderFeatures('bites.restaurants.chunchu.features', ['简化菜单', '耐心服务', '清晰标识'])}
+                    {renderFeatures('bites.restaurants.chunchu.features', [
+                      '简化菜单',
+                      '耐心服务',
+                      '清晰标识',
+                    ])}
                   </ul>
                 </div>
                 <div className="info-section">
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.food" fallback="主要菜品" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.chunchu.food" fallback="家常菜、汤品、面食" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.food"
+                        fallback="主要菜品"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.chunchu.food"
+                        fallback="家常菜、汤品、面食"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.value" fallback="人均消费" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.chunchu.value" fallback="¥30-50" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.value"
+                        fallback="人均消费"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.chunchu.value"
+                        fallback="¥30-50"
+                      />
+                    </span>
                   </div>
                   <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.address" fallback="地址" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.chunchu.address" fallback="北京市西城区德胜门" /></span>
+                    <span className="info-label">
+                      <SafeTranslation
+                        tKey="bites.labels.address"
+                        fallback="地址"
+                      />
+                    </span>
+                    <span>
+                      <SafeTranslation
+                        tKey="bites.restaurants.chunchu.address"
+                        fallback="北京市西城区德胜门"
+                      />
+                    </span>
                     <button
                       aria-label="导航"
                       className="ml-2 px-3 py-1 rounded-md text-white bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 hover:brightness-110 text-xs align-middle transition-all duration-200 flex items-center gap-1 shadow-sm hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => openAmapNavigation('北京市西城区德胜门', '春厨')}
+                      onClick={() =>
+                        openAmapNavigation('北京市西城区德胜门', '春厨')
+                      }
                     >
-                      <svg className="h-3 w-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <svg
+                        className="h-3 w-3 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
                       </svg>
-                      <SafeTranslation tKey="bites.labels.navigate" fallback="导航" />
+                      <SafeTranslation
+                        tKey="bites.labels.navigate"
+                        fallback="导航"
+                      />
                     </button>
                   </div>
                 </div>
               </div>
 
-            {/* 星巴克DC店（北京） */}
-            <div className={`restaurant-card ${isVisible('wheelchair') ? '' : 'hidden'}`} data-accessibility="wheelchair">
-              <div className="card-header">
-                <h2 className="restaurant-name"><SafeTranslation tKey="bites.restaurants.starbucks_dc.name" fallback="星巴克DC店" /></h2>
-                <div className="accessibility-tags">
-                  <span className="tag">
-                    <span className="icon">♿</span>
-                    <SafeTranslation tKey="bites.tags.wheelchair" fallback="轮椅友好" />
-                  </span>
-                </div>
-              </div>
-              <div className="card-body">
-                <p className="description"><SafeTranslation tKey="bites.restaurants.starbucks_dc.description" fallback="提供轮椅无障碍通道的咖啡店" /></p>
-                <div className="features">
-                  <h3 className="features-title"><SafeTranslation tKey="bites.labels.features" fallback="特色服务" /></h3>
-                  <ul className="features-list">
-                    {renderFeatures('bites.restaurants.starbucks_dc.features', ['无障碍通道', '轮椅友好桌椅', '便民设施'])}
-                  </ul>
-                </div>
-                <div className="info-section">
-                  <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.food" fallback="主要菜品" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.starbucks_dc.food" fallback="咖啡、轻食、甜品" /></span>
+              {/* 星巴克DC店（北京） */}
+              <div
+                className={`restaurant-card ${isVisible('wheelchair') ? '' : 'hidden'}`}
+                data-accessibility="wheelchair"
+              >
+                <div className="card-header">
+                  <h2 className="restaurant-name">
+                    <SafeTranslation
+                      tKey="bites.restaurants.starbucks_dc.name"
+                      fallback="星巴克DC店"
+                    />
+                  </h2>
+                  <div className="accessibility-tags">
+                    <span className="tag">
+                      <span className="icon">♿</span>
+                      <SafeTranslation
+                        tKey="bites.tags.wheelchair"
+                        fallback="轮椅友好"
+                      />
+                    </span>
                   </div>
-                  <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.value" fallback="人均消费" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.starbucks_dc.value" fallback="¥40-60" /></span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label"><SafeTranslation tKey="bites.labels.address" fallback="地址" /></span>
-                    <span><SafeTranslation tKey="bites.restaurants.starbucks_dc.address" fallback="北京市朝阳区国贸" /></span>
-                    <button
-                      aria-label="导航"
-            className="ml-2 px-3 py-1 rounded-md text-white bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 hover:brightness-110 text-xs align-middle transition-all duration-200 flex items-center gap-1 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => openAmapNavigation('starbucks_dc', '星巴克DC店')}
-                      disabled={navigationLoading === 'starbucks_dc'}
-                    >
-                      {navigationLoading === 'starbucks_dc' ? (
-                        <>
-                          <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          <SafeTranslation tKey="bites.labels.navigating" fallback="导航中..." />
-                        </>
-                      ) : (
-                        <>
-                          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                          <SafeTranslation tKey="bites.labels.navigate" fallback="导航" />
-                        </>
+                </div>
+                <div className="card-body">
+                  <p className="description">
+                    <SafeTranslation
+                      tKey="bites.restaurants.starbucks_dc.description"
+                      fallback="提供轮椅无障碍通道的咖啡店"
+                    />
+                  </p>
+                  <div className="features">
+                    <h3 className="features-title">
+                      <SafeTranslation
+                        tKey="bites.labels.features"
+                        fallback="特色服务"
+                      />
+                    </h3>
+                    <ul className="features-list">
+                      {renderFeatures(
+                        'bites.restaurants.starbucks_dc.features',
+                        ['无障碍通道', '轮椅友好桌椅', '便民设施'],
                       )}
-                    </button>
+                    </ul>
+                  </div>
+                  <div className="info-section">
+                    <div className="info-item">
+                      <span className="info-label">
+                        <SafeTranslation
+                          tKey="bites.labels.food"
+                          fallback="主要菜品"
+                        />
+                      </span>
+                      <span>
+                        <SafeTranslation
+                          tKey="bites.restaurants.starbucks_dc.food"
+                          fallback="咖啡、轻食、甜品"
+                        />
+                      </span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">
+                        <SafeTranslation
+                          tKey="bites.labels.value"
+                          fallback="人均消费"
+                        />
+                      </span>
+                      <span>
+                        <SafeTranslation
+                          tKey="bites.restaurants.starbucks_dc.value"
+                          fallback="¥40-60"
+                        />
+                      </span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">
+                        <SafeTranslation
+                          tKey="bites.labels.address"
+                          fallback="地址"
+                        />
+                      </span>
+                      <span>
+                        <SafeTranslation
+                          tKey="bites.restaurants.starbucks_dc.address"
+                          fallback="北京市朝阳区国贸"
+                        />
+                      </span>
+                      <button
+                        aria-label="导航"
+                        className="ml-2 px-3 py-1 rounded-md text-white bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 hover:brightness-110 text-xs align-middle transition-all duration-200 flex items-center gap-1 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() =>
+                          openAmapNavigation('starbucks_dc', '星巴克DC店')
+                        }
+                        disabled={navigationLoading === 'starbucks_dc'}
+                      >
+                        {navigationLoading === 'starbucks_dc' ? (
+                          <>
+                            <svg
+                              className="animate-spin h-3 w-3"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                                fill="none"
+                              ></circle>
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              ></path>
+                            </svg>
+                            <SafeTranslation
+                              tKey="bites.labels.navigating"
+                              fallback="导航中..."
+                            />
+                          </>
+                        ) : (
+                          <>
+                            <svg
+                              className="h-3 w-3"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                            </svg>
+                            <SafeTranslation
+                              tKey="bites.labels.navigate"
+                              fallback="导航"
+                            />
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* 关于部分 */}
-        <div className="about-section">
-          <div className="about-header">
-            <span className="about-icon" aria-hidden="true">🍽️</span>
-            <h2 className="about-title"><SafeTranslation tKey="bites.about.title" fallback="关于无障碍美食" /></h2>
+          {/* 关于部分 */}
+          <div className="about-section">
+            <div className="about-header">
+              <span className="about-icon" aria-hidden="true">
+                🍽️
+              </span>
+              <h2 className="about-title">
+                <SafeTranslation
+                  tKey="bites.about.title"
+                  fallback="关于无障碍美食"
+                />
+              </h2>
+            </div>
+            <div className="about-content">
+              <p>
+                <SafeTranslation
+                  tKey="bites.about.p1"
+                  fallback="无障碍美食致力于为残障人士提供平等的用餐体验。我们精选了北京及周边地区的无障碍友好餐厅，涵盖听障、视障、轮椅使用者和认知障碍人士的需求。"
+                />
+              </p>
+              <p>
+                <SafeTranslation
+                  tKey="bites.about.p2"
+                  fallback="每家餐厅都经过实地考察，确保提供真正的无障碍服务。我们希望通过这个平台，让更多人了解和支持无障碍餐饮，共同创造一个更包容的社会。"
+                />
+              </p>
+            </div>
           </div>
-          <div className="about-content">
-            <p>
-              <SafeTranslation tKey="bites.about.p1" fallback="无障碍美食致力于为残障人士提供平等的用餐体验。我们精选了北京及周边地区的无障碍友好餐厅，涵盖听障、视障、轮椅使用者和认知障碍人士的需求。" />
-            </p>
-            <p>
-              <SafeTranslation tKey="bites.about.p2" fallback="每家餐厅都经过实地考察，确保提供真正的无障碍服务。我们希望通过这个平台，让更多人了解和支持无障碍餐饮，共同创造一个更包容的社会。" />
-            </p>
-          </div>
-        </div>
-
         </div>
       </div>
       {/* AI 美食推荐对话框触发器 */}

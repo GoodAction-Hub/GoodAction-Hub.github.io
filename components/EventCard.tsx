@@ -9,7 +9,7 @@ import { DeadlineItem, EventData, isEventEnded } from '@/lib/data'
 import { useEventStore } from '@/lib/store'
 import { formatTimezoneToUTC } from '@/lib/utils'
 import { Calendar, Clock, ExternalLink, MapPin, Star } from 'lucide-react'
-import { DateTime } from "luxon"
+import { DateTime } from 'luxon'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -20,16 +20,33 @@ interface EventCardProps {
   event: EventData
 }
 
+interface CategoryBadgeProps {
+  category: DeadlineItem['category']
+  t: (key: string) => string
+}
 
+function CategoryBadge({ category, t }: CategoryBadgeProps) {
+  return (
+    <div
+      className={`inline-flex px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl ${
+        {
+          conference:
+            'bg-gradient-to-r from-purple-500 to-purple-600 text-white',
+          competition: 'bg-gradient-to-r from-pink-500 to-pink-600 text-white',
+          activity: 'bg-gradient-to-r from-cyan-500 to-cyan-600 text-white',
+        }[category] ||
+        'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
+      }`}
+    >
+      {t(`filter.category_${category}`)}
+    </div>
+  )
+}
 
 export function EventCard({ item, event }: EventCardProps) {
-  const { t } = useTranslation('common');
-  const {
-    favorites,
-    toggleFavorite,
-    mounted,
-    displayTimezone
-  } = useEventStore()
+  const { t } = useTranslation('common')
+  const { favorites, toggleFavorite, mounted, displayTimezone } =
+    useEventStore()
 
   const cardId = `${event.id}`
   const isFavorited = favorites.includes(cardId)
@@ -47,75 +64,61 @@ export function EventCard({ item, event }: EventCardProps) {
       ...t,
       // 正确处理时区：将原始字符串解析为指定时区的日期
       date: DateTime.fromISO(t.deadline, { zone: event.timezone }),
-      index
+      index,
     }))
     // 转换到显示时区进行比较
-    .filter(t => t.date.setZone(displayTimezone) > now)
+    .filter((t) => t.date.setZone(displayTimezone) > now)
     .sort((a, b) => a.date.toMillis() - b.date.toMillis())
 
   const nextDeadline = upcomingDeadlines[0]
 
   // 转换时区为UTC偏移格式
-  const displayTimezoneUTC = formatTimezoneToUTC(displayTimezone);
-  const eventTimezoneUTC = formatTimezoneToUTC(event.timezone);
+  const displayTimezoneUTC = formatTimezoneToUTC(displayTimezone)
+  const eventTimezoneUTC = formatTimezoneToUTC(event.timezone)
 
-  const upcomingIndexes = upcomingDeadlines.map(t => t.index);
+  const upcomingIndexes = upcomingDeadlines.map((t) => t.index)
 
   // timeline 横向滑动相关逻辑
   // scrollContentRef: timeline 主体容器，用于检测内容宽度
   // scrollViewportRef: ScrollArea Viewport，用于检测可视宽度和自动滚动
   // activeDotRef: 当前 isActive 节点的 ref，实现自动居中
   // showScrollHint: 是否显示滑动指引
-  const scrollContentRef = useRef<HTMLDivElement>(null);
-  const scrollViewportRef = useRef<HTMLDivElement>(null);
-  const activeDotRef = useRef<HTMLDivElement>(null);
-  const [showScrollHint, setShowScrollHint] = useState(false);
+  const scrollContentRef = useRef<HTMLDivElement>(null)
+  const scrollViewportRef = useRef<HTMLDivElement>(null)
+  const activeDotRef = useRef<HTMLDivElement>(null)
+  const [showScrollHint, setShowScrollHint] = useState(false)
 
   // 检测 timeline 是否溢出，决定是否显示滑动指引
   useEffect(() => {
     const checkOverflow = () => {
       if (scrollContentRef.current && scrollViewportRef.current) {
-        const contentWidth = scrollContentRef.current.scrollWidth;
-        const viewportWidth = scrollViewportRef.current.offsetWidth;
-        setShowScrollHint(contentWidth > viewportWidth + 1);
+        const contentWidth = scrollContentRef.current.scrollWidth
+        const viewportWidth = scrollViewportRef.current.offsetWidth
+        setShowScrollHint(contentWidth > viewportWidth + 1)
       }
-    };
-    setTimeout(checkOverflow, 0);
-    window.addEventListener("resize", checkOverflow);
-    return () => window.removeEventListener("resize", checkOverflow);
-  }, [event.timeline]);
+    }
+    setTimeout(checkOverflow, 0)
+    window.addEventListener('resize', checkOverflow)
+    return () => window.removeEventListener('resize', checkOverflow)
+  }, [event.timeline])
 
   // timeline 溢出时，自动将 isActive 节点平滑滚动到 ScrollArea Viewport 的中间位置
   useEffect(() => {
-    if (
-      showScrollHint &&
-      scrollViewportRef.current &&
-      activeDotRef.current
-    ) {
-      const viewport = scrollViewportRef.current;
-      const active = activeDotRef.current;
-      const viewportWidth = viewport.offsetWidth;
-      const activeLeft = active.offsetLeft;
-      const activeWidth = active.offsetWidth;
-      const targetScrollLeft = activeLeft - (viewportWidth / 2) + (activeWidth / 2);
-      viewport.scrollTo({ left: targetScrollLeft, behavior: "smooth" });
+    if (showScrollHint && scrollViewportRef.current && activeDotRef.current) {
+      const viewport = scrollViewportRef.current
+      const active = activeDotRef.current
+      const viewportWidth = viewport.offsetWidth
+      const activeLeft = active.offsetLeft
+      const activeWidth = active.offsetWidth
+      const targetScrollLeft = activeLeft - viewportWidth / 2 + activeWidth / 2
+      viewport.scrollTo({ left: targetScrollLeft, behavior: 'smooth' })
     }
-  }, [showScrollHint, event.timeline]);
-
-  // 类别标签组件
-  const CategoryBadge = () => (
-    <div className={`inline-flex px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl ${{
-      'conference': 'bg-gradient-to-r from-purple-500 to-purple-600 text-white',
-      'competition': 'bg-gradient-to-r from-pink-500 to-pink-600 text-white',
-      'activity': 'bg-gradient-to-r from-cyan-500 to-cyan-600 text-white'
-    }[item.category] || 'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
-      }`}>
-      {t(`filter.category_${item.category}`)}
-    </div>
-  );
+  }, [showScrollHint, event.timeline])
 
   return (
-    <Card className={`transition-all duration-300 hover:shadow-lg ${ended ? 'opacity-60 grayscale' : ''}`}>
+    <Card
+      className={`transition-all duration-300 hover:shadow-lg ${ended ? 'opacity-60 grayscale' : ''}`}
+    >
       <CardContent>
         <div className="flex flex-col md:flex-row md:gap-6">
           {/* 左侧内容区域 */}
@@ -128,10 +131,15 @@ export function EventCard({ item, event }: EventCardProps) {
                   {/* 类别标签与标题 */}
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <div className="mb-1 sm:mb-0 sm:mr-2 flex">
-                      <CategoryBadge />
+                      <CategoryBadge category={item.category} t={t} />
                     </div>
                     <div className="flex items-start gap-2 flex-wrap">
-                      <Link href={event.link} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
+                      <Link
+                        href={event.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline flex items-center gap-1"
+                      >
                         <h2 className="text-xl font-semibold leading-tight break-words underline">
                           {item.title}
                         </h2>
@@ -148,10 +156,11 @@ export function EventCard({ item, event }: EventCardProps) {
                         )}
                         {mounted && (
                           <Star
-                            className={`w-4 h-4 cursor-pointer transition-colors ${isFavorited
-                              ? 'text-yellow-400 fill-yellow-400'
-                              : 'text-gray-400 hover:text-yellow-500'
-                              }`}
+                            className={`w-4 h-4 cursor-pointer transition-colors ${
+                              isFavorited
+                                ? 'text-yellow-400 fill-yellow-400'
+                                : 'text-gray-400 hover:text-yellow-500'
+                            }`}
                             onClick={() => toggleFavorite(cardId)}
                           />
                         )}
@@ -199,17 +208,19 @@ export function EventCard({ item, event }: EventCardProps) {
               <div className="space-y-3">
                 <div className="flex items-center gap-2 flex-nowrap">
                   <Clock className="w-4 h-4" />
-                  <span className="text-sm font-medium">{t("events.timeline")}</span>
+                  <span className="text-sm font-medium">
+                    {t('events.timeline')}
+                  </span>
                   {!ended && nextDeadline && (
                     <div className="ml-auto">
                       <AddToCalendar
                         title={item.title}
                         description={item.description}
                         location={event.place}
-                        startDate={nextDeadline.date.toFormat("yyyy-MM-dd")}
-                        endDate={nextDeadline.date.toFormat("yyyy-MM-dd")}
-                        startTime={nextDeadline.date.toFormat("HH:mm")}
-                        endTime={nextDeadline.date.toFormat("HH:mm")}
+                        startDate={nextDeadline.date.toFormat('yyyy-MM-dd')}
+                        endDate={nextDeadline.date.toFormat('yyyy-MM-dd')}
+                        startTime={nextDeadline.date.toFormat('HH:mm')}
+                        endTime={nextDeadline.date.toFormat('HH:mm')}
                         timeZone={event.timezone}
                       />
                     </div>
@@ -230,7 +241,11 @@ export function EventCard({ item, event }: EventCardProps) {
                           isUpcoming={upcomingIndexes.slice(1).includes(index)}
                           totalEvents={event.timeline.length}
                           index={index}
-                          ref={nextDeadline?.index === index ? activeDotRef : undefined}
+                          ref={
+                            nextDeadline?.index === index
+                              ? activeDotRef
+                              : undefined
+                          }
                         />
                       ))}
                     </div>
@@ -251,7 +266,10 @@ export function EventCard({ item, event }: EventCardProps) {
                         {nextDeadline.comment}
                       </div>
                       <div className="text-xs text-gray-600">
-                        {nextDeadline.date.setZone(displayTimezone).toFormat('yyyy-MM-dd HH:mm:ss')} ({displayTimezoneUTC})
+                        {nextDeadline.date
+                          .setZone(displayTimezone)
+                          .toFormat('yyyy-MM-dd HH:mm:ss')}{' '}
+                        ({displayTimezoneUTC})
                       </div>
                     </div>
 
@@ -265,10 +283,10 @@ export function EventCard({ item, event }: EventCardProps) {
                 <div className="p-3 bg-gradient-to-br from-gray-100/80 to-gray-200/80 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg">
                   <div className="text-center">
                     <div className="text-sm font-bold bg-gradient-to-r from-gray-600 to-gray-700 bg-clip-text text-transparent mb-1">
-                      {t("events.ended")}
+                      {t('events.ended')}
                     </div>
                     <div className="text-xs text-gray-500">
-                      {t("events.allDeadlinesPassed")}
+                      {t('events.allDeadlinesPassed')}
                     </div>
                   </div>
                 </div>
@@ -283,17 +301,21 @@ export function EventCard({ item, event }: EventCardProps) {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              <span className="text-sm font-medium">{t("events.timeline")}</span>
+              <span className="text-sm font-medium">
+                {t('events.timeline')}
+              </span>
               {!ended && nextDeadline && (
                 <div className="mt-2 ml-auto">
                   <AddToCalendar
                     title={item.title}
                     description={item.description}
                     location={event.place}
-                    startDate={nextDeadline.date.toFormat("yyyy-MM-dd")}
-                    endDate={nextDeadline.date.toFormat("yyyy-MM-dd")}
-                    startTime={nextDeadline.date.toFormat("HH:mm")}
-                    endTime={nextDeadline.date.plus({ hours: 1 }).toFormat("HH:mm")}
+                    startDate={nextDeadline.date.toFormat('yyyy-MM-dd')}
+                    endDate={nextDeadline.date.toFormat('yyyy-MM-dd')}
+                    startTime={nextDeadline.date.toFormat('HH:mm')}
+                    endTime={nextDeadline.date
+                      .plus({ hours: 1 })
+                      .toFormat('HH:mm')}
                     timeZone={event.timezone}
                   />
                 </div>
@@ -305,7 +327,10 @@ export function EventCard({ item, event }: EventCardProps) {
               {/* 左右渐变遮罩，z-10，避免遮挡 tooltip */}
               <div className="pointer-events-none absolute left-0 top-0 h-full w-6 z-10 bg-gradient-to-r from-gray-50/90 to-transparent" />
               <div className="pointer-events-none absolute right-0 top-0 h-full w-6 z-10 bg-gradient-to-l from-gray-50/90 to-transparent" />
-              <ScrollArea className="w-full pb-6" viewportRef={scrollViewportRef}>
+              <ScrollArea
+                className="w-full pb-6"
+                viewportRef={scrollViewportRef}
+              >
                 <div
                   className="relative flex items-center h-16 min-w-[320px]"
                   style={{ minWidth: `${event.timeline.length * 80}px` }}
@@ -325,7 +350,11 @@ export function EventCard({ item, event }: EventCardProps) {
                         isUpcoming={upcomingIndexes.slice(1).includes(index)}
                         totalEvents={event.timeline.length}
                         index={index}
-                        ref={nextDeadline?.index === index ? activeDotRef : undefined}
+                        ref={
+                          nextDeadline?.index === index
+                            ? activeDotRef
+                            : undefined
+                        }
                       />
                     ))}
                   </div>
@@ -333,9 +362,21 @@ export function EventCard({ item, event }: EventCardProps) {
               </ScrollArea>
               {showScrollHint && (
                 <div className="absolute right-2 bottom-2 flex items-center z-30 animate-bounce">
-                  <span className="text-xs text-gray-400 mr-1">{t('events.swipe')}</span>
-                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14m-7-7l7 7-7 7" />
+                  <span className="text-xs text-gray-400 mr-1">
+                    {t('events.swipe')}
+                  </span>
+                  <svg
+                    className="w-4 h-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 12h14m-7-7l7 7-7 7"
+                    />
                   </svg>
                 </div>
               )}
@@ -355,7 +396,10 @@ export function EventCard({ item, event }: EventCardProps) {
                       {nextDeadline.comment}
                     </div>
                     <div className="text-xs text-gray-600">
-                      {nextDeadline.date.setZone(displayTimezone).toFormat('yyyy-MM-dd HH:mm:ss')} ({displayTimezoneUTC})
+                      {nextDeadline.date
+                        .setZone(displayTimezone)
+                        .toFormat('yyyy-MM-dd HH:mm:ss')}{' '}
+                      ({displayTimezoneUTC})
                     </div>
                   </div>
                   <div className="flex justify-center">

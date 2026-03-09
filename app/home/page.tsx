@@ -1,9 +1,9 @@
-"use client"
+'use client'
 
-import Link from "next/link"
-import Image from "next/image"
-import { Card, CardContent } from "@/components/ui/card"
-import { Calendar, Utensils } from "lucide-react"
+import Link from 'next/link'
+import Image from 'next/image'
+import { Card, CardContent } from '@/components/ui/card'
+import { Calendar, Utensils } from 'lucide-react'
 
 export default function HomeSelector() {
   return (
@@ -62,7 +62,7 @@ export default function HomeSelector() {
           </Link>
         </div>
       </div>
-      
+
       {/* 微信二维码图片 */}
       <div className="flex justify-center mt-12 mb-8">
         <div className="text-center">
