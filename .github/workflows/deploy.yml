@@ -1,62 +1,80 @@
-name: Deploy to GitHub Pages
+name: Deploy to Vercel
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches:
+      - "**"
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
+  contents: write
 jobs:
-  build:
+  Build-and-Deploy:
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+        if: ${{ env.VERCEL_TOKEN && env.VERCEL_ORG_ID && env.VERCEL_PROJECT_ID }}
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@v2
+        if: ${{ env.VERCEL_TOKEN && env.VERCEL_ORG_ID && env.VERCEL_PROJECT_ID }}
+
+      - name: Deploy to Vercel
+        id: vercel-deployment
+        if: ${{ env.VERCEL_TOKEN && env.VERCEL_ORG_ID && env.VERCEL_PROJECT_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          bun install vercel -g
+
+          if [[ "$GITHUB_REF" == 'refs/heads/main' ]]; then
+            DeployOutput=$(vercel -t "$VERCEL_TOKEN" --prod)
+          else
+            DeployOutput=$(vercel -t "$VERCEL_TOKEN")
+          fi
+          echo "$DeployOutput"
+
+          ParsedURL=$(echo "$DeployOutput" | grep -Eo 'https://[^[:space:]]*\.vercel\.app' | tail -n 1)
+
+          if [[ -z "$ParsedURL" ]]; then
+            echo "Failed to parse Vercel URL from deploy output"
+            exit 1
+          fi
+          vercel inspect "$ParsedURL" -t "$VERCEL_TOKEN" -F json > vercel-inspect.json
+
+          InspectURL=$(jq -r '.url // empty' vercel-inspect.json)
+
+          if [[ -z "$InspectURL" ]]; then
+            echo "Failed to parse inspect url from vercel-inspect.json"
+            exit 1
+          fi
+          if [[ "$InspectURL" != http* ]]; then
+            InspectURL="https://$InspectURL"
+          fi
+          echo "preview-url=$InspectURL" >> "$GITHUB_OUTPUT"
+
+      - name: Lark notification
+        uses: Open-Source-Bazaar/feishu-action@v3
         with:
-          bun-version: latest
-
-      - name: Restore cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            .next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock', '**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-
-
-      - name: Install dependencies
-        run: bun install
-
-      - name: Build with Next.js
-        run: bun run build
-        env:
-          NODE_ENV: production
-          NEXT_TELEMETRY_DISABLED: 1
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./out
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          url: ${{ secrets.LARK_CHATBOT_HOOK_URL }}
+          msg_type: interactive
+          content: |
+            schema: "2.0"
+            config:
+              wide_screen_mode: true
+            header:
+              title:
+                tag: plain_text
+                content: Vercel deployment
+              template: blue
+            body:
+              elements:
+                - tag: markdown
+                  content: |
+                    - **Git Repository**: [${{ github.server_url }}/${{ github.repository }}](${{ github.server_url }}/${{ github.repository }})
+                    - **Code Branch**:    [${{ github.ref }}](${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }})
+                    - **Commit Author**:  [${{ github.actor }}](${{ github.server_url }}/${{ github.actor }})
+                    - **Preview Link**:   [${{ steps.vercel-deployment.outputs.preview-url }}](${{ steps.vercel-deployment.outputs.preview-url }})

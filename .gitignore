@@ -47,8 +47,7 @@ next-env.d.ts
 .yoyo/
 
 # VSCode
-.vscode/
-.env*.local
+.vscode/settings.json
 
 # Security - prevent credential leaks
 *.pem
@@ -78,5 +77,6 @@ __pycache__/
 *.bak
 *.backup
 *.old
-.vscode/
+
+# Secret environment files (local overrides)
 .env*.local
