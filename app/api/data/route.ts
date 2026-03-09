@@ -1,31 +1,79 @@
-import { NextResponse } from 'next/server'
-import yaml from 'yaml'
-import fs from 'fs'
-import path from 'path'
-import { DeadlineItem } from '@/lib/data'
+import { NextResponse } from "next/server";
+import { DeadlineItem, EventData } from "@/lib/data";
 
-export const dynamic = 'force-static'
+export const dynamic = "force-static";
 
-let STATIC_DATA: DeadlineItem[] = []
-let INIT_ERROR: unknown = null
+const DATA_API_URL =
+  "https://goodaction-hub.github.io/GoodAction-data/activities.json";
 
-try {
-  const conferencesPath = path.join(process.cwd(), 'data', 'conferences.yml')
-  const competitionsPath = path.join(process.cwd(), 'data', 'competitions.yml')
-  const activitiesPath = path.join(process.cwd(), 'data', 'activities.yml')
+interface ExternalEventData {
+  id: string;
+  link: string;
+  start_time?: string;
+  end_time?: string;
+  timeline: { deadline: string; comment: string }[];
+  timezone: string;
+  place: string;
+}
 
-  const conferencesData = yaml.parse(fs.readFileSync(conferencesPath, 'utf8')) as DeadlineItem[]
-  const competitionsData = yaml.parse(fs.readFileSync(competitionsPath, 'utf8')) as DeadlineItem[]
-  const activitiesData = yaml.parse(fs.readFileSync(activitiesPath, 'utf8')) as DeadlineItem[]
+interface ExternalDeadlineItem {
+  title: string;
+  description: string;
+  category: "meetup" | "conference" | "competition";
+  tags: string[];
+  events: ExternalEventData[];
+}
 
-  STATIC_DATA = [...conferencesData, ...competitionsData, ...activitiesData]
-} catch (err) {
-  INIT_ERROR = err
+function transformEvent(event: ExternalEventData): EventData {
+  const startTime = event.start_time ?? event.timeline[0]?.deadline ?? "";
+  const startDate = startTime ? new Date(startTime.replace(" ", "T")) : null;
+  const year = startDate ? startDate.getFullYear() : new Date().getFullYear();
+
+  const formatDateToChinese = (d: Date) =>
+    `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+  let date = startDate ? formatDateToChinese(startDate) : "";
+  if (startDate && event.end_time) {
+    const endDate = new Date(event.end_time.replace(" ", "T"));
+    if (endDate.getTime() !== startDate.getTime()) {
+      date = `${date}-${endDate.getMonth() + 1}月${endDate.getDate()}日`;
+    }
+  }
+
+  return {
+    year,
+    id: event.id,
+    link: event.link,
+    timeline: event.timeline,
+    timezone: event.timezone,
+    date,
+    place: event.place,
+  };
+}
+
+function transformItem(item: ExternalDeadlineItem): DeadlineItem {
+  return {
+    title: item.title,
+    description: item.description,
+    category: item.category === "meetup" ? "activity" : item.category,
+    tags: item.tags ?? [],
+    events: item.events.map(transformEvent),
+  };
 }
 
 export async function GET() {
-  if (INIT_ERROR) {
-    return NextResponse.json({ error: 'Failed to load data' }, { status: 500 })
+  try {
+    const res = await fetch(DATA_API_URL, { cache: "force-cache" });
+    if (!res.ok) {
+      return NextResponse.json(
+        { error: "Failed to fetch data from external API" },
+        { status: 502 },
+      );
+    }
+    const externalData = (await res.json()) as ExternalDeadlineItem[];
+    const data: DeadlineItem[] = externalData.map(transformItem);
+    return NextResponse.json(data);
+  } catch (err) {
+    console.error("Failed to fetch data from external API:", err);
+    return NextResponse.json({ error: "Failed to load data" }, { status: 500 });
   }
-  return NextResponse.json(STATIC_DATA)
 }
