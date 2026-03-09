@@ -6,13 +6,16 @@ import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 export default function Home() {
-  const { loading, fetchItems } = useEventStore()
+  const {
+    loading,
+    fetchItems,
+  } = useEventStore()
 
   useEffect(() => {
     fetchItems()
   }, [fetchItems])
 
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
   // Filtered events for display (currently unused in this page)
   // const filteredEvents = useMemo(() => {
@@ -49,11 +52,12 @@ export default function Home() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">{t('events.loading')}</p>
+          <p className="text-slate-600">{t("events.loading")}</p>
         </div>
       </div>
     )
   }
+
 
   return (
     <div
@@ -74,8 +78,7 @@ export default function Home() {
         {/* Footer description */}
         <footer className="mt-14 text-center max-w-2xl">
           <p className="text-white/80 text-base md:text-lg italic">
-            GoodAction Hub helps you discover the world&apos;s best free
-            opportunities — powered by AI, open to all.
+            GoodAction Hub helps you discover the world&apos;s best free opportunities — powered by AI, open to all.
           </p>
         </footer>
       </div>

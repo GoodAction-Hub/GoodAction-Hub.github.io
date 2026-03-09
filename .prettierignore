@@ -1,0 +1,34 @@
+# Files that have not yet been migrated to the project's Prettier style.
+# Remove a file's entry here when it is next meaningfully changed.
+.github/scripts/count-reward.ts
+.github/scripts/share-reward.ts
+.github/scripts/type.ts
+app/Barrier-Free-Bites/layout.tsx
+app/api/ai/health/route.ts
+app/deadlines/page.tsx
+app/home/page.tsx
+app/origin/page.tsx
+app/page.tsx
+components/AddToCalendar.tsx
+components/Aggregation.tsx
+components/CountdownTimer.tsx
+components/FilterBar.tsx
+components/I18nProvider.tsx
+components/TimelineItem.tsx
+components/ui/badge.tsx
+components/ui/button.tsx
+components/ui/card.tsx
+components/ui/dialog.tsx
+components/ui/dropdown-menu.tsx
+components/ui/input.tsx
+components/ui/label.tsx
+components/ui/scroll-area.tsx
+components/ui/switch.tsx
+eslint.config.mjs
+i18n/config.ts
+lib/data.ts
+lib/spark.ts
+lib/store.ts
+lib/utils.ts
+next.config.ts
+postcss.config.mjs

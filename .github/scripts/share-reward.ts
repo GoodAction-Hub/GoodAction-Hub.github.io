@@ -1,9 +1,9 @@
-import { components } from 'npm:@octokit/openapi-types'
-import { $, argv, YAML } from 'npm:zx'
+import { components } from "npm:@octokit/openapi-types";
+import { $, argv, YAML } from "npm:zx";
 
-import { Reward } from './type.ts'
+import { Reward } from "./type.ts";
 
-$.verbose = true
+$.verbose = true;
 
 const [
   repositoryOwner,
@@ -12,11 +12,11 @@ const [
   payer, // GitHub username of the payer (provided by workflow, defaults to issue creator)
   currency,
   reward,
-] = argv._
+] = argv._;
 
 interface PRMeta {
-  author: components['schemas']['simple-user']
-  assignees: components['schemas']['simple-user'][]
+  author: components["schemas"]["simple-user"];
+  assignees: components["schemas"]["simple-user"][];
 }
 
 const PR_DATA = await $`gh api graphql -f query='{
@@ -33,54 +33,54 @@ const PR_DATA = await $`gh api graphql -f query='{
       }
     }
   }
-}' --jq '.data.repository.issue.closedByPullRequestsReferences.nodes[] | select(.merged == true) | {url: .url, mergeCommitSha: .mergeCommit.oid}' | head -n 1`
+}' --jq '.data.repository.issue.closedByPullRequestsReferences.nodes[] | select(.merged == true) | {url: .url, mergeCommitSha: .mergeCommit.oid}' | head -n 1`;
 
-const prData = PR_DATA.text().trim()
+const prData = PR_DATA.text().trim();
 
 if (!prData)
-  throw new ReferenceError('No merged PR is found for the given issue number.')
+  throw new ReferenceError("No merged PR is found for the given issue number.");
 
-const { url: PR_URL, mergeCommitSha } = JSON.parse(prData)
+const { url: PR_URL, mergeCommitSha } = JSON.parse(prData);
 
 if (!PR_URL || !mergeCommitSha)
-  throw new Error('Missing required fields in PR data')
+  throw new Error("Missing required fields in PR data");
 
-console.table({ PR_URL, mergeCommitSha })
+console.table({ PR_URL, mergeCommitSha });
 
 const { author, assignees }: PRMeta = await (
   await $`gh pr view ${PR_URL} --json author,assignees`
-).json()
+).json();
 
 function isBotUser(login: string) {
-  const lowerLogin = login.toLowerCase()
+  const lowerLogin = login.toLowerCase();
   return (
-    lowerLogin.includes('copilot') ||
-    lowerLogin.includes('[bot]') ||
-    lowerLogin === 'github-actions[bot]' ||
-    lowerLogin.endsWith('[bot]')
-  )
+    lowerLogin.includes("copilot") ||
+    lowerLogin.includes("[bot]") ||
+    lowerLogin === "github-actions[bot]" ||
+    lowerLogin.endsWith("[bot]")
+  );
 }
 
 // Filter out Bot users from the list
-const allUsers = [author.login, ...assignees.map(({ login }) => login)]
-const users = allUsers.filter((login) => !isBotUser(login))
+const allUsers = [author.login, ...assignees.map(({ login }) => login)];
+const users = allUsers.filter((login) => !isBotUser(login));
 
-console.log(`All users: ${allUsers.join(', ')}`)
-console.log(`Filtered users (excluding bots): ${users.join(', ')}`)
+console.log(`All users: ${allUsers.join(", ")}`);
+console.log(`Filtered users (excluding bots): ${users.join(", ")}`);
 
 if (!users[0])
   throw new ReferenceError(
-    'No real users found (all users are bots). Skipping reward distribution.',
-  )
+    "No real users found (all users are bots). Skipping reward distribution."
+  );
 
-const rewardNumber = parseFloat(reward)
+const rewardNumber = parseFloat(reward);
 
 if (isNaN(rewardNumber) || rewardNumber <= 0)
   throw new RangeError(
-    `Reward amount is not a valid number, can not proceed with reward distribution. Received reward value: ${reward}`,
-  )
+    `Reward amount is not a valid number, can not proceed with reward distribution. Received reward value: ${reward}`
+  );
 
-const averageReward = (rewardNumber / users.length).toFixed(2)
+const averageReward = (rewardNumber / users.length).toFixed(2);
 
 const list: Reward[] = users.map((login) => ({
   issue: `#${issueNumber}`,
@@ -88,20 +88,20 @@ const list: Reward[] = users.map((login) => ({
   payee: `@${login}`,
   currency,
   reward: parseFloat(averageReward),
-}))
-const listText = YAML.stringify(list)
+}));
+const listText = YAML.stringify(list);
 
-console.log(listText)
+console.log(listText);
 
-await $`git config user.name "github-actions[bot]"`
-await $`git config user.email "github-actions[bot]@users.noreply.github.com"`
-await $`git tag -a "reward-${issueNumber}" ${mergeCommitSha} -m ${listText}`
-await $`git push origin --tags --no-verify`
+await $`git config user.name "github-actions[bot]"`;
+await $`git config user.email "github-actions[bot]@users.noreply.github.com"`;
+await $`git tag -a "reward-${issueNumber}" ${mergeCommitSha} -m ${listText}`;
+await $`git push origin --tags --no-verify`;
 
 const commentBody = `## Reward data
 
 \`\`\`yml
 ${listText}
 \`\`\`
-`
-await $`gh issue comment ${issueNumber} --body ${commentBody}`
+`;
+await $`gh issue comment ${issueNumber} --body ${commentBody}`;
