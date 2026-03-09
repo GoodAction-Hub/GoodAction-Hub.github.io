@@ -3,17 +3,15 @@
 import i18next, { supportedLngDisplayNames } from '@/i18n/config'
 import { ChevronDownIcon } from '@radix-ui/react-icons'
 import * as Select from '@radix-ui/react-select'
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Globe } from 'lucide-react'
 
 export function SwitchLanguage() {
   const { i18n } = useTranslation()
-  const [currentLng, setCurrentLng] = useState(() => i18n.language || 'zh-CN')
+  const currentLng = i18n.language || 'zh-CN'
 
   const handleChange = (value: string) => {
     i18next.changeLanguage(value)
-    setCurrentLng(value)
   }
 
   return (

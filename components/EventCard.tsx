@@ -20,29 +20,6 @@ interface EventCardProps {
   event: EventData
 }
 
-interface CategoryBadgeProps {
-  category: DeadlineItem['category']
-  t: (key: string) => string
-}
-
-function CategoryBadge({ category, t }: CategoryBadgeProps) {
-  return (
-    <div
-      className={`inline-flex px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl ${
-        {
-          conference:
-            'bg-gradient-to-r from-purple-500 to-purple-600 text-white',
-          competition: 'bg-gradient-to-r from-pink-500 to-pink-600 text-white',
-          activity: 'bg-gradient-to-r from-cyan-500 to-cyan-600 text-white',
-        }[category] ||
-        'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
-      }`}
-    >
-      {t(`filter.category_${category}`)}
-    </div>
-  )
-}
-
 export function EventCard({ item, event }: EventCardProps) {
   const { t } = useTranslation('common')
   const { favorites, toggleFavorite, mounted, displayTimezone } =
@@ -115,6 +92,8 @@ export function EventCard({ item, event }: EventCardProps) {
     }
   }, [showScrollHint, event.timeline])
 
+  // 类别标签内联渲染
+
   return (
     <Card
       className={`transition-all duration-300 hover:shadow-lg ${ended ? 'opacity-60 grayscale' : ''}`}
@@ -131,7 +110,21 @@ export function EventCard({ item, event }: EventCardProps) {
                   {/* 类别标签与标题 */}
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <div className="mb-1 sm:mb-0 sm:mr-2 flex">
-                      <CategoryBadge category={item.category} t={t} />
+                      <div
+                        className={`inline-flex px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl ${
+                          {
+                            conference:
+                              'bg-gradient-to-r from-purple-500 to-purple-600 text-white',
+                            competition:
+                              'bg-gradient-to-r from-pink-500 to-pink-600 text-white',
+                            activity:
+                              'bg-gradient-to-r from-cyan-500 to-cyan-600 text-white',
+                          }[item.category] ||
+                          'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
+                        }`}
+                      >
+                        {t(`filter.category_${item.category}`)}
+                      </div>
                     </div>
                     <div className="flex items-start gap-2 flex-wrap">
                       <Link

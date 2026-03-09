@@ -14,24 +14,18 @@ export function TimezoneSelector() {
 
   // 时区选择器相关状态
   const [timezones, setTimezones] = useState<string[]>(() => {
-    // 首先尝试从浏览器获取所有时区（仅在客户端）
-    if (typeof window === 'undefined') return []
     try {
-      const availableTimeZones = Intl.supportedValuesOf('timeZone')
-      if (availableTimeZones && availableTimeZones.length > 0)
-        return availableTimeZones
-    } catch {
-      // 浏览器API不可用，稍后通过 fetch 加载
-    }
+      const tzs = Intl.supportedValuesOf('timeZone')
+      if (tzs && tzs.length > 0) return tzs
+    } catch {}
     return []
   })
   const [searchTimeZone, setSearchTimeZone] = useState('')
   const [showTimezoneDropdown, setShowTimezoneDropdown] = useState(false)
 
-  // 如果时区列表为空，从 timeapi.io 获取
+  // 初始加载时区列表（浏览器API不可用时从远程获取）
   useEffect(() => {
     if (timezones.length > 0) return
-
     // 如果浏览器API不可用，从timeapi.io获取
     fetch('https://www.timeapi.io/api/timezone/availabletimezones')
       .then((res) => res.json())

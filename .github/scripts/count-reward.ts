@@ -41,7 +41,7 @@ const summaryList = Object.entries(groupedRewards).map(([payee, rewards]) => {
   return {
     payee,
     reward,
-    accounts: rewards!.map(({ payee: _payee, ...account }) => account),
+    accounts: rewards!.map(({ payee: _, ...account }) => account),
   }
 })
 
