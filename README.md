@@ -1,1 +1,205 @@
-# GoodAction-Hub.github.io
+# GoodAction Hub公益慈善生活平台
+
+GoodAction Hub 是一个聚合公益活动信息与无障碍餐饮指南的开源站点，包含两大模块：
+
+- 公益慈善活动截止日期（路径：`/deadlines`）：基于 [hust-open-atom-club/open-source-deadlines](https://github.com/hust-open-atom-club/open-source-deadlines) 改造与扩展，汇总会议、竞赛与活动的关键时间节点，帮助公益从业者、志愿者和爱心人士不再错过参与机会。
+- 无障碍友好美食指南（路径：`/Barrier-Free-Bites`）：原创功能模块，聚焦无障碍就餐体验与友好餐饮空间，提供更易获取的线索与导航入口（路径大小写需一致）。
+
+## 模块来源说明
+
+为便于理解项目结构与来源，现对两大模块的来源说明如下：
+
+- 公益慈善活动截止日期（改造自开源项目）
+  - 基于 [hust-open-atom-club/open-source-deadlines](https://github.com/hust-open-atom-club/open-source-deadlines) 改造开发
+  - 我们的改动：
+    - 🎯 主题转换：从开源技术活动切换为公益慈善活动
+    - 🎨 UI 增强：视觉与交互优化
+    - 📊 数据适配：统一数据模型，适配公益活动特点
+  - 致谢：感谢原项目团队的开源贡献与优秀架构
+
+- 无障碍友好美食指南（原创模块）
+  - 路径：`/Barrier-Free-Bites`
+  - 目标：提升餐饮空间的无障碍友好度信息的可获得性
+  - 内容：餐厅无障碍设施线索、就餐体验与导航建议
+  - 注意：请使用大小写一致的路径以避免托管平台的大小写路由差异
+
+## 核心功能
+
+- 公益慈善活动截止日期（路径：`/deadlines`）
+  - 汇总公益会议、竞赛与活动的关键时间节点，支持时区展示与人类可读日期
+  - 提供「日历添加」与「倒计时」等便捷功能（组件参考：`components/AddToCalendar.tsx`、`components/CountdownTimer.tsx`、`components/TimelineItem.tsx`）
+  - 活动来源数据在 `data/activities.yml`、`data/competitions.yml`、`data/conferences.yml`，通过统一数据模型渲染
+
+- 无障碍友好美食指南（路径：`/Barrier-Free-Bites`）
+  - 聚焦无障碍就餐体验与友好餐饮空间，提供更易获取的线索与导航入口
+  - 建议使用「大小写一致」的路径访问：`/Barrier-Free-Bites`（注意大小写），以保证在不同托管平台上的最佳路由兼容性
+
+
+## 如何添加活动
+
+我们非常欢迎社区贡献！如果您发现有未收录的公益慈善会议、竞赛及活动，或者信息有误，请通过提交 Pull Request 的方式来帮助我们更新。
+
+我们会定期查看并处理这些提交，感谢您对公益事业的支持！
+
+所有活动数据都存储在 `/data` 目录下的 YAML 文件中。
+
+- **会议**: 请添加到 `data/conferences.yml`
+- **竞赛**: 请添加到 `data/competitions.yml`
+- **活动**: 请添加到 `data/activities.yml`
+
+### 数据结构
+
+请在对应的 YAML 文件中，仿照以下格式添加新条目：
+
+```yaml
+- title: 活动名称 (例如：第三届老龄志愿与公益服务学术论坛)
+  description: 探讨AI时代应对人口老龄化的新策略，推动我国老龄志愿与公益服务事业多元发展
+  category: conference # 会议请使用 "conference"，竞赛请使用 "competition"，活动请使用 "activity"
+  tags:
+    - 老龄服务
+    - 志愿公益
+    - 人工智能
+    - 学术论坛
+  events:
+    - year: 2025 # 年份
+      id: aging-volunteer-forum-2025 # 全局唯一的ID
+      link: https://mp.weixin.qq.com/s/qi9gF1ETgk6UvFnnGNSVlg # 链接
+      timeline:
+        - deadline: '2025-10-19T23:59:00' # 关键日期 (ISO 8601 格式)
+          comment: '论文征集截止' # 日期说明
+        - deadline: '2025-11-15T09:00:00'
+          comment: '学术年会开始'
+        - deadline: '2025-11-16T17:00:00'
+          comment: '学术年会结束'
+      timezone: Asia/Shanghai # 所在时区
+      date: 2025年11月15日-11月16日 # 人类可读的日期范围
+      place: 中国，北京 # 地点
+```
+
+**注意事项:**
+
+- `category`: 必须是 `conference` 、 `competition` 或 `activity`
+- `timeline.deadline`: 请使用 ISO 8601 标准格式 - `YYYY-MM-DDTHH:mm:ss`
+- `timezone`: 请使用标准的 IANA 时区名称（例如 `Asia/Shanghai`），否则会影响时区转换
+- `date`: 请使用人类可读的单个日期或日期范围，如 `2025 年 4 月 30 日` 或 `2025 年 4 月 30 日 - 9 月 30 日`
+- `place`: 活动地址，如 `中国，上海`（`国家，城市`）；如果是线上活动，直接写 `线上`
+
+💡 **新手友好提示**：如果您不熟悉 Pull Request 流程，也可以通过Discussions和Issues方式提交活动信息，我们来帮您添加  
+> 
+> 🎉 **每一份贡献都很珍贵，欢迎您的参与！**
+
+## 如何添加美食地（无障碍友好美食指南）
+
+我们欢迎社区补充无障碍友好餐饮空间的信息。暂时数据以页面内配置与文案翻译驱动（`app/Barrier-Free-Bites/page.tsx` 与 `public/locales/*/translation.json`）。
+
+### 数据放置位置
+
+- 页面组件：`app/Barrier-Free-Bites/page.tsx`
+  - 可在 `restaurantCoords` 中为餐厅添加坐标与地址（用于导航按钮），键需与文案 key 对齐
+  - 在页面 JSX 中增添一张餐厅卡片，引用对应的 i18n 文案 key
+- 文案翻译：`public/locales/zh-CN/translation.json` 与 `public/locales/en/translation.json`
+  - 在 `bites.restaurants.<your_key>` 下新增：
+    - `name`: 餐厅名称
+    - `description`: 简介
+    - `features`: 特色服务（数组）
+    - `food`: 特色美食
+    - `experience` / `highlights`（可选）：特色体验/亮点
+    - `value`: 社会价值或人均消费等
+    - `address`: 地址
+
+### 最小示例（翻译 JSON）
+
+```json
+"bites": {
+  "restaurants": {
+    "your_place_key": {
+      "name": "示例餐厅",
+      "description": "简短介绍",
+      "features": ["手语服务", "无障碍通道"],
+      "food": "咖啡、甜品",
+      "value": "提供残障友好服务与就业机会",
+      "address": "示例市示例区示例路"
+    }
+  }
+}
+```
+
+### 最小示例（页面坐标）
+
+```ts
+// app/Barrier-Free-Bites/page.tsx
+const restaurantCoords = {
+  your_place_key: { lat: 39.9, lng: 116.4, address: "示例市示例区示例路" }
+}
+```
+
+### 注意事项
+
+- 路径大小写：页面路径为 `/Barrier-Free-Bites`，请使用一致大小写
+- key 一致性：`restaurantCoords` 的 key 应与 `translation.json` 中 `bites.restaurants.<key>` 一致
+- 信息准确：尽可能提供官方链接或来源，便于核验
+- 无障碍要素：优先补充实际可用的设施与服务（如通道、菜单、手语、导视、情绪支持等）
+- 多语言支持：建议同时更新 `zh-CN` 与 `en` 两个翻译文件
+
+如对页面结构或数据流程有改进建议，欢迎提交 PR 或在 Discussions 中讨论。
+
+## 开发指南
+
+### 环境准备
+
+**Bun**: 本项目使用 [Bun](https://bun.sh/) 作为包管理器和运行时。
+
+### 本地启动
+
+1. **克隆项目**
+
+    ```bash
+    git clone <your-repository-url>
+    cd GoodAction-Hub
+    ```
+
+2. **安装依赖**
+
+    ```bash
+    bun install
+    ```
+
+3. **激活 Git Hook（此步骤会在安装依赖后自动执行）**
+
+   ```bash
+   bun run prepare
+   ```
+
+4. **启动开发服务器**
+
+    ```bash
+    bun run dev
+    ```
+
+5. **（可选）剪枝**
+
+    ```bash
+    bun run knip
+    ```
+
+现在，在浏览器中打开 [http://localhost:3000](http://localhost:3000) 即可看到项目页面。
+
+### 部署与运维
+
+- 推荐平台：Netlify（已集成 `@netlify/plugin-nextjs`）
+  - 构建命令：`npm run build`
+  - 如遇到路由大小写或缓存相关问题，建议在 Netlify 后台执行 “Clear cache and deploy site” 重新构建
+- 也可选择 GitHub Pages 或华为云部署（参考仓库根目录的相关文档与脚本）
+
+### 反馈与支持
+
+- 提交 Issue：用于报告 bug 或提出功能建议
+- 发起讨论：欢迎在 Discussions 分享使用体验与数据来源
+- 路由与无障碍建议：如发现路径大小写或页面访问问题，请附上平台与链接便于排查
+
+### 技术栈
+
+- **框架**: [Next.js](https://nextjs.org/)
+- **UI**: [Tailwind CSS](https://tailwindcss.com/) & [shadcn/ui](https://ui.shadcn.com/)
+- **状态管理**: [Zustand](https://github.com/pmndrs/zustand)
+- **搜索**: [Fuse.js](https://github.com/krisk/fuse)
