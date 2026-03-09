@@ -1,2 +1,2 @@
 export COREPACK_ENABLE_AUTO_PIN=0
-npm run lint
+npm test
