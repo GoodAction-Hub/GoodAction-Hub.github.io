@@ -1,4 +1,4 @@
-:root {
+:global(:root) {
   --color-white: rgba(255, 255, 255, 1);
   --color-cream-50: rgba(252, 252, 249, 1);
   --color-cream-100: rgba(255, 255, 253, 1);
@@ -47,7 +47,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :global(:root) {
     --color-background: var(--color-charcoal-700);
     --color-surface: var(--color-charcoal-800);
     --color-text: var(--color-gray-200);
