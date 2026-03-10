@@ -2,8 +2,8 @@
 
 import { EventCard } from '@/components/EventCard';
 import { FilterBar } from '@/components/FilterBar';
-import GitCodeIcon from '@/components/icons/GitCodeIcon';
-import GitHubIcon from '@/components/icons/GitHubIcon';
+import { GitCodeIcon } from '@/components/icons/GitCodeIcon';
+import { GitHubIcon } from '@/components/icons/GitHubIcon';
 
 import { DeadlineItem, EventData } from '@/lib/data';
 import { useEventStore } from '@/lib/store';
