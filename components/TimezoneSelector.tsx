@@ -8,63 +8,60 @@ import { useEventStore } from '@/lib/store'
 import { useTranslation } from 'react-i18next'
 
 export function TimezoneSelector() {
-  const { displayTimezone, setDisplayTimezone, detectUserTimezone } = useEventStore()
-  const { t } = useTranslation('common');
-  
+  const { displayTimezone, setDisplayTimezone, detectUserTimezone } =
+    useEventStore()
+  const { t } = useTranslation('common')
+
   // 时区选择器相关状态
-  const [timezones, setTimezones] = useState<string[]>([])
+  const [timezones, setTimezones] = useState<string[]>(() => {
+    try {
+      const tzs = Intl.supportedValuesOf('timeZone')
+      if (tzs && tzs.length > 0) return tzs
+    } catch {}
+    return []
+  })
   const [searchTimeZone, setSearchTimeZone] = useState('')
   const [showTimezoneDropdown, setShowTimezoneDropdown] = useState(false)
-  
-  // 初始加载时区列表
+
+  // 初始加载时区列表（浏览器API不可用时从远程获取）
   useEffect(() => {
-    // 首先尝试从浏览器获取所有时区
-    try {
-      // 尝试使用Intl API获取所有可用时区
-      const availableTimeZones = Intl.supportedValuesOf('timeZone');
-      if (availableTimeZones && availableTimeZones.length > 0) {
-        setTimezones(availableTimeZones);
-        return;
-      }
-    } catch (e) {
-      console.warn('Failed to get timezones from browser:', e);
-    }
-    
+    if (timezones.length > 0) return
     // 如果浏览器API不可用，从timeapi.io获取
     fetch('https://www.timeapi.io/api/timezone/availabletimezones')
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         if (Array.isArray(data)) {
-          setTimezones(data);
+          setTimezones(data)
         }
       })
-      .catch(err => {
-        console.error('Failed to fetch timezones:', err);
+      .catch((err) => {
+        console.error('Failed to fetch timezones:', err)
         // 设置一些常见的时区作为备选
-        setTimezones(['Asia/Shanghai']);
-      });
-  }, []);
-  
+        setTimezones(['Asia/Shanghai'])
+      })
+  }, [timezones.length])
+
   // 点击外部关闭下拉菜单
   useEffect(() => {
     if (showTimezoneDropdown) {
       const handleClickOutside = (event: MouseEvent) => {
-        const target = event.target as HTMLElement;
+        const target = event.target as HTMLElement
         if (!target.closest('.timezone-selector-container')) {
-          setShowTimezoneDropdown(false);
+          setShowTimezoneDropdown(false)
         }
-      };
-      
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+      }
+
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [showTimezoneDropdown]);
-  
+  }, [showTimezoneDropdown])
+
   // 根据搜索过滤时区
   const filteredTimezones = searchTimeZone
-    ? timezones.filter(tz => 
-        tz.toLowerCase().includes(searchTimeZone.toLowerCase()))
-    : timezones;
+    ? timezones.filter((tz) =>
+        tz.toLowerCase().includes(searchTimeZone.toLowerCase()),
+      )
+    : timezones
 
   return (
     <div className="relative timezone-selector-container">
@@ -78,7 +75,7 @@ export function TimezoneSelector() {
             <Globe className="w-4 h-4" />
             <span>{displayTimezone}</span>
           </Button>
-          
+
           {showTimezoneDropdown && (
             <div className="absolute z-50 mt-1 bg-white border rounded-md shadow-lg w-80 max-h-80 overflow-y-auto">
               <div className="p-2">
@@ -94,11 +91,13 @@ export function TimezoneSelector() {
                     <div
                       key={tz}
                       className={`px-3 py-2 text-sm rounded-md cursor-pointer hover:bg-gray-100 ${
-                        displayTimezone === tz ? 'bg-primary/10 font-medium' : ''
+                        displayTimezone === tz
+                          ? 'bg-primary/10 font-medium'
+                          : ''
                       }`}
                       onClick={() => {
-                        setDisplayTimezone(tz);
-                        setShowTimezoneDropdown(false);
+                        setDisplayTimezone(tz)
+                        setShowTimezoneDropdown(false)
                       }}
                     >
                       {tz}
@@ -109,13 +108,13 @@ export function TimezoneSelector() {
             </div>
           )}
         </div>
-        
-        <Button 
-          variant="outline" 
-          size="sm" 
+
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => {
-            detectUserTimezone();
-            setShowTimezoneDropdown(false);
+            detectUserTimezone()
+            setShowTimezoneDropdown(false)
           }}
           className="whitespace-nowrap"
         >
@@ -124,4 +123,4 @@ export function TimezoneSelector() {
       </div>
     </div>
   )
-} 
+}
