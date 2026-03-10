@@ -3,7 +3,10 @@
 import { useState, useEffect } from 'react';
 import FoodAIDialog from '@/components/FoodAIDialog';
 import SafeTranslation from '@/components/SafeTranslation';
+import SpinnerIcon from '@/components/icons/SpinnerIcon';
+import NavigationPinIcon from '@/components/icons/NavigationPinIcon';
 import { fetchBitesCatalog, BitesRestaurant } from '@/lib/bitesCatalog';
+import styles from './page.module.css';
 
 type FilterType = 'all' | 'hearing' | 'visual' | 'wheelchair' | 'cognitive';
 
@@ -106,100 +109,7 @@ export default function BarrierFreeBitesPage() {
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-cyan-50 relative overflow-hidden">
       <div className="container mx-auto px-4 py-8 relative z-10">
         <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
-          <style>{`
-          :root {
-            --color-white: rgba(255, 255, 255, 1);
-            --color-cream-50: rgba(252, 252, 249, 1);
-            --color-cream-100: rgba(255, 255, 253, 1);
-            --color-gray-300: rgba(167, 169, 169, 1);
-            --color-slate-500: rgba(98, 108, 113, 1);
-            --color-brown-600: rgba(94, 82, 64, 1);
-            --color-charcoal-700: rgba(31, 33, 33, 1);
-            --color-charcoal-800: rgba(38, 40, 40, 1);
-            --color-slate-900: rgba(19, 52, 59, 1);
-            --color-teal-300: rgba(50, 184, 198, 1);
-            --color-teal-500: rgba(33, 128, 141, 1);
-            --color-teal-600: rgba(29, 116, 128, 1);
-            --color-teal-700: rgba(8, 145, 178, 1);
-            --color-gray-200: rgba(245, 245, 245, 1);
-            --color-orange-500: rgba(168, 75, 47, 1);
-            --color-background: var(--color-cream-50);
-            --color-surface: var(--color-cream-100);
-            --color-text: var(--color-slate-900);
-            --color-text-secondary: var(--color-slate-500);
-            --color-primary: rgba(147, 51, 234, 1);
-            --color-primary-hover: rgba(126, 34, 206, 1);
-            --color-accent: rgba(219, 39, 119, 1);
-            --color-secondary: rgba(8, 145, 178, 1);
-            --color-card-border: rgba(255, 255, 255, 0.2);
-            --color-border: rgba(255, 255, 255, 0.2);
-            --font-size-sm: 12px;
-            --font-size-base: 14px;
-            --font-size-lg: 16px;
-            --font-size-xl: 18px;
-            --font-size-2xl: 20px;
-            --font-size-3xl: 24px;
-            --font-weight-medium: 500;
-            --font-weight-semibold: 550;
-            --font-weight-bold: 600;
-            --space-8: 8px;
-            --space-12: 12px;
-            --space-16: 16px;
-            --space-20: 20px;
-            --space-24: 24px;
-            --space-32: 32px;
-            --radius-base: 8px;
-            --radius-lg: 12px;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
-            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.04), 0 2px 4px -1px rgba(0,0,0,0.02);
-          }
-          @media (prefers-color-scheme: dark) {
-            :root {
-              --color-background: var(--color-charcoal-700);
-              --color-surface: var(--color-charcoal-800);
-              --color-text: var(--color-gray-200);
-              --color-primary: rgba(192, 132, 252, 1);
-              --color-card-border: rgba(255, 255, 255, 0.15);
-              --color-border: rgba(255, 255, 255, 0.3);
-            }
-          }
-          .header { text-align: center; margin-bottom: var(--space-32); padding: var(--space-24) 0; }
-          .subtitle { font-size: var(--font-size-lg); color: var(--color-text-secondary); font-weight: var(--font-weight-medium); }
-          .filter-section { display: flex; gap: var(--space-12); margin-bottom: var(--space-32); flex-wrap: wrap; justify-content: center; }
-          .filter-btn { padding: var(--space-8) var(--space-20); border: 2px solid var(--color-border); background: var(--color-surface); color: var(--color-text); border-radius: var(--radius-base); cursor: pointer; font-size: var(--font-size-base); font-weight: var(--font-weight-medium); transition: all 0.3s ease; }
-          .filter-btn:hover, .filter-btn.active { border-color: var(--color-primary); background: linear-gradient(90deg, var(--color-primary), var(--color-accent)); color: var(--color-white); }
-          .restaurants-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-24); margin-bottom: var(--space-32); }
-          .restaurant-card { background: var(--color-surface); border: 1px solid var(--color-card-border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); transition: all 0.3s ease; display: flex; flex-direction: column; }
-          .restaurant-card:hover { box-shadow: var(--shadow-md); transform: translateY(-4px); }
-          .card-header { background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 50%, var(--color-secondary) 100%); padding: var(--space-20); color: var(--color-white); }
-          .restaurant-name { font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); margin-bottom: var(--space-8); }
-          .accessibility-tags { display: flex; gap: var(--space-8); flex-wrap: wrap; }
-          .tag { display: inline-flex; align-items: center; gap: 4px; padding: 4px var(--space-12); background: rgba(255,255,255,0.2); border-radius: 20px; font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); }
-          .card-body { padding: var(--space-20); flex-grow: 1; display: flex; flex-direction: column; }
-          .description { font-size: var(--font-size-base); color: var(--color-text-secondary); margin-bottom: var(--space-16); line-height: 1.7; }
-          .features { margin-bottom: var(--space-16); }
-          .features-title { font-size: var(--font-size-base); font-weight: var(--font-weight-semibold); margin-bottom: var(--space-8); color: var(--color-text); }
-          .features-list { list-style: none; padding: 0; }
-          .features-list li { font-size: var(--font-size-sm); color: var(--color-text-secondary); padding: 4px 0 4px var(--space-16); position: relative; }
-          .features-list li::before { content: "✓"; position: absolute; left: 0; color: var(--color-primary); font-weight: var(--font-weight-bold); }
-          .info-section { margin-top: auto; padding-top: var(--space-16); border-top: 1px solid var(--color-card-border); }
-          .info-item { display: flex; align-items: flex-start; gap: var(--space-8); margin-bottom: var(--space-8); font-size: var(--font-size-sm); color: var(--color-text-secondary); }
-          .info-label { font-weight: var(--font-weight-semibold); color: var(--color-text); min-width: 60px; }
-          .about-section { position: relative; overflow: hidden; background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(255,255,255,0.96)); border: 1px solid var(--color-card-border); border-radius: var(--radius-lg); padding: var(--space-24); margin-top: var(--space-32); box-shadow: 0 12px 28px rgba(0,0,0,0.08); }
-          .about-header { display: flex; align-items: center; gap: var(--space-12); margin-bottom: var(--space-12); }
-          .about-icon { flex: 0 0 auto; width: 36px; height: 36px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-white); background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 50%, var(--color-secondary) 100%); font-size: var(--font-size-lg); }
-          .about-title { font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--color-text); }
-          .about-content { font-size: var(--font-size-base); color: var(--color-text-secondary); line-height: 1.85; }
-          .about-content p { margin-bottom: var(--space-12); }
-          .icon { font-size: var(--font-size-lg); }
-          @media (max-width: 768px) {
-            .restaurants-grid { grid-template-columns: 1fr; }
-            .filter-section { flex-direction: column; }
-            .filter-btn { width: 100%; }
-          }
-          `}</style>
-
-          <header className="header">
+          <header className={styles.header}>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 bg-clip-text text-transparent mb-3">
               🌟{' '}
               <SafeTranslation
@@ -207,7 +117,7 @@ export default function BarrierFreeBitesPage() {
                 fallback="无障碍友好美食指南"
               />
             </h1>
-            <p className="subtitle">
+            <p className={styles.subtitle}>
               <SafeTranslation
                 tKey="bites.subtitle"
                 fallback="发现包容性餐饮体验"
@@ -215,15 +125,15 @@ export default function BarrierFreeBitesPage() {
             </p>
           </header>
 
-          <div className="filter-section">
+          <div className={styles.filterSection}>
             <button
-              className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
+              className={`${styles.filterBtn} ${filter === 'all' ? styles.filterBtnActive : ''}`}
               onClick={() => setFilter('all')}
             >
               <SafeTranslation tKey="bites.filters.all" fallback="全部" />
             </button>
             <button
-              className={`filter-btn ${filter === 'hearing' ? 'active' : ''}`}
+              className={`${styles.filterBtn} ${filter === 'hearing' ? styles.filterBtnActive : ''}`}
               onClick={() => setFilter('hearing')}
             >
               <SafeTranslation
@@ -232,7 +142,7 @@ export default function BarrierFreeBitesPage() {
               />
             </button>
             <button
-              className={`filter-btn ${filter === 'visual' ? 'active' : ''}`}
+              className={`${styles.filterBtn} ${filter === 'visual' ? styles.filterBtnActive : ''}`}
               onClick={() => setFilter('visual')}
             >
               <SafeTranslation
@@ -241,7 +151,7 @@ export default function BarrierFreeBitesPage() {
               />
             </button>
             <button
-              className={`filter-btn ${filter === 'wheelchair' ? 'active' : ''}`}
+              className={`${styles.filterBtn} ${filter === 'wheelchair' ? styles.filterBtnActive : ''}`}
               onClick={() => setFilter('wheelchair')}
             >
               <SafeTranslation
@@ -250,7 +160,7 @@ export default function BarrierFreeBitesPage() {
               />
             </button>
             <button
-              className={`filter-btn ${filter === 'cognitive' ? 'active' : ''}`}
+              className={`${styles.filterBtn} ${filter === 'cognitive' ? styles.filterBtnActive : ''}`}
               onClick={() => setFilter('cognitive')}
             >
               <SafeTranslation
@@ -260,7 +170,7 @@ export default function BarrierFreeBitesPage() {
             </button>
           </div>
 
-          <div className="restaurants-grid">
+          <div className={styles.restaurantsGrid}>
             {loading ? (
               <div className="text-center py-12 text-gray-500">
                 <SafeTranslation tKey="bites.loading" fallback="加载中..." />
@@ -278,16 +188,18 @@ export default function BarrierFreeBitesPage() {
                 const isNavigating = navigationLoading === restaurant.name;
                 return (
                   <div
-                    className="restaurant-card"
+                    className={styles.restaurantCard}
                     key={restaurant.id}
                     data-accessibility={types.join(',')}
                   >
-                    <div className="card-header">
-                      <h2 className="restaurant-name">{restaurant.name}</h2>
-                      <div className="accessibility-tags">
+                    <div className={styles.cardHeader}>
+                      <h2 className={styles.restaurantName}>
+                        {restaurant.name}
+                      </h2>
+                      <div className={styles.accessibilityTags}>
                         {restaurant.accessibility.deafFriendly && (
-                          <span className="tag">
-                            <span className="icon">👂</span>
+                          <span className={styles.tag}>
+                            <span className={styles.icon}>👂</span>
                             <SafeTranslation
                               tKey="bites.tags.hearing"
                               fallback="听障友好"
@@ -295,8 +207,8 @@ export default function BarrierFreeBitesPage() {
                           </span>
                         )}
                         {restaurant.accessibility.blindFriendly && (
-                          <span className="tag">
-                            <span className="icon">👁️</span>
+                          <span className={styles.tag}>
+                            <span className={styles.icon}>👁️</span>
                             <SafeTranslation
                               tKey="bites.tags.visual"
                               fallback="视障友好"
@@ -304,8 +216,8 @@ export default function BarrierFreeBitesPage() {
                           </span>
                         )}
                         {types.includes('wheelchair') && (
-                          <span className="tag">
-                            <span className="icon">♿</span>
+                          <span className={styles.tag}>
+                            <span className={styles.icon}>♿</span>
                             <SafeTranslation
                               tKey="bites.tags.wheelchair"
                               fallback="轮椅友好"
@@ -314,17 +226,19 @@ export default function BarrierFreeBitesPage() {
                         )}
                       </div>
                     </div>
-                    <div className="card-body">
-                      <p className="description">{restaurant.description}</p>
+                    <div className={styles.cardBody}>
+                      <p className={styles.description}>
+                        {restaurant.description}
+                      </p>
                       {restaurant.tags.length > 0 && (
-                        <div className="features">
-                          <h3 className="features-title">
+                        <div className={styles.features}>
+                          <h3 className={styles.featuresTitle}>
                             <SafeTranslation
                               tKey="bites.labels.features"
                               fallback="特色服务"
                             />
                           </h3>
-                          <ul className="features-list">
+                          <ul className={styles.featuresList}>
                             {restaurant.tags.map((tag, i) => (
                               <li key={i}>{tag}</li>
                             ))}
@@ -332,8 +246,8 @@ export default function BarrierFreeBitesPage() {
                         </div>
                       )}
                       {restaurant.food && restaurant.food.length > 0 && (
-                        <div className="info-item">
-                          <span className="info-label">
+                        <div className={styles.infoItem}>
+                          <span className={styles.infoLabel}>
                             <SafeTranslation
                               tKey="bites.labels.food"
                               fallback="美食类型"
@@ -344,9 +258,9 @@ export default function BarrierFreeBitesPage() {
                           </span>
                         </div>
                       )}
-                      <div className="info-section">
-                        <div className="info-item">
-                          <span className="info-label">
+                      <div className={styles.infoSection}>
+                        <div className={styles.infoItem}>
+                          <span className={styles.infoLabel}>
                             <SafeTranslation
                               tKey="bites.labels.address"
                               fallback="地址"
@@ -361,25 +275,7 @@ export default function BarrierFreeBitesPage() {
                           >
                             {isNavigating ? (
                               <>
-                                <svg
-                                  className="animate-spin h-3 w-3"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <circle
-                                    className="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    strokeWidth="4"
-                                    fill="none"
-                                  />
-                                  <path
-                                    className="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                  />
-                                </svg>
+                                <SpinnerIcon className="animate-spin h-3 w-3" />
                                 <SafeTranslation
                                   tKey="bites.labels.navigating"
                                   fallback="导航中..."
@@ -387,25 +283,7 @@ export default function BarrierFreeBitesPage() {
                               </>
                             ) : (
                               <>
-                                <svg
-                                  className="h-3 w-3"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                  />
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                  />
-                                </svg>
+                                <NavigationPinIcon className="h-3 w-3" />
                                 <SafeTranslation
                                   tKey="bites.labels.navigate"
                                   fallback="导航"
@@ -423,19 +301,19 @@ export default function BarrierFreeBitesPage() {
           </div>
 
           {/* 关于部分 */}
-          <div className="about-section">
-            <div className="about-header">
-              <span className="about-icon" aria-hidden="true">
+          <div className={styles.aboutSection}>
+            <div className={styles.aboutHeader}>
+              <span className={styles.aboutIcon} aria-hidden="true">
                 🍽️
               </span>
-              <h2 className="about-title">
+              <h2 className={styles.aboutTitle}>
                 <SafeTranslation
                   tKey="bites.about.title"
                   fallback="关于无障碍美食"
                 />
               </h2>
             </div>
-            <div className="about-content">
+            <div className={styles.aboutContent}>
               <p>
                 <SafeTranslation
                   tKey="bites.about.p1"
