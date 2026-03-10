@@ -1,39 +1,46 @@
-'use client'
+'use client';
 
-import { CountdownTimer } from '@/components/CountdownTimer'
-import { TimelineItem } from '@/components/TimelineItem'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { DeadlineItem, EventData, isEventEnded } from '@/lib/data'
-import { useEventStore } from '@/lib/store'
-import { formatTimezoneToUTC } from '@/lib/utils'
-import { Calendar, Clock, ExternalLink, MapPin, Star } from 'lucide-react'
-import { DateTime } from 'luxon'
-import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { AddToCalendar } from './AddToCalendar'
+import { CountdownTimer } from '@/components/CountdownTimer';
+import { TimelineItem } from '@/components/TimelineItem';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { DeadlineItem, EventData, isEventEnded } from '@/lib/data';
+import { useEventStore } from '@/lib/store';
+import { formatTimezoneToUTC } from '@/lib/utils';
+import {
+  ArrowRight,
+  Calendar,
+  Clock,
+  ExternalLink,
+  MapPin,
+  Star,
+} from 'lucide-react';
+import { DateTime } from 'luxon';
+import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { AddToCalendar } from './AddToCalendar';
 
 interface EventCardProps {
-  item: DeadlineItem
-  event: EventData
+  item: DeadlineItem;
+  event: EventData;
 }
 
 export function EventCard({ item, event }: EventCardProps) {
-  const { t } = useTranslation('common')
+  const { t } = useTranslation('common');
   const { favorites, toggleFavorite, mounted, displayTimezone } =
-    useEventStore()
+    useEventStore();
 
-  const cardId = `${event.id}`
-  const isFavorited = favorites.includes(cardId)
+  const cardId = `${event.id}`;
+  const isFavorited = favorites.includes(cardId);
 
   useEffect(() => {
-    useEventStore.setState({ mounted: true })
-  }, [])
+    useEventStore.setState({ mounted: true });
+  }, []);
 
-  const ended = isEventEnded(event)
-  const now = DateTime.now().setZone(displayTimezone)
+  const ended = isEventEnded(event);
+  const now = DateTime.now().setZone(displayTimezone);
 
   // 找到下一个截止日期
   const upcomingDeadlines = event.timeline
@@ -45,52 +52,52 @@ export function EventCard({ item, event }: EventCardProps) {
     }))
     // 转换到显示时区进行比较
     .filter((t) => t.date.setZone(displayTimezone) > now)
-    .sort((a, b) => a.date.toMillis() - b.date.toMillis())
+    .sort((a, b) => a.date.toMillis() - b.date.toMillis());
 
-  const nextDeadline = upcomingDeadlines[0]
+  const nextDeadline = upcomingDeadlines[0];
 
   // 转换时区为UTC偏移格式
-  const displayTimezoneUTC = formatTimezoneToUTC(displayTimezone)
-  const eventTimezoneUTC = formatTimezoneToUTC(event.timezone)
+  const displayTimezoneUTC = formatTimezoneToUTC(displayTimezone);
+  const eventTimezoneUTC = formatTimezoneToUTC(event.timezone);
 
-  const upcomingIndexes = upcomingDeadlines.map((t) => t.index)
+  const upcomingIndexes = upcomingDeadlines.map((t) => t.index);
 
   // timeline 横向滑动相关逻辑
   // scrollContentRef: timeline 主体容器，用于检测内容宽度
   // scrollViewportRef: ScrollArea Viewport，用于检测可视宽度和自动滚动
   // activeDotRef: 当前 isActive 节点的 ref，实现自动居中
   // showScrollHint: 是否显示滑动指引
-  const scrollContentRef = useRef<HTMLDivElement>(null)
-  const scrollViewportRef = useRef<HTMLDivElement>(null)
-  const activeDotRef = useRef<HTMLDivElement>(null)
-  const [showScrollHint, setShowScrollHint] = useState(false)
+  const scrollContentRef = useRef<HTMLDivElement>(null);
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
+  const activeDotRef = useRef<HTMLDivElement>(null);
+  const [showScrollHint, setShowScrollHint] = useState(false);
 
   // 检测 timeline 是否溢出，决定是否显示滑动指引
   useEffect(() => {
     const checkOverflow = () => {
       if (scrollContentRef.current && scrollViewportRef.current) {
-        const contentWidth = scrollContentRef.current.scrollWidth
-        const viewportWidth = scrollViewportRef.current.offsetWidth
-        setShowScrollHint(contentWidth > viewportWidth + 1)
+        const contentWidth = scrollContentRef.current.scrollWidth;
+        const viewportWidth = scrollViewportRef.current.offsetWidth;
+        setShowScrollHint(contentWidth > viewportWidth + 1);
       }
-    }
-    setTimeout(checkOverflow, 0)
-    window.addEventListener('resize', checkOverflow)
-    return () => window.removeEventListener('resize', checkOverflow)
-  }, [event.timeline])
+    };
+    setTimeout(checkOverflow, 0);
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [event.timeline]);
 
   // timeline 溢出时，自动将 isActive 节点平滑滚动到 ScrollArea Viewport 的中间位置
   useEffect(() => {
     if (showScrollHint && scrollViewportRef.current && activeDotRef.current) {
-      const viewport = scrollViewportRef.current
-      const active = activeDotRef.current
-      const viewportWidth = viewport.offsetWidth
-      const activeLeft = active.offsetLeft
-      const activeWidth = active.offsetWidth
-      const targetScrollLeft = activeLeft - viewportWidth / 2 + activeWidth / 2
-      viewport.scrollTo({ left: targetScrollLeft, behavior: 'smooth' })
+      const viewport = scrollViewportRef.current;
+      const active = activeDotRef.current;
+      const viewportWidth = viewport.offsetWidth;
+      const activeLeft = active.offsetLeft;
+      const activeWidth = active.offsetWidth;
+      const targetScrollLeft = activeLeft - viewportWidth / 2 + activeWidth / 2;
+      viewport.scrollTo({ left: targetScrollLeft, behavior: 'smooth' });
     }
-  }, [showScrollHint, event.timeline])
+  }, [showScrollHint, event.timeline]);
 
   // 类别标签内联渲染
 
@@ -358,19 +365,7 @@ export function EventCard({ item, event }: EventCardProps) {
                   <span className="text-xs text-gray-400 mr-1">
                     {t('events.swipe')}
                   </span>
-                  <svg
-                    className="w-4 h-4 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M5 12h14m-7-7l7 7-7 7"
-                    />
-                  </svg>
+                  <ArrowRight className="w-4 h-4 text-gray-400" />
                 </div>
               )}
             </div>
@@ -416,5 +411,5 @@ export function EventCard({ item, event }: EventCardProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

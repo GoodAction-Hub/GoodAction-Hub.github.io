@@ -5,7 +5,6 @@
 .github/scripts/type.ts
 app/Barrier-Free-Bites/layout.tsx
 app/api/ai/health/route.ts
-app/deadlines/page.tsx
 app/home/page.tsx
 app/origin/page.tsx
 app/page.tsx

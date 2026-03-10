@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Loader2, MapPin } from 'lucide-react';
 import FoodAIDialog from '@/components/FoodAIDialog';
 import SafeTranslation from '@/components/SafeTranslation';
-import SpinnerIcon from '@/components/icons/SpinnerIcon';
-import NavigationPinIcon from '@/components/icons/NavigationPinIcon';
 import { fetchBitesCatalog, BitesRestaurant } from '@/lib/bitesCatalog';
 import styles from './page.module.css';
 
@@ -275,7 +274,7 @@ export default function BarrierFreeBitesPage() {
                           >
                             {isNavigating ? (
                               <>
-                                <SpinnerIcon className="animate-spin h-3 w-3" />
+                                <Loader2 className="animate-spin h-3 w-3" />
                                 <SafeTranslation
                                   tKey="bites.labels.navigating"
                                   fallback="导航中..."
@@ -283,7 +282,7 @@ export default function BarrierFreeBitesPage() {
                               </>
                             ) : (
                               <>
-                                <NavigationPinIcon className="h-3 w-3" />
+                                <MapPin className="h-3 w-3" />
                                 <SafeTranslation
                                   tKey="bites.labels.navigate"
                                   fallback="导航"
