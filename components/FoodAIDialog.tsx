@@ -1,7 +1,6 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,48 +9,36 @@ import {
   DialogDescription,
   DialogTrigger,
   DialogClose,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
-import { Loader2, WandSparkles } from 'lucide-react'
-import { filterBitesCatalog, FALLBACK_CATALOG } from '@/lib/bitesCatalog'
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { Loader2, WandSparkles } from 'lucide-react';
+import SafeTranslation from '@/components/SafeTranslation';
 
 interface Recommendation {
-  name: string
-  address?: string
-  city?: string
-  tags?: string[]
-  description?: string
-}
-
-// 安全翻译组件，避免水合错误
-function SafeTranslation({
-  tKey,
-  fallback,
-}: {
-  tKey: string
-  fallback: string
-}) {
-  const { t, ready } = useTranslation('translation')
-  return <>{ready ? t(tKey) : fallback}</>
+  name: string;
+  address?: string;
+  city?: string;
+  tags?: string[];
+  description?: string;
 }
 
 export default function FoodAIDialog() {
-  const [open, setOpen] = useState(false)
-  const [location, setLocation] = useState('')
-  const [preferences, setPreferences] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [results, setResults] = useState<Recommendation[]>([])
+  const [open, setOpen] = useState(false);
+  const [location, setLocation] = useState('');
+  const [preferences, setPreferences] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [results, setResults] = useState<Recommendation[]>([]);
 
   const onSubmit = async () => {
-    setError(null)
-    setLoading(true)
-    setResults([])
+    setError(null);
+    setLoading(true);
+    setResults([]);
     try {
       const res = await fetch('/api/ai/recommend', {
         method: 'POST',
@@ -60,41 +47,29 @@ export default function FoodAIDialog() {
           location,
           preferences,
         }),
-      })
+      });
 
       if (!res.ok) {
-        throw new Error(`请求失败: ${res.status}`)
+        throw new Error(`请求失败: ${res.status}`);
       }
 
-      const data = await res.json()
-      const recs: Recommendation[] = data?.recommendations || []
+      const data = await res.json();
+      const recs: Recommendation[] = data?.recommendations || [];
       if (recs.length > 0) {
-        setResults(recs)
+        setResults(recs);
         if (data?.source && data.source !== 'spark') {
-          setError('AI服务暂不可用，已为您展示本地推荐')
+          setError('AI服务暂不可用，已为您展示推荐');
         }
-        return
+        return;
       }
 
-      const localRecs = filterBitesCatalog(
-        FALLBACK_CATALOG,
-        location,
-        {},
-      ).slice(0, 5)
-      setResults(localRecs)
-      setError('AI服务暂不可用，已为您展示本地推荐')
+      setError('未找到符合条件的推荐');
     } catch {
-      const localRecs = filterBitesCatalog(
-        FALLBACK_CATALOG,
-        location,
-        {},
-      ).slice(0, 5)
-      setResults(localRecs)
-      setError('AI服务暂不可用，已为您展示本地推荐')
+      setError('AI服务暂不可用，请稍后重试');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div>
@@ -176,12 +151,10 @@ export default function FoodAIDialog() {
                     />
                   </>
                 ) : (
-                  <>
-                    <SafeTranslation
-                      tKey="bites.ai_dialog.actions.generate"
-                      fallback="生成推荐"
-                    />
-                  </>
+                  <SafeTranslation
+                    tKey="bites.ai_dialog.actions.generate"
+                    fallback="生成推荐"
+                  />
                 )}
               </Button>
               <DialogClose asChild>
@@ -226,5 +199,5 @@ export default function FoodAIDialog() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

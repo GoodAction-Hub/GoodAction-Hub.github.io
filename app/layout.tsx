@@ -1,89 +1,31 @@
-import I18nProvider from '@/components/I18nProvider'
-import type { Metadata } from 'next'
-import localFont from 'next/font/local'
-import './globals.css'
-import Link from 'next/link'
-import { SwitchLanguage } from '@/components/SwitchLanguage'
+import I18nProvider from '@/components/I18nProvider';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import Link from 'next/link';
+import { SwitchLanguage } from '@/components/SwitchLanguage';
 
-// Use self-hosted Inter font to avoid build-time network dependency on Google Fonts
-const inter = localFont({
-  src: [
-    {
-      path: '../public/fonts/inter-latin-100-normal.woff2',
-      weight: '100',
-      style: 'normal',
-    },
-    {
-      path: '../public/fonts/inter-latin-200-normal.woff2',
-      weight: '200',
-      style: 'normal',
-    },
-    {
-      path: '../public/fonts/inter-latin-300-normal.woff2',
-      weight: '300',
-      style: 'normal',
-    },
-    {
-      path: '../public/fonts/inter-latin-400-normal.woff2',
-      weight: '400',
-      style: 'normal',
-    },
-    {
-      path: '../public/fonts/inter-latin-500-normal.woff2',
-      weight: '500',
-      style: 'normal',
-    },
-    {
-      path: '../public/fonts/inter-latin-600-normal.woff2',
-      weight: '600',
-      style: 'normal',
-    },
-    {
-      path: '../public/fonts/inter-latin-700-normal.woff2',
-      weight: '700',
-      style: 'normal',
-    },
-    {
-      path: '../public/fonts/inter-latin-800-normal.woff2',
-      weight: '800',
-      style: 'normal',
-    },
-    {
-      path: '../public/fonts/inter-latin-900-normal.woff2',
-      weight: '900',
-      style: 'normal',
-    },
-  ],
+const inter = Inter({
   variable: '--font-inter',
-})
+  subsets: ['latin'],
+});
 
 // 使用 Inter 字体替代 Geist 字体以避免 Turbopack 兼容性问题
-const fontMono = localFont({
-  src: [
-    {
-      path: '../public/fonts/inter-latin-400-normal.woff2',
-      weight: '400',
-      style: 'normal',
-    },
-    {
-      path: '../public/fonts/inter-latin-700-normal.woff2',
-      weight: '700',
-      style: 'normal',
-    },
-  ],
+const fontMono = Inter({
   variable: '--font-geist-mono',
-})
+  subsets: ['latin'],
+});
 
 export const metadata: Metadata = {
   title: 'GoodAction-Hub',
   description:
     '追踪公益慈善会议、竞赛和活动重要截止日期的网站，帮助公益从业者、志愿者和爱心人士及时了解最新的公益慈善活动动态，不再错过参与公益事业、奉献爱心和社会服务的机会。',
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="en">
@@ -122,5 +64,5 @@ export default function RootLayout({
         </I18nProvider>
       </body>
     </html>
-  )
+  );
 }

@@ -15,7 +15,6 @@
     "prepare": "husky"
   },
   "prettier": {
-    "semi": false,
     "singleQuote": true
   },
   "lint-staged": {
