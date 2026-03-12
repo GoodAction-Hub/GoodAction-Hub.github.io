@@ -166,7 +166,7 @@ export function EventCard({ item, event }: EventCardProps) {
                           />
                         )}
                         <Link
-                          href={`/deadlines/${event.id}`}
+                          href={`/activities/${event.id}`}
                           className="inline-flex items-center gap-1 text-xs text-purple-600 hover:text-purple-800 transition-colors"
                           title={t('detail.viewDetails')}
                         >

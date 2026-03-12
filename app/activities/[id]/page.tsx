@@ -250,7 +250,7 @@ export default function EventDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <MapEmbed address={event.place} />
+              <MapEmbed title={item.title} address={event.place} />
             </CardContent>
           </Card>
         )}

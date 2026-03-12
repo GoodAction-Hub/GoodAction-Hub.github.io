@@ -1,23 +1,21 @@
 'use client';
 
 import Giscus from '@giscus/react';
-import { useTranslation } from 'react-i18next';
 
 export function CommentBox() {
-  const { i18n } = useTranslation('common');
   return (
     <Giscus
-      repo="GoodAction-Hub/GoodAction-Hub.github.io"
-      repoId="R_kgDORiOZLg"
-      category={process.env.NEXT_PUBLIC_GISCUS_CATEGORY ?? 'General'}
-      categoryId={process.env.NEXT_PUBLIC_GISCUS_CATEGORY_ID ?? ''}
-      mapping="pathname"
-      strict="0"
+      repo="GoodAction-Hub/GoodAction-data"
+      repoId="R_kgDORijn4w"
+      category="Polls"
+      categoryId="DIC_kwDORijn484C4B4X"
+      mapping="title"
+      strict="1"
       reactionsEnabled="1"
-      emitMetadata="0"
+      emitMetadata="1"
       inputPosition="bottom"
       theme="preferred_color_scheme"
-      lang={i18n.language ?? 'zh-CN'}
+      lang="zh-CN"
     />
   );
 }

@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, MapPin } from 'lucide-react';
+import { Info, Loader2, MapPin } from 'lucide-react';
+import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 import FoodAIDialog from '@/components/FoodAIDialog';
 import SafeTranslation from '@/components/SafeTranslation';
 import { fetchBitesCatalog, BitesRestaurant } from '@/lib/bitesCatalog';
@@ -20,6 +22,7 @@ function getAccessibilityTypes(r: BitesRestaurant): FilterType[] {
 }
 
 export default function BarrierFreeBitesPage() {
+  const { t } = useTranslation('common');
   const [filter, setFilter] = useState<FilterType>('all');
   const [restaurants, setRestaurants] = useState<BitesRestaurant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -195,6 +198,15 @@ export default function BarrierFreeBitesPage() {
                       <h2 className={styles.restaurantName}>
                         {restaurant.name}
                       </h2>
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/Barrier-Free-Bites/${restaurant.id}`}
+                          className="inline-flex items-center text-purple-600 hover:text-purple-800 transition-colors"
+                          title={t('detail.viewDetails')}
+                        >
+                          <Info className="w-4 h-4" />
+                        </Link>
+                      </div>
                       <div className={styles.accessibilityTags}>
                         {restaurant.accessibility.deafFriendly && (
                           <span className={styles.tag}>
