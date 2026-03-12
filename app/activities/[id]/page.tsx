@@ -28,10 +28,14 @@ const DATA_EDIT_URL =
 
 async function findActivity(id: string) {
   const res = await fetch(ACTIVITIES_API_URL, { cache: 'force-cache' });
-  if (!res.ok) throw new Error(`Failed to fetch activities: ${res.status}`);
+
+  if (!res.ok) throw new URIError(`Failed to fetch activities: ${res.status}`);
+
   const externalData = (await res.json()) as ExternalDeadlineItem[];
+
   for (const raw of externalData) {
     const item = transformItem(raw);
+
     for (const event of item.events)
       if (event.id === id) return { item, event };
   }

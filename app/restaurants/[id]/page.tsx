@@ -70,7 +70,7 @@ export default async function RestaurantDetailPage({
             </div>
 
             {/* Food types */}
-            {restaurant.food && restaurant.food.length > 0 && (
+            {restaurant.food?.[0] && (
               <div className="text-sm">
                 <span className="font-medium text-gray-700">
                   美食类型
