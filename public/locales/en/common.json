@@ -54,5 +54,15 @@
   "ui_text": {
     "search_placeholder": "Search ...",
     "github_repo": "GitHub Repo"
+  },
+  "detail": {
+    "back": "Back",
+    "viewDetails": "View details",
+    "editOnGitHub": "Edit on GitHub",
+    "location": "Location",
+    "comments": "Comments",
+    "openInAmap": "Open in Amap",
+    "loadingMap": "Loading map...",
+    "mapUnavailable": "Map preview unavailable"
   }
 }

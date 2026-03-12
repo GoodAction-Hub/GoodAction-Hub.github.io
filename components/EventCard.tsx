@@ -13,6 +13,7 @@ import {
   Calendar,
   Clock,
   ExternalLink,
+  Info,
   MapPin,
   Star,
 } from 'lucide-react';
@@ -164,6 +165,13 @@ export function EventCard({ item, event }: EventCardProps) {
                             onClick={() => toggleFavorite(cardId)}
                           />
                         )}
+                        <Link
+                          href={`/deadlines/${event.id}`}
+                          className="inline-flex items-center gap-1 text-xs text-purple-600 hover:text-purple-800 transition-colors"
+                          title={t('detail.viewDetails')}
+                        >
+                          <Info className="w-4 h-4" />
+                        </Link>
                       </div>
                     </div>
                   </div>
