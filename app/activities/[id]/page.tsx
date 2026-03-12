@@ -4,7 +4,11 @@ import { TimelineItem } from '@/components/TimelineItem';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DeadlineItem, EventData } from '@/lib/data';
+import {
+  ACTIVITIES_API_URL,
+  ExternalDeadlineItem,
+  transformItem,
+} from '@/lib/activities';
 import { formatTimezoneToUTC } from '@/lib/utils';
 import {
   ArrowLeft,
@@ -17,80 +21,19 @@ import {
 } from 'lucide-react';
 import { DateTime } from 'luxon';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
 const DATA_EDIT_URL =
   'https://github.com/GoodAction-Hub/GoodAction-data/edit/main/activities.json';
 
-const ACTIVITIES_API_URL =
-  'https://goodaction-hub.github.io/GoodAction-data/activities.json';
-
-interface ExternalEventData {
-  id: string;
-  link: string;
-  start_time?: string;
-  end_time?: string;
-  timeline: { deadline: string; comment: string }[];
-  timezone: string;
-  place: string;
-}
-
-interface ExternalDeadlineItem {
-  title: string;
-  description: string;
-  category: 'meetup' | 'conference' | 'competition';
-  tags: string[];
-  events: ExternalEventData[];
-}
-
-function transformEvent(event: ExternalEventData): EventData {
-  const startTime = event.start_time ?? event.timeline[0]?.deadline ?? '';
-  const startDate = startTime ? new Date(startTime.replace(' ', 'T')) : null;
-  const year = startDate ? startDate.getFullYear() : new Date().getFullYear();
-
-  const formatDate = (d: Date) =>
-    `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
-  let date = startDate ? formatDate(startDate) : '';
-  if (startDate && event.end_time) {
-    const endDate = new Date(event.end_time.replace(' ', 'T'));
-    if (endDate.getTime() !== startDate.getTime())
-      date = `${date}-${endDate.getMonth() + 1}月${endDate.getDate()}日`;
-  }
-
-  return {
-    year,
-    id: event.id,
-    link: event.link,
-    timeline: event.timeline,
-    timezone: event.timezone,
-    date,
-    place: event.place,
-  };
-}
-
-function transformItem(item: ExternalDeadlineItem): DeadlineItem {
-  return {
-    title: item.title,
-    description: item.description,
-    category: item.category === 'meetup' ? 'activity' : item.category,
-    tags: item.tags ?? [],
-    events: item.events.map(transformEvent),
-  };
-}
-
 async function findActivity(id: string) {
-  try {
-    const res = await fetch(ACTIVITIES_API_URL, { cache: 'force-cache' });
-    if (!res.ok) return null;
-    const externalData = (await res.json()) as ExternalDeadlineItem[];
-    for (const raw of externalData) {
-      const item = transformItem(raw);
-      for (const event of item.events)
-        if (event.id === id) return { item, event };
-    }
-    return null;
-  } catch (error) {
-    console.error('Failed to fetch activity:', error);
-    return null;
+  const res = await fetch(ACTIVITIES_API_URL, { cache: 'force-cache' });
+  if (!res.ok) throw new Error(`Failed to fetch activities: ${res.status}`);
+  const externalData = (await res.json()) as ExternalDeadlineItem[];
+  for (const raw of externalData) {
+    const item = transformItem(raw);
+    for (const event of item.events)
+      if (event.id === id) return { item, event };
   }
 }
 
@@ -101,23 +44,7 @@ export default async function EventDetailPage({
 }) {
   const { id } = await params;
   const found = await findActivity(id);
-
-  if (!found) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-cyan-50 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="text-6xl">🔍</div>
-          <h2 className="text-xl font-semibold text-gray-700">未找到该活动</h2>
-          <Link href="/activities">
-            <Button variant="outline" className="gap-2">
-              <ArrowLeft className="w-4 h-4" />
-              返回列表
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  if (!found) notFound();
 
   const { item, event } = found;
   const displayTimezone = 'Asia/Shanghai';

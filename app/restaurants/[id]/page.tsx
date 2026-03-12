@@ -4,6 +4,7 @@ import SafeTranslation from '@/components/SafeTranslation';
 import { fetchBitesCatalog } from '@/lib/bitesCatalog';
 import { ArrowLeft, MapPin, MessageSquare, Pencil } from 'lucide-react';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -18,28 +19,7 @@ export default async function RestaurantDetailPage({
   const { id } = await params;
   const catalog = await fetchBitesCatalog();
   const restaurant = catalog.find((r) => r.id === id);
-
-  if (!restaurant) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-cyan-50 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="text-6xl">🔍</div>
-          <h2 className="text-xl font-semibold text-gray-700">
-            <SafeTranslation
-              tKey="bites.no_results"
-              fallback="暂无符合条件的餐厅"
-            />
-          </h2>
-          <Link href="/restaurants">
-            <Button variant="outline" className="gap-2">
-              <ArrowLeft className="w-4 h-4" />
-              <SafeTranslation tKey="detail.back" fallback="返回" />
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  if (!restaurant) notFound();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-cyan-50 relative overflow-hidden">

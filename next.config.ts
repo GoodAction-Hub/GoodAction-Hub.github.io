@@ -11,30 +11,18 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   experimental: {},
-  async redirects() {
-    return [
-      {
-        source: '/deadlines',
-        destination: '/activities',
-        permanent: true,
-      },
-      {
-        source: '/deadlines/:path*',
-        destination: '/activities/:path*',
-        permanent: true,
-      },
-      {
-        source: '/Barrier-Free-Bites',
-        destination: '/restaurants',
-        permanent: true,
-      },
-      {
-        source: '/Barrier-Free-Bites/:path*',
-        destination: '/restaurants/:path*',
-        permanent: true,
-      },
-    ];
-  },
+  redirects: async () => [
+    {
+      source: '/deadlines',
+      destination: '/activities',
+      permanent: true,
+    },
+    {
+      source: '/Barrier-Free-Bites',
+      destination: '/restaurants',
+      permanent: true,
+    },
+  ],
 };
 
 export default nextConfig;

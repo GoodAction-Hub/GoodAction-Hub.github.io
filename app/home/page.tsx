@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, Utensils } from 'lucide-react';
@@ -62,16 +63,16 @@ export default function HomeSelector() {
         </div>
       </div>
 
-      {/* 微信群二维码 */}
+      {/* 群二维码 */}
       <div className="flex justify-center mt-12 mb-8">
-        <div className="text-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="https://github.com/user-attachments/assets/01d03a06-5b5a-4824-ba18-6439ea8442d8"
-            alt="GoodAction Hub 益行汇微信群"
-            className="w-48 object-contain mx-auto"
-          />
-        </div>
+        <Image
+          src="/goodaction-hub-qr.png"
+          alt="GoodActionHub 益行汇群二维码"
+          width={192}
+          height={192}
+          className="w-48 object-contain"
+          unoptimized
+        />
       </div>
     </div>
   );
