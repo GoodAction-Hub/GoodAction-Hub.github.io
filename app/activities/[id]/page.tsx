@@ -24,7 +24,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 const DATA_EDIT_URL =
-  'https://github.com/GoodAction-Hub/GoodAction-data/edit/main/activities.json';
+  'https://github.com/GoodAction-Hub/GoodAction-data/edit/main/data/activities.yml';
 
 async function findActivity(id: string) {
   const res = await fetch(ACTIVITIES_API_URL, { cache: 'force-cache' });

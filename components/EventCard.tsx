@@ -291,6 +291,17 @@ export const EventCard: FC<EventCardProps> = ({ item, event }) => {
                   </div>
                 </div>
               )}
+
+              <div className="flex justify-end">
+                <Link
+                  href={`/activities/${event.id}`}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-purple-700 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+                  title={t('detail.viewDetails')}
+                >
+                  <span>{t('detail.viewDetails')}</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -408,17 +419,17 @@ export const EventCard: FC<EventCardProps> = ({ item, event }) => {
               </div>
             )}
           </div>
-        </div>
 
-        <div className="mt-6 flex md:justify-end">
-          <Link
-            href={`/activities/${event.id}`}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-purple-700 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 md:w-auto"
-            title={t('detail.viewDetails')}
-          >
-            <span>{t('detail.viewDetails')}</span>
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div className="w-full">
+            <Link
+              href={`/activities/${event.id}`}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-purple-700 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+              title={t('detail.viewDetails')}
+            >
+              <span>{t('detail.viewDetails')}</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </CardContent>
     </Card>

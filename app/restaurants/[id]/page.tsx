@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const DATA_EDIT_URL =
-  'https://github.com/GoodAction-Hub/GoodAction-data/edit/main/restaurants.json';
+  'https://github.com/GoodAction-Hub/GoodAction-data/edit/main/data/restaurants.yml';
 
 export default async function RestaurantDetailPage({
   params,
