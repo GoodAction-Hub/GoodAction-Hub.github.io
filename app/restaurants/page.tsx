@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, MapPin } from 'lucide-react';
+import { ArrowRight, Loader2, MapPin } from 'lucide-react';
+import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 import FoodAIDialog from '@/components/FoodAIDialog';
 import SafeTranslation from '@/components/SafeTranslation';
 import { fetchBitesCatalog, BitesRestaurant } from '@/lib/bitesCatalog';
@@ -20,6 +22,7 @@ function getAccessibilityTypes(r: BitesRestaurant): FilterType[] {
 }
 
 export default function BarrierFreeBitesPage() {
+  const { t } = useTranslation('common');
   const [filter, setFilter] = useState<FilterType>('all');
   const [restaurants, setRestaurants] = useState<BitesRestaurant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -122,6 +125,16 @@ export default function BarrierFreeBitesPage() {
                 fallback="发现包容性餐饮体验"
               />
             </p>
+            <div className="mt-4 flex justify-center">
+              <a
+                href="https://github.com/GoodAction-Hub/GoodAction-data/issues/new?template=restaurant.yml"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-lg hover:from-green-600 hover:to-teal-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm font-medium"
+              >
+                + 发布餐厅
+              </a>
+            </div>
           </header>
 
           <div className={styles.filterSection}>
@@ -291,6 +304,16 @@ export default function BarrierFreeBitesPage() {
                             )}
                           </button>
                         </div>
+                      </div>
+                      <div className={styles.detailButtonWrap}>
+                        <Link
+                          href={`/restaurants/${restaurant.id}`}
+                          className={styles.detailButton}
+                          title={t('detail.viewDetails')}
+                        >
+                          <span>{t('detail.viewDetails')}</span>
+                          <ArrowRight className="h-4 w-4" />
+                        </Link>
                       </div>
                     </div>
                   </div>

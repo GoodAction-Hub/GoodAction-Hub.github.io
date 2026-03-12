@@ -1,9 +1,9 @@
-"use client"
+'use client';
 
-import Link from "next/link"
-import Image from "next/image"
-import { Card, CardContent } from "@/components/ui/card"
-import { Calendar, Utensils } from "lucide-react"
+import Image from 'next/image';
+import Link from 'next/link';
+import { Card, CardContent } from '@/components/ui/card';
+import { Calendar, Utensils } from 'lucide-react';
 
 export default function HomeSelector() {
   return (
@@ -20,7 +20,7 @@ export default function HomeSelector() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
           {/* 公益慈善活动截止日期 */}
-          <Link href="/deadlines" className="group block h-full">
+          <Link href="/activities" className="group block h-full">
             <Card className="h-full min-h-[200px] overflow-hidden border-pink-200 hover:border-pink-400 transition-colors">
               <CardContent className="p-6 h-full">
                 <div className="flex items-center gap-4">
@@ -41,7 +41,7 @@ export default function HomeSelector() {
           </Link>
 
           {/* 无障碍友好美食指南 */}
-          <Link href="/Barrier-Free-Bites" className="group block h-full">
+          <Link href="/restaurants" className="group block h-full">
             <Card className="h-full min-h-[200px] overflow-hidden border-purple-200 hover:border-purple-400 transition-colors">
               <CardContent className="p-6 h-full">
                 <div className="flex items-center gap-4">
@@ -62,23 +62,18 @@ export default function HomeSelector() {
           </Link>
         </div>
       </div>
-      
-      {/* 微信二维码图片 */}
+
+      {/* 群二维码 */}
       <div className="flex justify-center mt-12 mb-8">
-        <div className="text-center">
-          <Image
-            src="/goodactionhub-12-6.png"
-            alt="GoodAction Hub 公益生活微信群"
-            width={192}
-            height={192}
-            className="w-48 h-48 object-contain mx-auto"
-            unoptimized
-          />
-          <p className="mt-2 text-sm text-gray-500">
-            加入GoodAction Hub开源公益生活交流群
-          </p>
-        </div>
+        <Image
+          src="/Lark-group.png"
+          alt="GoodActionHub 益行汇群二维码"
+          width={192}
+          height={192}
+          className="w-48 object-contain"
+          unoptimized
+        />
       </div>
     </div>
-  )
+  );
 }

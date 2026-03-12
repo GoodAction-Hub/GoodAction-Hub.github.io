@@ -1,17 +1,28 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
-const isStaticExport = process.env.STATIC_EXPORT === "true"
+const isStaticExport = process.env.STATIC_EXPORT === 'true';
 
 const nextConfig: NextConfig = {
   // 仅在显式开启时使用静态导出，避免禁用 API Routes（如 /api/ai/recommend）
-  ...(isStaticExport ? { output: "export" as const } : {}),
+  ...(isStaticExport ? { output: 'export' as const } : {}),
   trailingSlash: true,
   skipTrailingSlashRedirect: true,
   images: {
-    unoptimized: true
+    unoptimized: true,
   },
-  experimental: {
-  }
+  experimental: {},
+  redirects: async () => [
+    {
+      source: '/deadlines',
+      destination: '/activities',
+      permanent: true,
+    },
+    {
+      source: '/Barrier-Free-Bites',
+      destination: '/restaurants',
+      permanent: true,
+    },
+  ],
 };
 
 export default nextConfig;

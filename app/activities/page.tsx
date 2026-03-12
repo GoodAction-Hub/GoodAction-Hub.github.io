@@ -206,6 +206,14 @@ export default function Home() {
               <GitHubIcon className="w-5 h-5" />
               GitHub
             </Link>
+            <Link
+              href="https://github.com/GoodAction-Hub/GoodAction-data/issues/new?template=activity.yml"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-lg hover:from-green-600 hover:to-teal-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              + 发布活动
+            </Link>
           </div>
           <p className="text-lg text-gray-700 mb-4 font-medium">
             公益慈善会议、竞赛和活动重要截止日期概览，不再错过参与公益事业、奉献爱心和社会服务的机会

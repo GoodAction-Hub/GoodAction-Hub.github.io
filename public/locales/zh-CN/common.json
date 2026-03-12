@@ -48,5 +48,15 @@
   "ui_text": {
     "search_placeholder": "搜索...",
     "github_repo": "GitHub 仓库"
+  },
+  "detail": {
+    "back": "返回",
+    "viewDetails": "查看详情",
+    "editOnGitHub": "在 GitHub 上编辑",
+    "location": "活动地点",
+    "comments": "评论",
+    "openInAmap": "在高德地图中打开",
+    "loadingMap": "地图加载中...",
+    "mapUnavailable": "地图预览暂不可用"
   }
 }
