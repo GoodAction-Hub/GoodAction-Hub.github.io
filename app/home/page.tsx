@@ -1,9 +1,8 @@
-"use client"
+'use client';
 
-import Link from "next/link"
-import Image from "next/image"
-import { Card, CardContent } from "@/components/ui/card"
-import { Calendar, Utensils } from "lucide-react"
+import Link from 'next/link';
+import { Card, CardContent } from '@/components/ui/card';
+import { Calendar, Utensils } from 'lucide-react';
 
 export default function HomeSelector() {
   return (
@@ -20,7 +19,7 @@ export default function HomeSelector() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
           {/* 公益慈善活动截止日期 */}
-          <Link href="/deadlines" className="group block h-full">
+          <Link href="/activities" className="group block h-full">
             <Card className="h-full min-h-[200px] overflow-hidden border-pink-200 hover:border-pink-400 transition-colors">
               <CardContent className="p-6 h-full">
                 <div className="flex items-center gap-4">
@@ -41,7 +40,7 @@ export default function HomeSelector() {
           </Link>
 
           {/* 无障碍友好美食指南 */}
-          <Link href="/Barrier-Free-Bites" className="group block h-full">
+          <Link href="/restaurants" className="group block h-full">
             <Card className="h-full min-h-[200px] overflow-hidden border-purple-200 hover:border-purple-400 transition-colors">
               <CardContent className="p-6 h-full">
                 <div className="flex items-center gap-4">
@@ -62,23 +61,18 @@ export default function HomeSelector() {
           </Link>
         </div>
       </div>
-      
-      {/* 微信二维码图片 */}
+
+      {/* 微信群二维码 */}
       <div className="flex justify-center mt-12 mb-8">
         <div className="text-center">
-          <Image
-            src="/goodactionhub-12-6.png"
-            alt="GoodAction Hub 公益生活微信群"
-            width={192}
-            height={192}
-            className="w-48 h-48 object-contain mx-auto"
-            unoptimized
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="https://github.com/user-attachments/assets/01d03a06-5b5a-4824-ba18-6439ea8442d8"
+            alt="GoodAction Hub 益行汇微信群"
+            className="w-48 object-contain mx-auto"
           />
-          <p className="mt-2 text-sm text-gray-500">
-            加入GoodAction Hub开源公益生活交流群
-          </p>
         </div>
       </div>
     </div>
-  )
+  );
 }

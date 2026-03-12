@@ -49,7 +49,7 @@ export default function RootLayout({
                 </Link>
                 <span className="text-gray-300">|</span>
                 <Link
-                  href="/Barrier-Free-Bites"
+                  href="/restaurants"
                   className="text-sm md:text-base font-semibold bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 bg-clip-text text-transparent hover:brightness-110"
                 >
                   无障碍友好美食指南

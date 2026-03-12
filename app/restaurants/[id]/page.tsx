@@ -1,51 +1,23 @@
-'use client';
-
+import { ChinaMapWrapper } from '@/components/ChinaMapWrapper';
 import { CommentBox } from '@/components/CommentBox';
-import { MapEmbed } from '@/components/MapEmbed';
 import SafeTranslation from '@/components/SafeTranslation';
-import { BitesRestaurant, fetchBitesCatalog } from '@/lib/bitesCatalog';
-import {
-  ArrowLeft,
-  MapPin,
-  MessageSquare,
-  Pencil,
-} from 'lucide-react';
+import { fetchBitesCatalog } from '@/lib/bitesCatalog';
+import { ArrowLeft, MapPin, MessageSquare, Pencil } from 'lucide-react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const DATA_EDIT_URL =
   'https://github.com/GoodAction-Hub/GoodAction-data/edit/main/restaurants.json';
 
-export default function RestaurantDetailPage() {
-  const params = useParams();
-  const id = params.id as string;
-
-  const [restaurant, setRestaurant] = useState<BitesRestaurant | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchBitesCatalog().then((data) => {
-      const found = data.find((r) => r.id === id) ?? null;
-      setRestaurant(found);
-      setLoading(false);
-    });
-  }, [id]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-cyan-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4" />
-          <p className="text-purple-700">
-            <SafeTranslation tKey="bites.loading" fallback="加载中..." />
-          </p>
-        </div>
-      </div>
-    );
-  }
+export default async function RestaurantDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const catalog = await fetchBitesCatalog();
+  const restaurant = catalog.find((r) => r.id === id);
 
   if (!restaurant) {
     return (
@@ -53,9 +25,12 @@ export default function RestaurantDetailPage() {
         <div className="text-center space-y-4">
           <div className="text-6xl">🔍</div>
           <h2 className="text-xl font-semibold text-gray-700">
-            <SafeTranslation tKey="bites.no_results" fallback="暂无符合条件的餐厅" />
+            <SafeTranslation
+              tKey="bites.no_results"
+              fallback="暂无符合条件的餐厅"
+            />
           </h2>
-          <Link href="/Barrier-Free-Bites">
+          <Link href="/restaurants">
             <Button variant="outline" className="gap-2">
               <ArrowLeft className="w-4 h-4" />
               <SafeTranslation tKey="detail.back" fallback="返回" />
@@ -77,7 +52,7 @@ export default function RestaurantDetailPage() {
       <div className="container mx-auto px-4 py-8 relative z-10 max-w-4xl">
         {/* Back + Edit buttons */}
         <div className="flex items-center justify-between mb-6">
-          <Link href="/Barrier-Free-Bites">
+          <Link href="/restaurants">
             <Button variant="outline" size="sm" className="gap-2">
               <ArrowLeft className="w-4 h-4" />
               <SafeTranslation tKey="detail.back" fallback="返回" />
@@ -86,7 +61,10 @@ export default function RestaurantDetailPage() {
           <a href={DATA_EDIT_URL} target="_blank" rel="noopener noreferrer">
             <Button variant="outline" size="sm" className="gap-2">
               <Pencil className="w-4 h-4" />
-              <SafeTranslation tKey="detail.editOnGitHub" fallback="在 GitHub 上编辑" />
+              <SafeTranslation
+                tKey="detail.editOnGitHub"
+                fallback="在 GitHub 上编辑"
+              />
             </Button>
           </a>
         </div>
@@ -98,12 +76,20 @@ export default function RestaurantDetailPage() {
               <div className="flex flex-wrap gap-2">
                 {restaurant.accessibility.deafFriendly && (
                   <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                    👂 <SafeTranslation tKey="bites.tags.hearing" fallback="听障友好" />
+                    👂{' '}
+                    <SafeTranslation
+                      tKey="bites.tags.hearing"
+                      fallback="听障友好"
+                    />
                   </span>
                 )}
                 {restaurant.accessibility.blindFriendly && (
                   <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                    👁️ <SafeTranslation tKey="bites.tags.visual" fallback="视障友好" />
+                    👁️{' '}
+                    <SafeTranslation
+                      tKey="bites.tags.visual"
+                      fallback="视障友好"
+                    />
                   </span>
                 )}
               </div>
@@ -120,10 +106,13 @@ export default function RestaurantDetailPage() {
             {restaurant.food && restaurant.food.length > 0 && (
               <div className="text-sm">
                 <span className="font-medium text-gray-700">
-                  <SafeTranslation tKey="bites.labels.food" fallback="美食类型" />
+                  <SafeTranslation
+                    tKey="bites.labels.food"
+                    fallback="美食类型"
+                  />
                   {': '}
                 </span>
-                {restaurant.food.map((f) => f.name).join('、')}
+                {restaurant.food.map(({ name }) => name).join('、')}
               </div>
             )}
 
@@ -131,12 +120,15 @@ export default function RestaurantDetailPage() {
             {restaurant.tags.length > 0 && (
               <div className="space-y-1">
                 <p className="text-sm font-medium text-gray-700">
-                  <SafeTranslation tKey="bites.labels.features" fallback="特色服务" />
+                  <SafeTranslation
+                    tKey="bites.labels.features"
+                    fallback="特色服务"
+                  />
                 </p>
                 <ul className="flex flex-wrap gap-2">
-                  {restaurant.tags.map((tag, i) => (
+                  {restaurant.tags.map((tag) => (
                     <li
-                      key={i}
+                      key={tag}
                       className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 text-xs"
                     >
                       {tag}
@@ -152,15 +144,15 @@ export default function RestaurantDetailPage() {
               <span>{restaurant.address}</span>
             </div>
 
-            {/* External link if available */}
-            {restaurant.social_values && restaurant.social_values.length > 0 && (
+            {/* Social values */}
+            {restaurant.social_values?.[0] && (
               <div className="flex flex-wrap gap-2">
-                {restaurant.social_values.map((v, i) => (
+                {restaurant.social_values.map((value) => (
                   <span
-                    key={i}
+                    key={value}
                     className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-cyan-50 text-cyan-700 text-xs"
                   >
-                    {v}
+                    {value}
                   </span>
                 ))}
               </div>
@@ -177,7 +169,11 @@ export default function RestaurantDetailPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <MapEmbed title={restaurant.name} address={restaurant.address} />
+            <ChinaMapWrapper
+              zoom={10}
+              title={restaurant.name}
+              address={restaurant.address}
+            />
           </CardContent>
         </Card>
 

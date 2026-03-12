@@ -1,13 +1,10 @@
-'use client';
-
+import { ChinaMapWrapper } from '@/components/ChinaMapWrapper';
 import { CommentBox } from '@/components/CommentBox';
-import { MapEmbed } from '@/components/MapEmbed';
 import { TimelineItem } from '@/components/TimelineItem';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DeadlineItem, EventData } from '@/lib/data';
-import { useEventStore } from '@/lib/store';
 import { formatTimezoneToUTC } from '@/lib/utils';
 import {
   ArrowLeft,
@@ -20,69 +17,101 @@ import {
 } from 'lucide-react';
 import { DateTime } from 'luxon';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
 
 const DATA_EDIT_URL =
   'https://github.com/GoodAction-Hub/GoodAction-data/edit/main/activities.json';
 
-interface FoundEvent {
-  item: DeadlineItem;
-  event: EventData;
+const ACTIVITIES_API_URL =
+  'https://goodaction-hub.github.io/GoodAction-data/activities.json';
+
+interface ExternalEventData {
+  id: string;
+  link: string;
+  start_time?: string;
+  end_time?: string;
+  timeline: { deadline: string; comment: string }[];
+  timezone: string;
+  place: string;
 }
 
-function findEvent(items: DeadlineItem[], id: string): FoundEvent | null {
-  for (const item of items) {
-    for (const event of item.events) {
-      if (event.id === id) return { item, event };
+interface ExternalDeadlineItem {
+  title: string;
+  description: string;
+  category: 'meetup' | 'conference' | 'competition';
+  tags: string[];
+  events: ExternalEventData[];
+}
+
+function transformEvent(event: ExternalEventData): EventData {
+  const startTime = event.start_time ?? event.timeline[0]?.deadline ?? '';
+  const startDate = startTime ? new Date(startTime.replace(' ', 'T')) : null;
+  const year = startDate ? startDate.getFullYear() : new Date().getFullYear();
+
+  const formatDate = (d: Date) =>
+    `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+  let date = startDate ? formatDate(startDate) : '';
+  if (startDate && event.end_time) {
+    const endDate = new Date(event.end_time.replace(' ', 'T'));
+    if (endDate.getTime() !== startDate.getTime())
+      date = `${date}-${endDate.getMonth() + 1}月${endDate.getDate()}日`;
+  }
+
+  return {
+    year,
+    id: event.id,
+    link: event.link,
+    timeline: event.timeline,
+    timezone: event.timezone,
+    date,
+    place: event.place,
+  };
+}
+
+function transformItem(item: ExternalDeadlineItem): DeadlineItem {
+  return {
+    title: item.title,
+    description: item.description,
+    category: item.category === 'meetup' ? 'activity' : item.category,
+    tags: item.tags ?? [],
+    events: item.events.map(transformEvent),
+  };
+}
+
+async function findActivity(id: string) {
+  try {
+    const res = await fetch(ACTIVITIES_API_URL, { cache: 'force-cache' });
+    if (!res.ok) return null;
+    const externalData = (await res.json()) as ExternalDeadlineItem[];
+    for (const raw of externalData) {
+      const item = transformItem(raw);
+      for (const event of item.events)
+        if (event.id === id) return { item, event };
     }
+    return null;
+  } catch (error) {
+    console.error('Failed to fetch activity:', error);
+    return null;
   }
-  return null;
 }
 
-export default function EventDetailPage() {
-  const { t } = useTranslation('common');
-  const params = useParams();
-  const id = params.id as string;
-
-  const { items, loading, fetchItems, displayTimezone } = useEventStore();
-  const activeDotRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    fetchItems();
-  }, [fetchItems]);
-
-  useEffect(() => {
-    useEventStore.setState({ mounted: true });
-  }, []);
-
-  const found = !loading && items.length > 0 ? findEvent(items, id) : null;
-  const dataLoaded = !loading && items.length > 0;
-
-  if (loading || !dataLoaded) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-cyan-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4" />
-          <p className="text-purple-700">{t('events.loading')}</p>
-        </div>
-      </div>
-    );
-  }
+export default async function EventDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const found = await findActivity(id);
 
   if (!found) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-cyan-50 flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="text-6xl">🔍</div>
-          <h2 className="text-xl font-semibold text-gray-700">
-            {t('events.notFound')}
-          </h2>
-          <Link href="/deadlines">
+          <h2 className="text-xl font-semibold text-gray-700">未找到该活动</h2>
+          <Link href="/activities">
             <Button variant="outline" className="gap-2">
               <ArrowLeft className="w-4 h-4" />
-              {t('detail.back')}
+              返回列表
             </Button>
           </Link>
         </div>
@@ -91,6 +120,7 @@ export default function EventDetailPage() {
   }
 
   const { item, event } = found;
+  const displayTimezone = 'Asia/Shanghai';
   const now = DateTime.now().setZone(displayTimezone);
 
   const upcomingDeadlines = event.timeline
@@ -125,16 +155,15 @@ export default function EventDetailPage() {
       <div className="container mx-auto px-4 py-8 relative z-10 max-w-4xl">
         {/* Back + Edit buttons */}
         <div className="flex items-center justify-between mb-6">
-          <Link href="/deadlines">
+          <Link href="/activities">
             <Button variant="outline" size="sm" className="gap-2">
               <ArrowLeft className="w-4 h-4" />
-              {t('detail.back')}
+              返回列表
             </Button>
           </Link>
           <a href={DATA_EDIT_URL} target="_blank" rel="noopener noreferrer">
             <Button variant="outline" size="sm" className="gap-2">
-              <Pencil className="w-4 h-4" />
-              {t('detail.editOnGitHub')}
+              <Pencil className="w-4 h-4" />在 GitHub 上编辑
             </Button>
           </a>
         </div>
@@ -148,14 +177,18 @@ export default function EventDetailPage() {
                 <div
                   className={`inline-flex px-4 py-2 rounded-xl text-sm font-bold shadow-lg ${categoryStyle}`}
                 >
-                  {t(`filter.category_${item.category}`)}
+                  {item.category === 'conference'
+                    ? '会议'
+                    : item.category === 'competition'
+                      ? '竞赛'
+                      : '活动'}
                 </div>
                 <Badge variant="outline" className="text-xs">
                   {event.year}
                 </Badge>
                 {ended && (
                   <Badge variant="secondary" className="text-xs">
-                    {t('events.ended')}
+                    已结束
                   </Badge>
                 )}
               </div>
@@ -214,7 +247,7 @@ export default function EventDetailPage() {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm font-medium">
                 <Clock className="w-4 h-4" />
-                {t('events.timeline')}
+                时间轴
               </div>
               <div className="relative bg-gray-50 rounded-lg border h-16 flex items-center">
                 <div className="absolute left-[10%] right-[10%] h-0.5 bg-gray-300 top-1/2 -translate-y-1/2" />
@@ -229,9 +262,6 @@ export default function EventDetailPage() {
                       isUpcoming={upcomingIndexes.slice(1).includes(index)}
                       totalEvents={event.timeline.length}
                       index={index}
-                      ref={
-                        nextDeadline?.index === index ? activeDotRef : undefined
-                      }
                     />
                   ))}
                 </div>
@@ -246,11 +276,15 @@ export default function EventDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <MapPin className="w-5 h-5" />
-                {t('detail.location')}
+                活动地点
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <MapEmbed title={item.title} address={event.place} />
+              <ChinaMapWrapper
+                zoom={10}
+                title={item.title}
+                address={event.place}
+              />
             </CardContent>
           </Card>
         )}
@@ -260,7 +294,7 @@ export default function EventDetailPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <MessageSquare className="w-5 h-5" />
-              {t('detail.comments')}
+              评论
             </CardTitle>
           </CardHeader>
           <CardContent>

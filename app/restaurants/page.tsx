@@ -125,6 +125,16 @@ export default function BarrierFreeBitesPage() {
                 fallback="发现包容性餐饮体验"
               />
             </p>
+            <div className="mt-4 flex justify-center">
+              <a
+                href="https://github.com/GoodAction-Hub/GoodAction-data/issues/new?template=restaurant.yml"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-lg hover:from-green-600 hover:to-teal-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm font-medium"
+              >
+                + 发布餐厅
+              </a>
+            </div>
           </header>
 
           <div className={styles.filterSection}>
@@ -200,7 +210,7 @@ export default function BarrierFreeBitesPage() {
                       </h2>
                       <div className="flex items-center gap-2">
                         <Link
-                          href={`/Barrier-Free-Bites/${restaurant.id}`}
+                          href={`/restaurants/${restaurant.id}`}
                           className="inline-flex items-center text-purple-600 hover:text-purple-800 transition-colors"
                           title={t('detail.viewDetails')}
                         >
