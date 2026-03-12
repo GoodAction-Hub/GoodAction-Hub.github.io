@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Info, Loader2, MapPin } from 'lucide-react';
+import { ArrowRight, Loader2, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import FoodAIDialog from '@/components/FoodAIDialog';
@@ -208,15 +208,6 @@ export default function BarrierFreeBitesPage() {
                       <h2 className={styles.restaurantName}>
                         {restaurant.name}
                       </h2>
-                      <div className="flex items-center gap-2">
-                        <Link
-                          href={`/restaurants/${restaurant.id}`}
-                          className="inline-flex items-center text-purple-600 hover:text-purple-800 transition-colors"
-                          title={t('detail.viewDetails')}
-                        >
-                          <Info className="w-4 h-4" />
-                        </Link>
-                      </div>
                       <div className={styles.accessibilityTags}>
                         {restaurant.accessibility.deafFriendly && (
                           <span className={styles.tag}>
@@ -313,6 +304,16 @@ export default function BarrierFreeBitesPage() {
                             )}
                           </button>
                         </div>
+                      </div>
+                      <div className={styles.detailButtonWrap}>
+                        <Link
+                          href={`/restaurants/${restaurant.id}`}
+                          className={styles.detailButton}
+                          title={t('detail.viewDetails')}
+                        >
+                          <span>{t('detail.viewDetails')}</span>
+                          <ArrowRight className="h-4 w-4" />
+                        </Link>
                       </div>
                     </div>
                   </div>

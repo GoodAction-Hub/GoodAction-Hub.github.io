@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import Link from 'next/link';
+import Image from 'next/image';
 import { SwitchLanguage } from '@/components/SwitchLanguage';
 
 const inter = Inter({
@@ -41,6 +42,22 @@ export default function RootLayout({
           <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm shadow-sm border-b border-white/20">
             <div className="container mx-auto px-4 py-3 flex items-center justify-between">
               <nav className="flex items-center gap-3">
+                <Link
+                  href="/"
+                  className="inline-flex items-center gap-2 mr-1 group"
+                  aria-label="GoodActionHub"
+                >
+                  <Image
+                    src="/pick-heart.png"
+                    alt="GoodActionHub logo"
+                    width={24}
+                    height={24}
+                    className="rounded-sm"
+                  />
+                  <span className="text-sm md:text-base font-bold bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 bg-clip-text text-transparent group-hover:brightness-110 transition-all">
+                    GoodActionHub
+                  </span>
+                </Link>
                 <Link
                   href="/"
                   className="text-sm md:text-base font-semibold bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 bg-clip-text text-transparent hover:brightness-110"

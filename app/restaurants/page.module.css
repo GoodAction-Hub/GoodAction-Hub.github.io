@@ -204,6 +204,39 @@
   border-top: 1px solid var(--color-card-border);
 }
 
+.detailButtonWrap {
+  margin-top: var(--space-16);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.detailButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  padding: var(--space-12) var(--space-20);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-hover));
+  color: var(--color-white);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.detailButton:hover {
+  filter: brightness(1.05);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.detailButton:focus-visible {
+  outline: 2px solid var(--color-primary-hover);
+  outline-offset: 2px;
+}
+
 .infoItem {
   display: flex;
   align-items: flex-start;
@@ -289,6 +322,14 @@
   }
 
   .filterBtn {
+    width: 100%;
+  }
+
+  .detailButtonWrap {
+    justify-content: stretch;
+  }
+
+  .detailButton {
     width: 100%;
   }
 }

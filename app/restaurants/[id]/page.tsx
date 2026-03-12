@@ -1,6 +1,5 @@
 import { ChinaMapWrapper } from '@/components/ChinaMapWrapper';
 import { CommentBox } from '@/components/CommentBox';
-import SafeTranslation from '@/components/SafeTranslation';
 import { fetchBitesCatalog } from '@/lib/bitesCatalog';
 import { ArrowLeft, MapPin, MessageSquare, Pencil } from 'lucide-react';
 import Link from 'next/link';
@@ -35,16 +34,12 @@ export default async function RestaurantDetailPage({
           <Link href="/restaurants">
             <Button variant="outline" size="sm" className="gap-2">
               <ArrowLeft className="w-4 h-4" />
-              <SafeTranslation tKey="detail.back" fallback="返回" />
+              返回
             </Button>
           </Link>
           <a href={DATA_EDIT_URL} target="_blank" rel="noopener noreferrer">
             <Button variant="outline" size="sm" className="gap-2">
-              <Pencil className="w-4 h-4" />
-              <SafeTranslation
-                tKey="detail.editOnGitHub"
-                fallback="在 GitHub 上编辑"
-              />
+              <Pencil className="w-4 h-4" />在 GitHub 上编辑
             </Button>
           </a>
         </div>
@@ -56,20 +51,12 @@ export default async function RestaurantDetailPage({
               <div className="flex flex-wrap gap-2">
                 {restaurant.accessibility.deafFriendly && (
                   <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                    👂{' '}
-                    <SafeTranslation
-                      tKey="bites.tags.hearing"
-                      fallback="听障友好"
-                    />
+                    👂 听障友好
                   </span>
                 )}
                 {restaurant.accessibility.blindFriendly && (
                   <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                    👁️{' '}
-                    <SafeTranslation
-                      tKey="bites.tags.visual"
-                      fallback="视障友好"
-                    />
+                    👁️ 视障友好
                   </span>
                 )}
               </div>
@@ -86,10 +73,7 @@ export default async function RestaurantDetailPage({
             {restaurant.food && restaurant.food.length > 0 && (
               <div className="text-sm">
                 <span className="font-medium text-gray-700">
-                  <SafeTranslation
-                    tKey="bites.labels.food"
-                    fallback="美食类型"
-                  />
+                  美食类型
                   {': '}
                 </span>
                 {restaurant.food.map(({ name }) => name).join('、')}
@@ -99,12 +83,7 @@ export default async function RestaurantDetailPage({
             {/* Tags / features */}
             {restaurant.tags.length > 0 && (
               <div className="space-y-1">
-                <p className="text-sm font-medium text-gray-700">
-                  <SafeTranslation
-                    tKey="bites.labels.features"
-                    fallback="特色服务"
-                  />
-                </p>
+                <p className="text-sm font-medium text-gray-700">特色服务</p>
                 <ul className="flex flex-wrap gap-2">
                   {restaurant.tags.map((tag) => (
                     <li
@@ -145,7 +124,7 @@ export default async function RestaurantDetailPage({
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <MapPin className="w-5 h-5" />
-              <SafeTranslation tKey="detail.location" fallback="活动地点" />
+              餐厅位置
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -162,7 +141,7 @@ export default async function RestaurantDetailPage({
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <MessageSquare className="w-5 h-5" />
-              <SafeTranslation tKey="detail.comments" fallback="评论" />
+              评论
             </CardTitle>
           </CardHeader>
           <CardContent>

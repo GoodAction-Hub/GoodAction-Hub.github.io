@@ -10,7 +10,7 @@
     "build:huawei": "npm run build:static",
     "build:netlify": "next build",
     "start": "next start",
-    "test": "lint-staged  &&  tsc --noEmit",
+    "test": "next typegen  &&  lint-staged  &&  tsc --noEmit",
     "knip": "knip",
     "prepare": "husky"
   },

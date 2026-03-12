@@ -66,7 +66,7 @@ export default function HomeSelector() {
       {/* 群二维码 */}
       <div className="flex justify-center mt-12 mb-8">
         <Image
-          src="/goodaction-hub-qr.png"
+          src="/Lark-group.png"
           alt="GoodActionHub 益行汇群二维码"
           width={192}
           height={192}
