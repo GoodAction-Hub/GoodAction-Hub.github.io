@@ -1,6 +1,3 @@
-'use client';
-
-import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowRight,
@@ -9,40 +6,81 @@ import {
   GraduationCap,
   Search,
 } from 'lucide-react';
-import { fetchTutoringCatalog, TutoringCourse } from '@/lib/tutoring';
+import { fetchTutoringCatalog } from '@/lib/tutoring';
 
-export default function TutoringPage() {
-  const [courses, setCourses] = useState<TutoringCourse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState('');
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+const PAGE_SIZE = 10;
 
-  useEffect(() => {
-    fetchTutoringCatalog().then((data) => {
-      setCourses(data);
-      setLoading(false);
-    });
-  }, []);
+type PageSearchParams = Promise<{
+  page?: string;
+  query?: string;
+  tag?: string;
+}>;
 
-  const allTags = useMemo(() => {
-    const set = new Set<string>();
-    courses.forEach((c) => c.tags.forEach((t) => set.add(t)));
-    return Array.from(set);
-  }, [courses]);
+function parsePage(rawPage?: string): number {
+  const parsed = Number.parseInt(rawPage ?? '1', 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+}
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return courses.filter((c) => {
-      if (selectedTag && !c.tags.includes(selectedTag)) return false;
-      if (!q) return true;
-      return (
-        c.title.toLowerCase().includes(q) ||
-        c.summary.toLowerCase().includes(q) ||
-        c.tags.some((t) => t.toLowerCase().includes(q)) ||
-        (c.instructor ?? '').toLowerCase().includes(q)
-      );
-    });
-  }, [courses, query, selectedTag]);
+function buildPageHref(page: number, query: string, tag: string): string {
+  const params = new URLSearchParams();
+  if (query) params.set('query', query);
+  if (tag) params.set('tag', tag);
+  if (page > 1) params.set('page', String(page));
+  const queryString = params.toString();
+  return queryString ? `/tutoring?${queryString}` : '/tutoring';
+}
+
+function buildTagHref(nextTag: string, query: string): string {
+  const params = new URLSearchParams();
+  if (query) params.set('query', query);
+  if (nextTag) params.set('tag', nextTag);
+  const queryString = params.toString();
+  return queryString ? `/tutoring?${queryString}` : '/tutoring';
+}
+
+function getVisiblePages(totalPages: number, currentPage: number): number[] {
+  const pages: number[] = [];
+  const start = Math.max(1, currentPage - 2);
+  const end = Math.min(totalPages, currentPage + 2);
+
+  for (let page = start; page <= end; page += 1) {
+    pages.push(page);
+  }
+
+  return pages;
+}
+
+export default async function TutoringPage({
+  searchParams,
+}: {
+  searchParams: PageSearchParams;
+}) {
+  const { page: rawPage, query: rawQuery, tag: rawTag } = await searchParams;
+  const query = rawQuery?.trim() ?? '';
+  const selectedTag = rawTag?.trim() ?? '';
+
+  const courses = await fetchTutoringCatalog();
+
+  const allTags = Array.from(new Set(courses.flatMap((course) => course.tags)));
+
+  const filteredCourses = courses.filter((course) => {
+    if (selectedTag && !course.tags.includes(selectedTag)) return false;
+    if (!query) return true;
+
+    const q = query.toLowerCase();
+    return (
+      course.title.toLowerCase().includes(q) ||
+      course.summary.toLowerCase().includes(q) ||
+      course.tags.some((tag) => tag.toLowerCase().includes(q)) ||
+      (course.instructor ?? '').toLowerCase().includes(q)
+    );
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filteredCourses.length / PAGE_SIZE));
+  const currentPage = Math.min(parsePage(rawPage), totalPages);
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const pagedCourses = filteredCourses.slice(start, start + PAGE_SIZE);
+  const visiblePages = getVisiblePages(totalPages, currentPage);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-cyan-50 relative overflow-hidden">
@@ -72,20 +110,32 @@ export default function TutoringPage() {
         </div>
 
         <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Search className="w-4 h-4 text-gray-500" />
-            <input
-              type="text"
-              placeholder="搜索课程标题、标签、讲师..."
-              className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </div>
+          <form action="/tutoring" method="get">
+            <div className="flex items-center gap-2 mb-4">
+              <Search className="w-4 h-4 text-gray-500" />
+              <input
+                type="text"
+                name="query"
+                defaultValue={query}
+                placeholder="搜索课程标题、标签、讲师..."
+                className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm"
+              />
+              {selectedTag && (
+                <input type="hidden" name="tag" value={selectedTag} />
+              )}
+              <button
+                type="submit"
+                className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium"
+              >
+                搜索
+              </button>
+            </div>
+          </form>
+
           {allTags.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setSelectedTag(null)}
+              <Link
+                href={buildTagHref('', query)}
                 className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
                   !selectedTag
                     ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow'
@@ -93,13 +143,11 @@ export default function TutoringPage() {
                 }`}
               >
                 全部
-              </button>
+              </Link>
               {allTags.map((tag) => (
-                <button
+                <Link
                   key={tag}
-                  onClick={() =>
-                    setSelectedTag(tag === selectedTag ? null : tag)
-                  }
+                  href={buildTagHref(tag === selectedTag ? '' : tag, query)}
                   className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
                     tag === selectedTag
                       ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow'
@@ -107,18 +155,13 @@ export default function TutoringPage() {
                   }`}
                 >
                   {tag}
-                </button>
+                </Link>
               ))}
             </div>
           )}
         </div>
 
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-500 mx-auto mb-4"></div>
-            <p className="text-purple-700">正在加载课程...</p>
-          </div>
-        ) : filtered.length === 0 ? (
+        {pagedCourses.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">📚</div>
             <h3 className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
@@ -128,7 +171,7 @@ export default function TutoringPage() {
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((course) => (
+            {pagedCourses.map((course) => (
               <Link
                 key={course.slug}
                 href={`/tutoring/${course.slug}`}
@@ -185,6 +228,41 @@ export default function TutoringPage() {
                 </div>
               </Link>
             ))}
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <div className="mt-10 flex items-center justify-center gap-2">
+            {currentPage > 1 && (
+              <Link
+                href={buildPageHref(currentPage - 1, query, selectedTag)}
+                className="px-3 py-1.5 rounded-md border border-gray-300 bg-white text-sm"
+              >
+                上一页
+              </Link>
+            )}
+            {visiblePages.map((page) => (
+              <Link
+                key={page}
+                href={buildPageHref(page, query, selectedTag)}
+                aria-current={page === currentPage ? 'page' : undefined}
+                className={`px-3 py-1.5 rounded-md border text-sm ${
+                  page === currentPage
+                    ? 'bg-purple-600 border-purple-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-700'
+                }`}
+              >
+                {page}
+              </Link>
+            ))}
+            {currentPage < totalPages && (
+              <Link
+                href={buildPageHref(currentPage + 1, query, selectedTag)}
+                className="px-3 py-1.5 rounded-md border border-gray-300 bg-white text-sm"
+              >
+                下一页
+              </Link>
+            )}
           </div>
         )}
       </div>

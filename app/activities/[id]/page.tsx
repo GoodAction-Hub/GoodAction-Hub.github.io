@@ -4,11 +4,7 @@ import { TimelineItem } from '@/components/TimelineItem';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  ACTIVITIES_API_URL,
-  ExternalDeadlineItem,
-  transformItem,
-} from '@/lib/activities';
+import { fetchActivitiesCatalog, transformItem } from '@/lib/activities';
 import { formatTimezoneToUTC } from '@/lib/utils';
 import {
   ArrowLeft,
@@ -27,11 +23,7 @@ const DATA_EDIT_URL =
   'https://github.com/GoodAction-Hub/GoodAction-data/edit/main/data/activities.yml';
 
 async function findActivity(id: string) {
-  const res = await fetch(ACTIVITIES_API_URL, { cache: 'force-cache' });
-
-  if (!res.ok) throw new URIError(`Failed to fetch activities: ${res.status}`);
-
-  const externalData = (await res.json()) as ExternalDeadlineItem[];
+  const externalData = await fetchActivitiesCatalog();
 
   for (const raw of externalData) {
     const item = transformItem(raw);

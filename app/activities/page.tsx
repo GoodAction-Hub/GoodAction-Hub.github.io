@@ -1,188 +1,129 @@
-'use client';
-
 import { EventCard } from '@/components/EventCard';
-import { FilterBar } from '@/components/FilterBar';
 import { GitCodeIcon } from '@/components/icons/GitCodeIcon';
 import { GitHubIcon } from '@/components/icons/GitHubIcon';
-
-import { DeadlineItem, EventData } from '@/lib/data';
-import { useEventStore } from '@/lib/store';
+import {
+  fetchActivitiesCatalog,
+  transformItem,
+  ExternalDeadlineItem,
+} from '@/lib/activities';
 import Fuse from 'fuse.js';
-
 import { DateTime } from 'luxon';
 import Link from 'next/link';
-import { useEffect, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
 
 interface FlatEvent {
-  item: DeadlineItem;
-  event: EventData;
+  item: ReturnType<typeof transformItem>;
+  event: ReturnType<typeof transformItem>['events'][number];
   nextDeadline: DateTime;
   timeRemaining: number;
 }
 
-export default function Home() {
-  const {
-    items,
-    loading,
-    fetchItems,
-    selectedCategory,
-    selectedTags,
-    selectedLocations,
-    searchQuery,
-    favorites,
-    showOnlyFavorites,
-  } = useEventStore();
+const PAGE_SIZE = 10;
 
-  useEffect(() => {
-    fetchItems();
-  }, [fetchItems]);
+type PageSearchParams = Promise<{
+  page?: string;
+  query?: string;
+}>;
 
-  const { t } = useTranslation();
+function parsePage(rawPage?: string): number {
+  const parsed = Number.parseInt(rawPage ?? '1', 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+}
 
-  const flatEvents: FlatEvent[] = useMemo(
-    () =>
-      items.flatMap((item) =>
-        item.events.map((event) => {
-          const now = DateTime.now().setZone('Asia/Shanghai');
-          const upcomingDeadlines = event.timeline
-            .map((t) => DateTime.fromISO(t.deadline, { zone: event.timezone }))
-            .filter((d) => d > now)
-            .sort((a, b) => a.toMillis() - b.toMillis());
+function getPageHref(page: number, query: string): string {
+  const params = new URLSearchParams();
+  if (query) params.set('query', query);
+  if (page > 1) params.set('page', String(page));
+  const queryString = params.toString();
+  return queryString ? `/activities?${queryString}` : '/activities';
+}
 
-          const nextDeadline =
-            upcomingDeadlines[0] ||
-            DateTime.fromISO(
-              event.timeline[event.timeline.length - 1].deadline,
-              { zone: event.timezone },
-            );
-          const timeRemaining = nextDeadline.toMillis() - now.toMillis();
+function getVisiblePages(totalPages: number, currentPage: number): number[] {
+  const pages: number[] = [];
+  const start = Math.max(1, currentPage - 2);
+  const end = Math.min(totalPages, currentPage + 2);
 
-          return { item, event, nextDeadline, timeRemaining };
-        }),
-      ),
-    [items],
+  for (let page = start; page <= end; page += 1) {
+    pages.push(page);
+  }
+
+  return pages;
+}
+
+async function getFlatEvents(): Promise<FlatEvent[]> {
+  const externalData = await fetchActivitiesCatalog();
+  const items = externalData.map((item: ExternalDeadlineItem) =>
+    transformItem(item),
   );
 
-  // 为每个事件添加搜索用的日期字段
-  const eventsWithSearchDates = useMemo(() => {
-    return flatEvents.map((flatEvent) => ({
-      ...flatEvent,
-      searchableDate: flatEvent.nextDeadline.toFormat('yyyy-MM-dd'),
-      searchableMonth: flatEvent.nextDeadline.toFormat('MM'),
-      searchableYear: flatEvent.nextDeadline.toFormat('yyyy'),
-    }));
-  }, [flatEvents]);
+  return items.flatMap((item) =>
+    item.events.map((event) => {
+      const now = DateTime.now().setZone('Asia/Shanghai');
+      const upcomingDeadlines = event.timeline
+        .map((timeline) =>
+          DateTime.fromISO(timeline.deadline, { zone: event.timezone }),
+        )
+        .filter((deadline) => deadline > now)
+        .sort((a, b) => a.toMillis() - b.toMillis());
 
-  const filteredEvents = useMemo(() => {
-    let filtered = eventsWithSearchDates;
+      const nextDeadline =
+        upcomingDeadlines[0] ||
+        DateTime.fromISO(event.timeline[event.timeline.length - 1].deadline, {
+          zone: event.timezone,
+        });
 
-    // 分类过滤
-    if (selectedCategory) {
-      filtered = filtered.filter(
-        (flatEvent) => flatEvent.item.category === selectedCategory,
-      );
-    }
+      return {
+        item,
+        event,
+        nextDeadline,
+        timeRemaining: nextDeadline.toMillis() - now.toMillis(),
+      };
+    }),
+  );
+}
 
-    // 标签过滤
-    if (selectedTags.length > 0) {
-      filtered = filtered.filter((flatEvent) =>
-        selectedTags.some((tag) => flatEvent.item.tags?.includes(tag)),
-      );
-    }
+export default async function ActivitiesPage({
+  searchParams,
+}: {
+  searchParams: PageSearchParams;
+}) {
+  const { page: rawPage, query: rawQuery } = await searchParams;
+  const query = rawQuery?.trim() ?? '';
 
-    // 地点过滤
-    if (selectedLocations.length > 0) {
-      filtered = filtered.filter((flatEvent) =>
-        selectedLocations.includes(flatEvent.event.place),
-      );
-    }
+  const flatEvents = await getFlatEvents();
 
-    // 收藏过滤
-    if (showOnlyFavorites) {
-      console.log('Filtering favorites:', {
-        favorites,
-        showOnlyFavorites,
-        totalEvents: filtered.length,
-      });
-      filtered = filtered.filter((flatEvent) => {
-        const eventId = `${flatEvent.event.id}`;
-        const isFavorited = favorites.includes(eventId);
-        console.log(
-          `Event ${eventId}: ${isFavorited ? 'favorited' : 'not favorited'}`,
-        );
-        return isFavorited;
-      });
-      console.log('Filtered favorites result:', filtered.length);
-    }
-
-    // 搜索过滤
-    if (searchQuery.trim()) {
-      const fuse = new Fuse(filtered, {
-        keys: [
-          { name: 'item.title', weight: 0.4 },
-          { name: 'item.tags', weight: 0.3 },
-          { name: 'event.place', weight: 0.2 },
-          { name: 'searchableDate', weight: 0.1 },
-          { name: 'searchableMonth', weight: 0.1 },
-          { name: 'searchableYear', weight: 0.1 },
-        ],
-        threshold: 0.3,
-        includeScore: true,
-      });
-
-      const results = fuse.search(searchQuery);
-      filtered = results.map((result) => result.item);
-    }
-
-    // 排序逻辑：未结束的活动按 timeRemaining 升序，已结束的活动放在最后
-    return filtered.sort((a, b) => {
-      const aCompleted = a.timeRemaining < 0;
-      const bCompleted = b.timeRemaining < 0;
-
-      // 如果一个已结束，一个未结束，未结束的排在前面
-      if (aCompleted && !bCompleted) return 1;
-      if (!aCompleted && bCompleted) return -1;
-
-      // 如果都未结束，按 timeRemaining 升序（即将到期的在前）
-      if (!aCompleted && !bCompleted) {
-        return a.timeRemaining - b.timeRemaining;
-      }
-
-      // 如果都已结束，按 timeRemaining 降序（最近结束的在前）
-      return b.timeRemaining - a.timeRemaining;
+  let filteredEvents = flatEvents;
+  if (query) {
+    const fuse = new Fuse(filteredEvents, {
+      keys: ['item.title', 'item.tags', 'event.place'],
+      threshold: 0.3,
     });
-  }, [
-    eventsWithSearchDates,
-    selectedCategory,
-    selectedTags,
-    selectedLocations,
-    searchQuery,
-    showOnlyFavorites,
-    favorites,
-  ]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-cyan-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
-          <p className="text-purple-700">{t('events.loading')}</p>
-        </div>
-      </div>
-    );
+    filteredEvents = fuse.search(query).map((result) => result.item);
   }
+
+  filteredEvents = filteredEvents.sort((a, b) => {
+    const aCompleted = a.timeRemaining < 0;
+    const bCompleted = b.timeRemaining < 0;
+
+    if (aCompleted && !bCompleted) return 1;
+    if (!aCompleted && bCompleted) return -1;
+    if (!aCompleted && !bCompleted) return a.timeRemaining - b.timeRemaining;
+    return b.timeRemaining - a.timeRemaining;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filteredEvents.length / PAGE_SIZE));
+  const currentPage = Math.min(parsePage(rawPage), totalPages);
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const pagedEvents = filteredEvents.slice(start, start + PAGE_SIZE);
+  const visiblePages = getVisiblePages(totalPages, currentPage);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-cyan-50 relative overflow-hidden">
-      {/* 动态背景装饰 */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-cyan-400/20 to-purple-400/20 rounded-full blur-3xl"></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-pink-300/10 to-cyan-300/10 rounded-full blur-3xl"></div>
       </div>
       <div className="container mx-auto px-4 py-8 relative z-10">
-        {/* Header Section */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 bg-clip-text text-transparent mb-4">
             公益慈善活动截止日期
@@ -228,14 +169,26 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Filters */}
         <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 mb-8">
-          <FilterBar />
+          <form action="/activities" method="get" className="flex gap-3">
+            <input
+              type="text"
+              name="query"
+              defaultValue={query}
+              placeholder="搜索活动标题、标签、地点..."
+              className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm"
+            />
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium"
+            >
+              搜索
+            </button>
+          </form>
         </div>
 
-        {/* Events List */}
         <div className="space-y-4">
-          {filteredEvents.map(({ item, event }) => (
+          {pagedEvents.map(({ item, event }) => (
             <EventCard key={`${event.id}`} item={item} event={event} />
           ))}
         </div>
@@ -244,15 +197,49 @@ export default function Home() {
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🔍</div>
             <h3 className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-              {t('events.notFound')}
+              未找到结果
             </h3>
             <p className="text-gray-600 bg-white/60 backdrop-blur-sm rounded-lg px-4 py-2 inline-block">
-              {t('events.hint')}
+              请尝试其他关键词
             </p>
           </div>
         )}
 
-        {/* Footer */}
+        {totalPages > 1 && (
+          <div className="mt-10 flex items-center justify-center gap-2">
+            {currentPage > 1 && (
+              <Link
+                href={getPageHref(currentPage - 1, query)}
+                className="px-3 py-1.5 rounded-md border border-gray-300 bg-white text-sm"
+              >
+                上一页
+              </Link>
+            )}
+            {visiblePages.map((page) => (
+              <Link
+                key={page}
+                href={getPageHref(page, query)}
+                aria-current={page === currentPage ? 'page' : undefined}
+                className={`px-3 py-1.5 rounded-md border text-sm ${
+                  page === currentPage
+                    ? 'bg-purple-600 border-purple-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-700'
+                }`}
+              >
+                {page}
+              </Link>
+            ))}
+            {currentPage < totalPages && (
+              <Link
+                href={getPageHref(currentPage + 1, query)}
+                className="px-3 py-1.5 rounded-md border border-gray-300 bg-white text-sm"
+              >
+                下一页
+              </Link>
+            )}
+          </div>
+        )}
+
         <footer className="mt-16 text-center text-gray-600">
           <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 inline-block">
             <p className="text-sm">
