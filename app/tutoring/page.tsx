@@ -6,6 +6,7 @@ import {
   GraduationCap,
   Search,
 } from 'lucide-react';
+import { getVisiblePages, parsePage } from '@/lib/pagination';
 import { fetchTutoringCatalog } from '@/lib/tutoring';
 
 const PAGE_SIZE = 10;
@@ -15,11 +16,6 @@ type PageSearchParams = Promise<{
   query?: string;
   tag?: string;
 }>;
-
-function parsePage(rawPage?: string): number {
-  const parsed = Number.parseInt(rawPage ?? '1', 10);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
-}
 
 function buildPageHref(page: number, query: string, tag: string): string {
   const params = new URLSearchParams();
@@ -36,18 +32,6 @@ function buildTagHref(nextTag: string, query: string): string {
   if (nextTag) params.set('tag', nextTag);
   const queryString = params.toString();
   return queryString ? `/tutoring?${queryString}` : '/tutoring';
-}
-
-function getVisiblePages(totalPages: number, currentPage: number): number[] {
-  const pages: number[] = [];
-  const start = Math.max(1, currentPage - 2);
-  const end = Math.min(totalPages, currentPage + 2);
-
-  for (let page = start; page <= end; page += 1) {
-    pages.push(page);
-  }
-
-  return pages;
 }
 
 export default async function TutoringPage({

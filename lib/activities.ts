@@ -21,16 +21,12 @@ export interface ExternalDeadlineItem {
   events: ExternalEventData[];
 }
 
-let _activitiesCache: ExternalDeadlineItem[] | null = null;
-
 export async function fetchActivitiesCatalog(): Promise<
   ExternalDeadlineItem[]
 > {
-  if (_activitiesCache) return _activitiesCache;
   const res = await fetch(ACTIVITIES_API_URL, { cache: 'force-cache' });
   if (!res.ok) throw new URIError(`Failed to fetch activities: ${res.status}`);
-  _activitiesCache = (await res.json()) as ExternalDeadlineItem[];
-  return _activitiesCache;
+  return (await res.json()) as ExternalDeadlineItem[];
 }
 
 export function transformEvent(event: ExternalEventData): EventData {

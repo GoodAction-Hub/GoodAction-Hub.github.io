@@ -6,6 +6,7 @@ import {
   transformItem,
   ExternalDeadlineItem,
 } from '@/lib/activities';
+import { getVisiblePages, parsePage } from '@/lib/pagination';
 import Fuse from 'fuse.js';
 import { DateTime } from 'luxon';
 import Link from 'next/link';
@@ -24,29 +25,12 @@ type PageSearchParams = Promise<{
   query?: string;
 }>;
 
-function parsePage(rawPage?: string): number {
-  const parsed = Number.parseInt(rawPage ?? '1', 10);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
-}
-
 function getPageHref(page: number, query: string): string {
   const params = new URLSearchParams();
   if (query) params.set('query', query);
   if (page > 1) params.set('page', String(page));
   const queryString = params.toString();
   return queryString ? `/activities?${queryString}` : '/activities';
-}
-
-function getVisiblePages(totalPages: number, currentPage: number): number[] {
-  const pages: number[] = [];
-  const start = Math.max(1, currentPage - 2);
-  const end = Math.min(totalPages, currentPage + 2);
-
-  for (let page = start; page <= end; page += 1) {
-    pages.push(page);
-  }
-
-  return pages;
 }
 
 async function getFlatEvents(): Promise<FlatEvent[]> {

@@ -3,22 +3,32 @@ import Link from 'next/link';
 import FoodAIDialog from '@/components/FoodAIDialog';
 import SafeTranslation from '@/components/SafeTranslation';
 import { fetchBitesCatalog, BitesRestaurant } from '@/lib/bitesCatalog';
+import { getVisiblePages, parsePage } from '@/lib/pagination';
 import styles from './page.module.css';
 
 type FilterType = 'all' | 'hearing' | 'visual' | 'wheelchair' | 'cognitive';
+const FILTER_OPTIONS = [
+  'all',
+  'hearing',
+  'visual',
+  'wheelchair',
+  'cognitive',
+] as const satisfies readonly FilterType[];
+const FILTER_CONFIG: Record<FilterType, { tKey: string; fallback: string }> = {
+  all: { tKey: 'bites.filters.all', fallback: '全部' },
+  hearing: { tKey: 'bites.filters.hearing', fallback: '听障友好' },
+  visual: { tKey: 'bites.filters.visual', fallback: '视障友好' },
+  wheelchair: { tKey: 'bites.filters.wheelchair', fallback: '轮椅友好' },
+  cognitive: { tKey: 'bites.filters.cognitive', fallback: '认知友好' },
+};
 
 const PAGE_SIZE = 10;
 
 type PageSearchParams = Promise<{
   page?: string;
   query?: string;
-  filter?: FilterType;
+  filter?: string;
 }>;
-
-function parsePage(rawPage?: string): number {
-  const parsed = Number.parseInt(rawPage ?? '1', 10);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
-}
 
 function getAccessibilityTypes(r: BitesRestaurant): FilterType[] {
   const types: FilterType[] = [];
@@ -51,16 +61,12 @@ function buildFilterHref(nextFilter: FilterType, query: string): string {
   return queryString ? `/restaurants?${queryString}` : '/restaurants';
 }
 
-function getVisiblePages(totalPages: number, currentPage: number): number[] {
-  const pages: number[] = [];
-  const start = Math.max(1, currentPage - 2);
-  const end = Math.min(totalPages, currentPage + 2);
-
-  for (let page = start; page <= end; page += 1) {
-    pages.push(page);
-  }
-
-  return pages;
+function isFilterType(value: string): value is FilterType {
+  return FILTER_OPTIONS.includes(value as FilterType);
+}
+function parseFilter(rawFilter?: string): FilterType {
+  const normalized = rawFilter?.trim().toLowerCase();
+  return normalized && isFilterType(normalized) ? normalized : 'all';
 }
 
 export default async function BarrierFreeBitesPage({
@@ -74,11 +80,7 @@ export default async function BarrierFreeBitesPage({
     filter: rawFilter,
   } = await searchParams;
   const query = rawQuery?.trim() ?? '';
-  const filter: FilterType =
-    rawFilter &&
-    ['all', 'hearing', 'visual', 'wheelchair', 'cognitive'].includes(rawFilter)
-      ? rawFilter
-      : 'all';
+  const filter = parseFilter(rawFilter);
 
   const restaurants = await fetchBitesCatalog();
 
@@ -162,41 +164,16 @@ export default async function BarrierFreeBitesPage({
           </form>
 
           <div className={styles.filterSection}>
-            {(
-              ['all', 'hearing', 'visual', 'wheelchair', 'cognitive'] as const
-            ).map((item) => (
+            {FILTER_OPTIONS.map((item) => (
               <Link
                 key={item}
                 href={buildFilterHref(item, query)}
                 className={`${styles.filterBtn} ${filter === item ? styles.filterBtnActive : ''}`}
               >
-                {item === 'all' && (
-                  <SafeTranslation tKey="bites.filters.all" fallback="全部" />
-                )}
-                {item === 'hearing' && (
-                  <SafeTranslation
-                    tKey="bites.filters.hearing"
-                    fallback="听障友好"
-                  />
-                )}
-                {item === 'visual' && (
-                  <SafeTranslation
-                    tKey="bites.filters.visual"
-                    fallback="视障友好"
-                  />
-                )}
-                {item === 'wheelchair' && (
-                  <SafeTranslation
-                    tKey="bites.filters.wheelchair"
-                    fallback="轮椅友好"
-                  />
-                )}
-                {item === 'cognitive' && (
-                  <SafeTranslation
-                    tKey="bites.filters.cognitive"
-                    fallback="认知友好"
-                  />
-                )}
+                <SafeTranslation
+                  tKey={FILTER_CONFIG[item].tKey}
+                  fallback={FILTER_CONFIG[item].fallback}
+                />
               </Link>
             ))}
           </div>
@@ -314,8 +291,14 @@ export default async function BarrierFreeBitesPage({
                         <Link
                           href={`/restaurants/${restaurant.id}`}
                           className={styles.detailButton}
+                          title="查看详情"
                         >
-                          <span>查看详情</span>
+                          <span>
+                            <SafeTranslation
+                              tKey="detail.viewDetails"
+                              fallback="查看详情"
+                            />
+                          </span>
                           <ArrowRight className="h-4 w-4" />
                         </Link>
                       </div>
