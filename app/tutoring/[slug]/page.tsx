@@ -106,6 +106,32 @@ export default async function TutoringDetailPage({
           </CardContent>
         </Card>
 
+        {course.audios.length > 0 && (
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <h2 className="text-lg font-bold text-gray-800 mb-3 inline-flex items-center gap-2">
+                <Volume2 className="w-5 h-5 text-purple-600" />
+                音频资源
+              </h2>
+              <ul className="space-y-3">
+                {course.audios.map((a) => (
+                  <li key={a.url}>
+                    <div className="text-sm text-gray-700 mb-1">{a.title}</div>
+                    <audio
+                      controls
+                      preload="none"
+                      src={a.url}
+                      className="w-full"
+                    >
+                      您的浏览器不支持音频播放，<a href={a.url}>点此下载</a>。
+                    </audio>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
+
         {body && (
           <Card className="mb-6">
             <CardContent className="pt-6">
@@ -136,32 +162,6 @@ export default async function TutoringDetailPage({
                     >
                       {v.title}
                     </a>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        )}
-
-        {course.audios.length > 0 && (
-          <Card className="mb-6">
-            <CardContent className="pt-6">
-              <h2 className="text-lg font-bold text-gray-800 mb-3 inline-flex items-center gap-2">
-                <Volume2 className="w-5 h-5 text-purple-600" />
-                音频资源
-              </h2>
-              <ul className="space-y-3">
-                {course.audios.map((a) => (
-                  <li key={a.url}>
-                    <div className="text-sm text-gray-700 mb-1">{a.title}</div>
-                    <audio
-                      controls
-                      preload="none"
-                      src={a.url}
-                      className="w-full"
-                    >
-                      您的浏览器不支持音频播放，<a href={a.url}>点此下载</a>。
-                    </audio>
                   </li>
                 ))}
               </ul>

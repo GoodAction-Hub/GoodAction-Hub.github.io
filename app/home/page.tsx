@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Utensils } from 'lucide-react';
+import { Calendar, GraduationCap, Utensils } from 'lucide-react';
 
 export default function HomeSelector() {
   return (
@@ -14,11 +14,12 @@ export default function HomeSelector() {
             GoodAction Hub 首页
           </h1>
           <p className="mt-3 text-sm md:text-base text-gray-600">
-            请选择进入模块：公益慈善活动截止日期 或 无障碍友好美食指南
+            请选择进入模块：公益慈善活动截止日期、无障碍友好美食指南 或
+            志愿辅导课程
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
           {/* 公益慈善活动截止日期 */}
           <Link href="/activities" className="group block h-full">
             <Card className="h-full min-h-[200px] overflow-hidden border-pink-200 hover:border-pink-400 transition-colors">
@@ -54,6 +55,27 @@ export default function HomeSelector() {
                     </div>
                     <div className="mt-1 text-gray-600 text-sm">
                       探索更友好的餐饮空间与无障碍觅食导航。
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          {/* 志愿辅导课程 */}
+          <Link href="/tutoring" className="group block h-full">
+            <Card className="h-full min-h-[200px] overflow-hidden border-cyan-200 hover:border-cyan-400 transition-colors">
+              <CardContent className="p-6 h-full">
+                <div className="flex items-center gap-4">
+                  <div className="rounded-xl bg-cyan-100 text-cyan-600 p-3 group-hover:bg-cyan-200 transition-colors">
+                    <GraduationCap className="w-7 h-7" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-lg md:text-xl font-bold bg-gradient-to-r from-cyan-600 to-cyan-500 bg-clip-text text-transparent">
+                      志愿辅导课程
+                    </div>
+                    <div className="mt-1 text-gray-600 text-sm">
+                      志愿者老师的备课资料库，含教案与音视频素材。
                     </div>
                   </div>
                 </div>
