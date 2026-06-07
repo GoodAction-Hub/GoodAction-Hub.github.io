@@ -21,9 +21,7 @@ export interface ExternalDeadlineItem {
   events: ExternalEventData[];
 }
 
-export async function fetchActivitiesCatalog(): Promise<
-  ExternalDeadlineItem[]
-> {
+export async function fetchActivitiesCatalog() {
   const res = await fetch(ACTIVITIES_API_URL, { cache: 'force-cache' });
   if (!res.ok) throw new URIError(`Failed to fetch activities: ${res.status}`);
   return (await res.json()) as ExternalDeadlineItem[];

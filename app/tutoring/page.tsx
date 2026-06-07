@@ -6,6 +6,7 @@ import {
   GraduationCap,
   Search,
 } from 'lucide-react';
+import { Pager } from '@/components/Pager';
 import { getVisiblePages, parsePage } from '@/lib/pagination';
 import { fetchTutoringCatalog } from '@/lib/tutoring';
 
@@ -45,7 +46,7 @@ export default async function TutoringPage({
 
   const courses = await fetchTutoringCatalog();
 
-  const allTags = Array.from(new Set(courses.flatMap((course) => course.tags)));
+  const allTags = [...new Set(courses.flatMap(({ tags }) => tags))];
 
   const filteredCourses = courses.filter((course) => {
     if (selectedTag && !course.tags.includes(selectedTag)) return false;
@@ -215,40 +216,12 @@ export default async function TutoringPage({
           </div>
         )}
 
-        {totalPages > 1 && (
-          <div className="mt-10 flex items-center justify-center gap-2">
-            {currentPage > 1 && (
-              <Link
-                href={buildPageHref(currentPage - 1, query, selectedTag)}
-                className="px-3 py-1.5 rounded-md border border-gray-300 bg-white text-sm"
-              >
-                上一页
-              </Link>
-            )}
-            {visiblePages.map((page) => (
-              <Link
-                key={page}
-                href={buildPageHref(page, query, selectedTag)}
-                aria-current={page === currentPage ? 'page' : undefined}
-                className={`px-3 py-1.5 rounded-md border text-sm ${
-                  page === currentPage
-                    ? 'bg-purple-600 border-purple-600 text-white'
-                    : 'bg-white border-gray-300 text-gray-700'
-                }`}
-              >
-                {page}
-              </Link>
-            ))}
-            {currentPage < totalPages && (
-              <Link
-                href={buildPageHref(currentPage + 1, query, selectedTag)}
-                className="px-3 py-1.5 rounded-md border border-gray-300 bg-white text-sm"
-              >
-                下一页
-              </Link>
-            )}
-          </div>
-        )}
+        <Pager
+          currentPage={currentPage}
+          totalPages={totalPages}
+          visiblePages={visiblePages}
+          getPageHref={(page) => buildPageHref(page, query, selectedTag)}
+        />
       </div>
     </div>
   );

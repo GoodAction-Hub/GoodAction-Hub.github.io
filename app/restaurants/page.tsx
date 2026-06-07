@@ -1,6 +1,7 @@
 import { ArrowRight, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import FoodAIDialog from '@/components/FoodAIDialog';
+import { Pager } from '@/components/Pager';
 import SafeTranslation from '@/components/SafeTranslation';
 import { fetchBitesCatalog, BitesRestaurant } from '@/lib/bitesCatalog';
 import { getVisiblePages, parsePage } from '@/lib/pagination';
@@ -14,7 +15,8 @@ const FILTER_OPTIONS = [
   'wheelchair',
   'cognitive',
 ] as const satisfies readonly FilterType[];
-const FILTER_CONFIG: Record<FilterType, { tKey: string; fallback: string }> = {
+
+const FILTER_CONFIG: Record<FilterType, Record<'tKey' | 'fallback', string>> = {
   all: { tKey: 'bites.filters.all', fallback: '全部' },
   hearing: { tKey: 'bites.filters.hearing', fallback: '听障友好' },
   visual: { tKey: 'bites.filters.visual', fallback: '视障友好' },
@@ -61,9 +63,9 @@ function buildFilterHref(nextFilter: FilterType, query: string): string {
   return queryString ? `/restaurants?${queryString}` : '/restaurants';
 }
 
-function isFilterType(value: string): value is FilterType {
-  return FILTER_OPTIONS.includes(value as FilterType);
-}
+const isFilterType = (value: string): value is FilterType =>
+  FILTER_OPTIONS.includes(value as FilterType);
+
 function parseFilter(rawFilter?: string): FilterType {
   const normalized = rawFilter?.trim().toLowerCase();
   return normalized && isFilterType(normalized) ? normalized : 'all';
@@ -86,9 +88,7 @@ export default async function BarrierFreeBitesPage({
 
   const filteredRestaurants = restaurants.filter((restaurant) => {
     const matchesFilter =
-      filter === 'all'
-        ? true
-        : getAccessibilityTypes(restaurant).includes(filter);
+      filter === 'all' || getAccessibilityTypes(restaurant).includes(filter);
 
     if (!matchesFilter) return false;
     if (!query) return true;
@@ -189,7 +189,8 @@ export default async function BarrierFreeBitesPage({
             ) : (
               pagedRestaurants.map((restaurant) => {
                 const types = getAccessibilityTypes(restaurant);
-                const markerUrl = `https://uri.amap.com/marker?address=${encodeURIComponent(restaurant.address)}&name=${encodeURIComponent(restaurant.name)}`;
+                const { address, name } = restaurant;
+                const markerUrl = `https://uri.amap.com/marker?${new URLSearchParams({ address, name })}`;
 
                 return (
                   <div
@@ -309,40 +310,12 @@ export default async function BarrierFreeBitesPage({
             )}
           </div>
 
-          {totalPages > 1 && (
-            <div className="mt-10 flex items-center justify-center gap-2">
-              {currentPage > 1 && (
-                <Link
-                  href={buildPageHref(currentPage - 1, query, filter)}
-                  className="px-3 py-1.5 rounded-md border border-gray-300 bg-white text-sm"
-                >
-                  上一页
-                </Link>
-              )}
-              {visiblePages.map((page) => (
-                <Link
-                  key={page}
-                  href={buildPageHref(page, query, filter)}
-                  aria-current={page === currentPage ? 'page' : undefined}
-                  className={`px-3 py-1.5 rounded-md border text-sm ${
-                    page === currentPage
-                      ? 'bg-purple-600 border-purple-600 text-white'
-                      : 'bg-white border-gray-300 text-gray-700'
-                  }`}
-                >
-                  {page}
-                </Link>
-              ))}
-              {currentPage < totalPages && (
-                <Link
-                  href={buildPageHref(currentPage + 1, query, filter)}
-                  className="px-3 py-1.5 rounded-md border border-gray-300 bg-white text-sm"
-                >
-                  下一页
-                </Link>
-              )}
-            </div>
-          )}
+          <Pager
+            currentPage={currentPage}
+            totalPages={totalPages}
+            visiblePages={visiblePages}
+            getPageHref={(page) => buildPageHref(page, query, filter)}
+          />
 
           <div className={styles.aboutSection}>
             <div className={styles.aboutHeader}>

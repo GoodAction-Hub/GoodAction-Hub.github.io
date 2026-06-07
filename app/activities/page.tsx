@@ -1,6 +1,7 @@
 import { EventCard } from '@/components/EventCard';
 import { GitCodeIcon } from '@/components/icons/GitCodeIcon';
 import { GitHubIcon } from '@/components/icons/GitHubIcon';
+import { Pager } from '@/components/Pager';
 import {
   fetchActivitiesCatalog,
   transformItem,
@@ -10,6 +11,7 @@ import { getVisiblePages, parsePage } from '@/lib/pagination';
 import Fuse from 'fuse.js';
 import { DateTime } from 'luxon';
 import Link from 'next/link';
+import { headers } from 'next/headers';
 
 interface FlatEvent {
   item: ReturnType<typeof transformItem>;
@@ -24,6 +26,43 @@ type PageSearchParams = Promise<{
   page?: string;
   query?: string;
 }>;
+
+const I18N_TEXT = {
+  'zh-CN': {
+    title: '公益慈善活动截止日期',
+    subtitle:
+      '公益慈善会议、竞赛和活动重要截止日期概览，不再错过参与公益事业、奉献爱心和社会服务的机会',
+    searchPlaceholder: '搜索活动标题、标签、地点...',
+    searchButton: '搜索',
+    noResultTitle: '未找到结果',
+    noResultTip: '请尝试其他关键词',
+    previousPage: '上一页',
+    nextPage: '下一页',
+  },
+  en: {
+    title: 'Charity Activity Deadlines',
+    subtitle:
+      'An overview of important deadlines for charity conferences, competitions, and activities.',
+    searchPlaceholder: 'Search title, tags, location...',
+    searchButton: 'Search',
+    noResultTitle: 'No results found',
+    noResultTip: 'Try a different keyword',
+    previousPage: 'Previous',
+    nextPage: 'Next',
+  },
+} as const;
+
+function parseLocaleFromAcceptLanguage(acceptLanguage?: string) {
+  const languages = (acceptLanguage ?? '')
+    .split(',')
+    .map((value) => value.split(';')[0]?.trim().toLowerCase())
+    .filter(Boolean);
+  return languages.some(
+    (language) => language === 'en' || language.startsWith('en-'),
+  )
+    ? 'en'
+    : 'zh-CN';
+}
 
 function getPageHref(page: number, query: string): string {
   const params = new URLSearchParams();
@@ -72,6 +111,10 @@ export default async function ActivitiesPage({
 }) {
   const { page: rawPage, query: rawQuery } = await searchParams;
   const query = rawQuery?.trim() ?? '';
+  const locale = parseLocaleFromAcceptLanguage(
+    (await headers()).get('accept-language') ?? '',
+  );
+  const text = I18N_TEXT[locale];
 
   const flatEvents = await getFlatEvents();
 
@@ -81,17 +124,19 @@ export default async function ActivitiesPage({
       keys: ['item.title', 'item.tags', 'event.place'],
       threshold: 0.3,
     });
-    filteredEvents = fuse.search(query).map((result) => result.item);
+    filteredEvents = fuse.search(query).map(({ item }) => item);
   }
 
   filteredEvents = filteredEvents.sort((a, b) => {
     const aCompleted = a.timeRemaining < 0;
     const bCompleted = b.timeRemaining < 0;
-
-    if (aCompleted && !bCompleted) return 1;
-    if (!aCompleted && bCompleted) return -1;
-    if (!aCompleted && !bCompleted) return a.timeRemaining - b.timeRemaining;
-    return b.timeRemaining - a.timeRemaining;
+    const completedSort = aCompleted === bCompleted ? 0 : aCompleted ? 1 : -1;
+    return (
+      completedSort ||
+      (aCompleted
+        ? b.timeRemaining - a.timeRemaining
+        : a.timeRemaining - b.timeRemaining)
+    );
   });
 
   const totalPages = Math.max(1, Math.ceil(filteredEvents.length / PAGE_SIZE));
@@ -110,7 +155,7 @@ export default async function ActivitiesPage({
       <div className="container mx-auto px-4 py-8 relative z-10">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 bg-clip-text text-transparent mb-4">
-            公益慈善活动截止日期
+            {text.title}
           </h1>
           <div className="flex justify-center gap-3 mb-4">
             <Link
@@ -141,7 +186,7 @@ export default async function ActivitiesPage({
             </Link>
           </div>
           <p className="text-lg text-gray-700 mb-4 font-medium">
-            公益慈善会议、竞赛和活动重要截止日期概览，不再错过参与公益事业、奉献爱心和社会服务的机会
+            {text.subtitle}
           </p>
           <div className="text-sm text-gray-600 space-y-1">
             <p className="bg-white/60 backdrop-blur-sm rounded-lg px-4 py-2 inline-block">
@@ -159,14 +204,14 @@ export default async function ActivitiesPage({
               type="text"
               name="query"
               defaultValue={query}
-              placeholder="搜索活动标题、标签、地点..."
+              placeholder={text.searchPlaceholder}
               className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm"
             />
             <button
               type="submit"
               className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium"
             >
-              搜索
+              {text.searchButton}
             </button>
           </form>
         </div>
@@ -181,48 +226,22 @@ export default async function ActivitiesPage({
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🔍</div>
             <h3 className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-              未找到结果
+              {text.noResultTitle}
             </h3>
             <p className="text-gray-600 bg-white/60 backdrop-blur-sm rounded-lg px-4 py-2 inline-block">
-              请尝试其他关键词
+              {text.noResultTip}
             </p>
           </div>
         )}
 
-        {totalPages > 1 && (
-          <div className="mt-10 flex items-center justify-center gap-2">
-            {currentPage > 1 && (
-              <Link
-                href={getPageHref(currentPage - 1, query)}
-                className="px-3 py-1.5 rounded-md border border-gray-300 bg-white text-sm"
-              >
-                上一页
-              </Link>
-            )}
-            {visiblePages.map((page) => (
-              <Link
-                key={page}
-                href={getPageHref(page, query)}
-                aria-current={page === currentPage ? 'page' : undefined}
-                className={`px-3 py-1.5 rounded-md border text-sm ${
-                  page === currentPage
-                    ? 'bg-purple-600 border-purple-600 text-white'
-                    : 'bg-white border-gray-300 text-gray-700'
-                }`}
-              >
-                {page}
-              </Link>
-            ))}
-            {currentPage < totalPages && (
-              <Link
-                href={getPageHref(currentPage + 1, query)}
-                className="px-3 py-1.5 rounded-md border border-gray-300 bg-white text-sm"
-              >
-                下一页
-              </Link>
-            )}
-          </div>
-        )}
+        <Pager
+          currentPage={currentPage}
+          totalPages={totalPages}
+          visiblePages={visiblePages}
+          getPageHref={(page) => getPageHref(page, query)}
+          previousLabel={text.previousPage}
+          nextLabel={text.nextPage}
+        />
 
         <footer className="mt-16 text-center text-gray-600">
           <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 inline-block">
