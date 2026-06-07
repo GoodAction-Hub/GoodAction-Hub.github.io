@@ -77,7 +77,9 @@ let _catalogCache: TutoringCourse[] | null = null;
 export async function fetchTutoringCatalog(): Promise<TutoringCourse[]> {
   if (_catalogCache) return _catalogCache;
   try {
-    const res = await fetch(TUTORING_API_URL, { cache: 'force-cache' });
+    // 默认缓存：尊重 GitHub Pages 的 Cache-Control，过期后用 ETag 重新校验，
+    // 避免 force-cache 把过期数据一直钉死在浏览器缓存里
+    const res = await fetch(TUTORING_API_URL);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = (await res.json()) as ExternalTutoringCourse[];
     _catalogCache = data.map(transformCourse);
@@ -90,7 +92,7 @@ export async function fetchTutoringCatalog(): Promise<TutoringCourse[]> {
 
 export async function fetchTutoringBody(url: string): Promise<string> {
   try {
-    const res = await fetch(url, { cache: 'force-cache' });
+    const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.text();
   } catch (err) {
