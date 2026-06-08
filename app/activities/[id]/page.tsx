@@ -1,11 +1,3 @@
-import { ChinaMapWrapper } from '@/components/ChinaMapWrapper';
-import { CommentBox } from '@/components/CommentBox';
-import { TimelineItem } from '@/components/TimelineItem';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { fetchActivitiesCatalog, transformItem } from '@/lib/activities';
-import { formatTimezoneToUTC } from '@/lib/utils';
 import {
   ArrowLeft,
   Calendar,
@@ -17,7 +9,18 @@ import {
 } from 'lucide-react';
 import { DateTime } from 'luxon';
 import Link from 'next/link';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
+
+import { createI18nStore, loadSSRLanguage } from '@/i18n';
+import { ChinaMapWrapper } from '@/components/ChinaMapWrapper';
+import { CommentBox } from '@/components/CommentBox';
+import { TimelineItem } from '@/components/TimelineItem';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { fetchActivitiesCatalog, transformItem } from '@/lib/activities';
+import { formatTimezoneToUTC } from '@/lib/utils';
 
 const DATA_EDIT_URL =
   'https://github.com/GoodAction-Hub/GoodAction-data/edit/main/data/activities.yml';
@@ -39,6 +42,13 @@ export default async function EventDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const headerStore = await headers();
+  const { language, languageMap } = await loadSSRLanguage({
+    cookie: headerStore.get('cookie') ?? '',
+    acceptLanguage: headerStore.get('accept-language') ?? '',
+  });
+  const { t } = createI18nStore(language, languageMap);
+
   const found = await findActivity(id);
   if (!found) notFound();
 
@@ -81,12 +91,13 @@ export default async function EventDetailPage({
           <Link href="/activities">
             <Button variant="outline" size="sm" className="gap-2">
               <ArrowLeft className="w-4 h-4" />
-              返回列表
+              {t('activities_detail_text_back_to_list')}
             </Button>
           </Link>
           <a href={DATA_EDIT_URL} target="_blank" rel="noopener noreferrer">
             <Button variant="outline" size="sm" className="gap-2">
-              <Pencil className="w-4 h-4" />在 GitHub 上编辑
+              <Pencil className="w-4 h-4" />
+              {t('activities_detail_text_edit_on_github')}
             </Button>
           </a>
         </div>
@@ -101,17 +112,17 @@ export default async function EventDetailPage({
                   className={`inline-flex px-4 py-2 rounded-xl text-sm font-bold shadow-lg ${categoryStyle}`}
                 >
                   {item.category === 'conference'
-                    ? '会议'
+                    ? t('activities_detail_text_category_conference')
                     : item.category === 'competition'
-                      ? '竞赛'
-                      : '活动'}
+                      ? t('activities_detail_text_category_competition')
+                      : t('activities_detail_text_category_activity')}
                 </div>
                 <Badge variant="outline" className="text-xs">
                   {event.year}
                 </Badge>
                 {ended && (
                   <Badge variant="secondary" className="text-xs">
-                    已结束
+                    {t('activities_detail_text_ended')}
                   </Badge>
                 )}
               </div>
@@ -170,7 +181,7 @@ export default async function EventDetailPage({
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm font-medium">
                 <Clock className="w-4 h-4" />
-                时间轴
+                {t('activities_detail_text_timeline')}
               </div>
               <div className="relative bg-gray-50 rounded-lg border h-16 flex items-center">
                 <div className="absolute left-[10%] right-[10%] h-0.5 bg-gray-300 top-1/2 -translate-y-1/2" />
@@ -199,7 +210,7 @@ export default async function EventDetailPage({
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <MapPin className="w-5 h-5" />
-                活动地点
+                {t('activities_detail_text_location')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -217,7 +228,7 @@ export default async function EventDetailPage({
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <MessageSquare className="w-5 h-5" />
-              评论
+              {t('activities_detail_text_comments')}
             </CardTitle>
           </CardHeader>
           <CardContent>

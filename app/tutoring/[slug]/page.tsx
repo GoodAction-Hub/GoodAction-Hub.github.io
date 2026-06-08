@@ -9,10 +9,12 @@ import {
   Volume2,
 } from 'lucide-react';
 import Link from 'next/link';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+import { createI18nStore, loadSSRLanguage } from '@/i18n';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { fetchTutoringBody, fetchTutoringCatalog } from '@/lib/tutoring';
@@ -27,6 +29,13 @@ export default async function TutoringDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const headerStore = await headers();
+  const { language, languageMap } = await loadSSRLanguage({
+    cookie: headerStore.get('cookie') ?? '',
+    acceptLanguage: headerStore.get('accept-language') ?? '',
+  });
+  const { t } = createI18nStore(language, languageMap);
+
   const catalog = await fetchTutoringCatalog();
   const course = catalog.find((c) => c.slug === slug);
   if (!course) notFound();
@@ -45,12 +54,13 @@ export default async function TutoringDetailPage({
           <Link href="/tutoring">
             <Button variant="outline" size="sm" className="gap-2">
               <ArrowLeft className="w-4 h-4" />
-              返回课程列表
+              {t('tutoring_detail_text_back_to_list')}
             </Button>
           </Link>
           <a href={DATA_EDIT_URL} target="_blank" rel="noopener noreferrer">
             <Button variant="outline" size="sm" className="gap-2">
-              <Pencil className="w-4 h-4" />在 GitHub 上编辑
+              <Pencil className="w-4 h-4" />
+              {t('tutoring_detail_text_edit_on_github')}
             </Button>
           </a>
         </div>
@@ -86,7 +96,7 @@ export default async function TutoringDetailPage({
               {course.durationMin && (
                 <span className="inline-flex items-center gap-1.5">
                   <Clock className="w-4 h-4" />
-                  {course.durationMin} 分钟
+                  {course.durationMin} {t('tutoring_detail_text_minutes')}
                 </span>
               )}
             </div>
@@ -111,7 +121,7 @@ export default async function TutoringDetailPage({
             <CardContent className="pt-6">
               <h2 className="text-lg font-bold text-gray-800 mb-3 inline-flex items-center gap-2">
                 <Volume2 className="w-5 h-5 text-purple-600" />
-                音频资源
+                {t('tutoring_detail_text_audio_resources')}
               </h2>
               <ul className="space-y-3">
                 {course.audios.map((a) => (
@@ -123,7 +133,11 @@ export default async function TutoringDetailPage({
                       src={a.url}
                       className="w-full"
                     >
-                      您的浏览器不支持音频播放，<a href={a.url}>点此下载</a>。
+                      {t('tutoring_detail_text_audio_unsupported_prefix')}
+                      <a href={a.url}>
+                        {t('tutoring_detail_text_audio_unsupported_link')}
+                      </a>
+                      {t('tutoring_detail_text_audio_unsupported_suffix')}
                     </audio>
                   </li>
                 ))}
@@ -149,7 +163,7 @@ export default async function TutoringDetailPage({
             <CardContent className="pt-6">
               <h2 className="text-lg font-bold text-gray-800 mb-3 inline-flex items-center gap-2">
                 <Video className="w-5 h-5 text-purple-600" />
-                视频资源
+                {t('tutoring_detail_text_video_resources')}
               </h2>
               <ul className="space-y-2">
                 {course.videos.map((v) => (
@@ -174,7 +188,7 @@ export default async function TutoringDetailPage({
             <CardContent className="pt-6">
               <h2 className="text-lg font-bold text-gray-800 mb-3 inline-flex items-center gap-2">
                 <FileText className="w-5 h-5 text-purple-600" />
-                附件下载
+                {t('tutoring_detail_text_attachments')}
               </h2>
               <ul className="space-y-2">
                 {course.attachments.map((f) => (

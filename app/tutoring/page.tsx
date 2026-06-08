@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { headers } from 'next/headers';
 import {
   ArrowRight,
   BookOpen,
@@ -6,8 +7,10 @@ import {
   GraduationCap,
   Search,
 } from 'lucide-react';
-import { Pager } from '@/components/Pager';
-import { getVisiblePages, parsePage } from '@/lib/pagination';
+
+import { createI18nStore, loadSSRLanguage } from '@/i18n';
+import { Pager } from '@/components/ui/mobx-restful-shadcn/pager';
+import { parsePage } from '@/lib/pagination';
 import { fetchTutoringCatalog } from '@/lib/tutoring';
 
 const PAGE_SIZE = 10;
@@ -17,15 +20,6 @@ type PageSearchParams = Promise<{
   query?: string;
   tag?: string;
 }>;
-
-function buildPageHref(page: number, query: string, tag: string): string {
-  const params = new URLSearchParams();
-  if (query) params.set('query', query);
-  if (tag) params.set('tag', tag);
-  if (page > 1) params.set('page', String(page));
-  const queryString = params.toString();
-  return queryString ? `/tutoring?${queryString}` : '/tutoring';
-}
 
 function buildTagHref(nextTag: string, query: string): string {
   const params = new URLSearchParams();
@@ -40,9 +34,17 @@ export default async function TutoringPage({
 }: {
   searchParams: PageSearchParams;
 }) {
-  const { page: rawPage, query: rawQuery, tag: rawTag } = await searchParams;
+  const rawSearchParams = await searchParams;
+  const { page: rawPage, query: rawQuery, tag: rawTag } = rawSearchParams;
   const query = rawQuery?.trim() ?? '';
   const selectedTag = rawTag?.trim() ?? '';
+  const headerStore = await headers();
+  const { language, languageMap } = await loadSSRLanguage({
+    cookie: headerStore.get('cookie') ?? '',
+    acceptLanguage: headerStore.get('accept-language') ?? '',
+    query: rawSearchParams,
+  });
+  const { t } = createI18nStore(language, languageMap);
 
   const courses = await fetchTutoringCatalog();
 
@@ -65,7 +67,6 @@ export default async function TutoringPage({
   const currentPage = Math.min(parsePage(rawPage), totalPages);
   const start = (currentPage - 1) * PAGE_SIZE;
   const pagedCourses = filteredCourses.slice(start, start + PAGE_SIZE);
-  const visiblePages = getVisiblePages(totalPages, currentPage);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-cyan-50 relative overflow-hidden">
@@ -77,10 +78,10 @@ export default async function TutoringPage({
       <div className="container mx-auto px-4 py-8 relative z-10">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 bg-clip-text text-transparent mb-4">
-            志愿辅导课程
+            {t('tutoring_list_text_title')}
           </h1>
           <p className="text-lg text-gray-700 mb-4 font-medium">
-            志愿者老师的备课资料库，含教案、示范视频与音频素材
+            {t('tutoring_list_text_subtitle')}
           </p>
           <div className="flex justify-center gap-3">
             <a
@@ -89,7 +90,7 @@ export default async function TutoringPage({
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-lg hover:from-green-600 hover:to-teal-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm font-medium"
             >
-              + 贡献课程
+              {t('tutoring_list_text_contribute_course')}
             </a>
           </div>
         </div>
@@ -102,7 +103,7 @@ export default async function TutoringPage({
                 type="text"
                 name="query"
                 defaultValue={query}
-                placeholder="搜索课程标题、标签、讲师..."
+                placeholder={t('tutoring_list_text_search_placeholder')}
                 className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm"
               />
               {selectedTag && (
@@ -112,7 +113,7 @@ export default async function TutoringPage({
                 type="submit"
                 className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium"
               >
-                搜索
+                {t('tutoring_list_text_search_button')}
               </button>
             </div>
           </form>
@@ -127,7 +128,7 @@ export default async function TutoringPage({
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                全部
+                {t('tutoring_list_text_all_tags')}
               </Link>
               {allTags.map((tag) => (
                 <Link
@@ -150,9 +151,9 @@ export default async function TutoringPage({
           <div className="text-center py-12">
             <div className="text-6xl mb-4">📚</div>
             <h3 className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-              暂无符合条件的课程
+              {t('tutoring_list_text_empty_title')}
             </h3>
-            <p className="text-gray-600">请尝试更换关键词或标签</p>
+            <p className="text-gray-600">{t('tutoring_list_text_empty_tip')}</p>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -193,7 +194,7 @@ export default async function TutoringPage({
                     {course.durationMin && (
                       <span className="inline-flex items-center gap-1">
                         <Clock className="w-3.5 h-3.5" />
-                        {course.durationMin} 分钟
+                        {course.durationMin} {t('tutoring_list_text_minutes')}
                       </span>
                     )}
                   </div>
@@ -208,7 +209,8 @@ export default async function TutoringPage({
                     ))}
                   </div>
                   <div className="inline-flex items-center gap-1 text-sm font-semibold text-purple-600 group-hover:gap-2 transition-all">
-                    查看课程 <ArrowRight className="w-4 h-4" />
+                    {t('tutoring_list_text_view_course')}{' '}
+                    <ArrowRight className="w-4 h-4" />
                   </div>
                 </div>
               </Link>
@@ -217,10 +219,9 @@ export default async function TutoringPage({
         )}
 
         <Pager
-          currentPage={currentPage}
-          totalPages={totalPages}
-          visiblePages={visiblePages}
-          getPageHref={(page) => buildPageHref(page, query, selectedTag)}
+          pageSize={PAGE_SIZE}
+          pageIndex={currentPage}
+          pageCount={totalPages}
         />
       </div>
     </div>
