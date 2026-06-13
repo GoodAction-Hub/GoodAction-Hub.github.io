@@ -30,7 +30,12 @@ const flattenLanguageMap = (
       result[nextKey] = value;
       continue;
     }
-    if (Array.isArray(value) || value == null || typeof value !== 'object')
+    if (
+      Array.isArray(value) ||
+      value === null ||
+      value === undefined ||
+      typeof value !== 'object'
+    )
       continue;
 
     flattenLanguageMap(value as TranslationTree, nextKey, result);
@@ -138,6 +143,7 @@ export const loadSSRLanguage = async ({
   acceptLanguage = '',
   query = {},
 }: SSRI18nInput = {}) => {
+  // Cookie/query values are normalized to supported language codes below.
   const { language } = parseSSRContext<{ language?: string }>(
     { cookie, query },
     ['language'],

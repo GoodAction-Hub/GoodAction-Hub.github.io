@@ -5,7 +5,8 @@ import { useEffect, useState } from 'react';
 
 import { i18n, normalizeLanguageCode } from '.';
 
-export const useTranslation = (_namespace?: string) => {
+export const useTranslation = (namespace?: string) => {
+  void namespace;
   const [, update] = useState(0);
 
   useEffect(() => {
