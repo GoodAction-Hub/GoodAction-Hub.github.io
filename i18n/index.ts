@@ -143,8 +143,8 @@ export const loadSSRLanguage = async ({
     ['language'],
   );
   const acceptedLanguages = acceptLanguage
-    .split(',')
-    .map((item) => item.split(';')[0]?.trim());
+    ? acceptLanguage.split(',').map((item) => item.split(';')[0]?.trim())
+    : [];
   const normalizedLanguage = [
     normalizeLanguageCode(pickFirstQueryValue(query.language)),
     normalizeLanguageCode(language),
