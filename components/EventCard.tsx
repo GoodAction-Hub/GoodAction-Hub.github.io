@@ -105,7 +105,7 @@ export const EventCard: FC<EventCardProps> = ({ item, event }) => {
     <Card
       className={`transition-all duration-300 hover:shadow-lg ${ended ? 'opacity-60 grayscale' : ''}`}
     >
-      <CardContent>
+      <CardContent className="py-4 md:py-5">
         <div className="flex flex-col md:flex-row md:gap-6">
           {/* 左侧内容区域 */}
           <div className="flex-1 space-y-4">

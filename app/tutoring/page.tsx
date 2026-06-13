@@ -16,7 +16,7 @@ import { fetchTutoringCatalog } from '@/lib/tutoring';
 const PAGE_SIZE = 10;
 
 type PageSearchParams = Promise<{
-  page?: string;
+  pageIndex?: string;
   keywords?: string;
   tag?: string;
 }>;
@@ -35,7 +35,11 @@ export default async function TutoringPage({
   searchParams: PageSearchParams;
 }) {
   const rawSearchParams = await searchParams;
-  const { page: rawPage, keywords: rawKeywords, tag: rawTag } = rawSearchParams;
+  const {
+    pageIndex: rawPageIndex,
+    keywords: rawKeywords,
+    tag: rawTag,
+  } = rawSearchParams;
   const keywords = rawKeywords?.trim() ?? '';
   const selectedTag = rawTag?.trim() ?? '';
   const headerStore = await headers();
@@ -64,7 +68,7 @@ export default async function TutoringPage({
   });
 
   const totalPages = Math.max(1, Math.ceil(filteredCourses.length / PAGE_SIZE));
-  const currentPage = Math.min(parsePage(rawPage), totalPages);
+  const currentPage = Math.min(parsePage(rawPageIndex), totalPages);
   const start = (currentPage - 1) * PAGE_SIZE;
   const pagedCourses = filteredCourses.slice(start, start + PAGE_SIZE);
 
@@ -218,11 +222,13 @@ export default async function TutoringPage({
           </div>
         )}
 
-        <Pager
-          pageSize={PAGE_SIZE}
-          pageIndex={currentPage}
-          pageCount={totalPages}
-        />
+        <div className="mt-8 flex justify-center">
+          <Pager
+            pageSize={PAGE_SIZE}
+            pageIndex={currentPage}
+            pageCount={totalPages}
+          />
+        </div>
       </div>
     </div>
   );

@@ -21,7 +21,7 @@ const FILTER_OPTIONS = [
 const PAGE_SIZE = 10;
 
 type PageSearchParams = Promise<{
-  page?: string;
+  pageIndex?: string;
   keywords?: string;
   filter?: string;
 }>;
@@ -60,7 +60,7 @@ export default async function BarrierFreeBitesPage({
 }) {
   const rawSearchParams = await searchParams;
   const {
-    page: rawPage,
+    pageIndex: rawPageIndex,
     keywords: rawKeywords,
     filter: rawFilter,
   } = rawSearchParams;
@@ -97,7 +97,7 @@ export default async function BarrierFreeBitesPage({
     1,
     Math.ceil(filteredRestaurants.length / PAGE_SIZE),
   );
-  const currentPage = Math.min(parsePage(rawPage), totalPages);
+  const currentPage = Math.min(parsePage(rawPageIndex), totalPages);
   const start = (currentPage - 1) * PAGE_SIZE;
   const pagedRestaurants = filteredRestaurants.slice(start, start + PAGE_SIZE);
 
@@ -262,11 +262,13 @@ export default async function BarrierFreeBitesPage({
             )}
           </div>
 
-          <Pager
-            pageSize={PAGE_SIZE}
-            pageIndex={currentPage}
-            pageCount={totalPages}
-          />
+          <div className="mt-8 flex justify-center">
+            <Pager
+              pageSize={PAGE_SIZE}
+              pageIndex={currentPage}
+              pageCount={totalPages}
+            />
+          </div>
 
           <div className={styles.aboutSection}>
             <div className={styles.aboutHeader}>
