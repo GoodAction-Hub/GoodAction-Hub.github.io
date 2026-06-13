@@ -19,7 +19,7 @@ export const useTranslation = (_namespace?: string) => {
 
   return {
     ready: !i18n.loading,
-    t: (key: string) => i18n.t(key as never) || key,
+    t: (key: string) => i18n.t(key) || key,
     i18n: {
       changeLanguage: (language: string) =>
         i18n.loadLanguages(normalizeLanguageCode(language) || 'zh-CN'),

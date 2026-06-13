@@ -30,7 +30,8 @@ const flattenLanguageMap = (
       result[nextKey] = value;
       continue;
     }
-    if (Array.isArray(value) || !value || typeof value !== 'object') continue;
+    if (Array.isArray(value) || value == null || typeof value !== 'object')
+      continue;
 
     flattenLanguageMap(value as TranslationTree, nextKey, result);
   }
@@ -90,7 +91,7 @@ export const createI18nStore = <N extends LanguageCode>(
   language?: N,
   data?: TranslationMap<I18nTextKey>,
 ) => {
-  const store = new TranslationModel({
+  const store = new TranslationModel<LanguageCode, I18nTextKey>({
     ...i18nData,
     ...(language && { [language]: data }),
   });
