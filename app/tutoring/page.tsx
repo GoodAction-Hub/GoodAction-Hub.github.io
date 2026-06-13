@@ -17,13 +17,13 @@ const PAGE_SIZE = 10;
 
 type PageSearchParams = Promise<{
   page?: string;
-  query?: string;
+  keywords?: string;
   tag?: string;
 }>;
 
-function buildTagHref(nextTag: string, query: string): string {
+function buildTagHref(nextTag: string, keywords: string): string {
   const params = new URLSearchParams();
-  if (query) params.set('query', query);
+  if (keywords) params.set('keywords', keywords);
   if (nextTag) params.set('tag', nextTag);
   const queryString = params.toString();
   return queryString ? `/tutoring?${queryString}` : '/tutoring';
@@ -35,8 +35,8 @@ export default async function TutoringPage({
   searchParams: PageSearchParams;
 }) {
   const rawSearchParams = await searchParams;
-  const { page: rawPage, query: rawQuery, tag: rawTag } = rawSearchParams;
-  const query = rawQuery?.trim() ?? '';
+  const { page: rawPage, keywords: rawKeywords, tag: rawTag } = rawSearchParams;
+  const keywords = rawKeywords?.trim() ?? '';
   const selectedTag = rawTag?.trim() ?? '';
   const headerStore = await headers();
   const { language, languageMap } = await loadSSRLanguage({
@@ -52,9 +52,9 @@ export default async function TutoringPage({
 
   const filteredCourses = courses.filter((course) => {
     if (selectedTag && !course.tags.includes(selectedTag)) return false;
-    if (!query) return true;
+    if (!keywords) return true;
 
-    const q = query.toLowerCase();
+    const q = keywords.toLowerCase();
     return (
       course.title.toLowerCase().includes(q) ||
       course.summary.toLowerCase().includes(q) ||
@@ -101,8 +101,8 @@ export default async function TutoringPage({
               <Search className="w-4 h-4 text-gray-500" />
               <input
                 type="text"
-                name="query"
-                defaultValue={query}
+                name="keywords"
+                defaultValue={keywords}
                 placeholder={t('tutoring_list_text_search_placeholder')}
                 className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm"
               />
@@ -121,7 +121,7 @@ export default async function TutoringPage({
           {allTags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               <Link
-                href={buildTagHref('', query)}
+                href={buildTagHref('', keywords)}
                 className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
                   !selectedTag
                     ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow'
@@ -133,7 +133,7 @@ export default async function TutoringPage({
               {allTags.map((tag) => (
                 <Link
                   key={tag}
-                  href={buildTagHref(tag === selectedTag ? '' : tag, query)}
+                  href={buildTagHref(tag === selectedTag ? '' : tag, keywords)}
                   className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
                     tag === selectedTag
                       ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow'

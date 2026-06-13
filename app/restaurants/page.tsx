@@ -22,7 +22,7 @@ const PAGE_SIZE = 10;
 
 type PageSearchParams = Promise<{
   page?: string;
-  query?: string;
+  keywords?: string;
   filter?: string;
 }>;
 
@@ -36,12 +36,13 @@ function getAccessibilityTypes(r: BitesRestaurant): FilterType[] {
   return types;
 }
 
-function buildFilterHref(nextFilter: FilterType, query: string): string {
+function buildFilterHref(nextFilter: FilterType, keywords: string) {
   const params = new URLSearchParams();
-  if (query) params.set('query', query);
+
+  if (keywords) params.set('keywords', keywords);
   if (nextFilter !== 'all') params.set('filter', nextFilter);
-  const queryString = params.toString();
-  return queryString ? `/restaurants?${queryString}` : '/restaurants';
+
+  return params + '' ? `/restaurants?${params}` : '/restaurants';
 }
 
 const isFilterType = (value: string): value is FilterType =>
@@ -58,8 +59,12 @@ export default async function BarrierFreeBitesPage({
   searchParams: PageSearchParams;
 }) {
   const rawSearchParams = await searchParams;
-  const { page: rawPage, query: rawQuery, filter: rawFilter } = rawSearchParams;
-  const query = rawQuery?.trim() ?? '';
+  const {
+    page: rawPage,
+    keywords: rawKeywords,
+    filter: rawFilter,
+  } = rawSearchParams;
+  const keywords = rawKeywords?.trim() ?? '';
   const filter = parseFilter(rawFilter);
   const headerStore = await headers();
   const { language, languageMap } = await loadSSRLanguage({
@@ -76,9 +81,9 @@ export default async function BarrierFreeBitesPage({
       filter === 'all' || getAccessibilityTypes(restaurant).includes(filter);
 
     if (!matchesFilter) return false;
-    if (!query) return true;
+    if (!keywords) return true;
 
-    const q = query.toLowerCase();
+    const q = keywords.toLowerCase();
     return (
       restaurant.name.toLowerCase().includes(q) ||
       restaurant.address.toLowerCase().includes(q) ||
@@ -123,8 +128,8 @@ export default async function BarrierFreeBitesPage({
             <div className="flex items-center gap-2">
               <input
                 type="text"
-                name="query"
-                defaultValue={query}
+                name="keywords"
+                defaultValue={keywords}
                 placeholder={t('restaurants_list_text_search_placeholder')}
                 className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm"
               />
@@ -144,7 +149,7 @@ export default async function BarrierFreeBitesPage({
             {FILTER_OPTIONS.map((item) => (
               <Link
                 key={item}
-                href={buildFilterHref(item, query)}
+                href={buildFilterHref(item, keywords)}
                 className={`${styles.filterBtn} ${filter === item ? styles.filterBtnActive : ''}`}
               >
                 {t(`restaurants_list_text_filters_${item}`)}

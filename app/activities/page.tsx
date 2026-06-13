@@ -26,7 +26,7 @@ const PAGE_SIZE = 10;
 
 type PageSearchParams = Promise<{
   page?: string;
-  query?: string;
+  keywords?: string;
 }>;
 
 async function getFlatEvents(): Promise<FlatEvent[]> {
@@ -67,8 +67,8 @@ export default async function ActivitiesPage({
   searchParams: PageSearchParams;
 }) {
   const rawSearchParams = await searchParams;
-  const { page: rawPage, query: rawQuery } = rawSearchParams;
-  const query = rawQuery?.trim() ?? '';
+  const { page: rawPage, keywords: rawKeywords } = rawSearchParams;
+  const keywords = rawKeywords?.trim() ?? '';
   const headerStore = await headers();
   const { language, languageMap } = await loadSSRLanguage({
     cookie: headerStore.get('cookie') ?? '',
@@ -80,12 +80,12 @@ export default async function ActivitiesPage({
   const flatEvents = await getFlatEvents();
 
   let filteredEvents = flatEvents;
-  if (query) {
+  if (keywords) {
     const fuse = new Fuse(filteredEvents, {
       keys: ['item.title', 'item.tags', 'event.place'],
       threshold: 0.3,
     });
-    filteredEvents = fuse.search(query).map(({ item }) => item);
+    filteredEvents = fuse.search(keywords).map(({ item }) => item);
   }
 
   filteredEvents = filteredEvents.sort((a, b) => {
@@ -162,8 +162,8 @@ export default async function ActivitiesPage({
           <form action="/activities" method="get" className="flex gap-3">
             <input
               type="text"
-              name="query"
-              defaultValue={query}
+              name="keywords"
+              defaultValue={keywords}
               placeholder={t('activities_list_text_search_placeholder')}
               className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm"
             />
