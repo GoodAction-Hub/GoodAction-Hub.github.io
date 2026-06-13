@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useTranslation } from '@/i18n/useTranslation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +17,6 @@ import {
   Mail,
 } from "lucide-react";
 import { DateTime } from "luxon";
-import { useTranslation } from "react-i18next";
 
 interface AddToCalendarProps {
   title: string;

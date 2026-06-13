@@ -1,9 +1,12 @@
+import { ArrowLeft, MapPin, MessageSquare, Pencil } from 'lucide-react';
+import Link from 'next/link';
+import { headers } from 'next/headers';
+import { notFound } from 'next/navigation';
+
+import { createI18nStore, loadSSRLanguage } from '@/i18n';
 import { ChinaMapWrapper } from '@/components/ChinaMapWrapper';
 import { CommentBox } from '@/components/CommentBox';
 import { fetchBitesCatalog } from '@/lib/bitesCatalog';
-import { ArrowLeft, MapPin, MessageSquare, Pencil } from 'lucide-react';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -16,6 +19,13 @@ export default async function RestaurantDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const headerStore = await headers();
+  const { language, languageMap } = await loadSSRLanguage({
+    cookie: headerStore.get('cookie') ?? '',
+    acceptLanguage: headerStore.get('accept-language') ?? '',
+  });
+  const { t } = createI18nStore(language, languageMap);
+
   const catalog = await fetchBitesCatalog();
   const restaurant = catalog.find((r) => r.id === id);
   if (!restaurant) notFound();
@@ -34,12 +44,13 @@ export default async function RestaurantDetailPage({
           <Link href="/restaurants">
             <Button variant="outline" size="sm" className="gap-2">
               <ArrowLeft className="w-4 h-4" />
-              返回
+              {t('restaurants_detail_text_back')}
             </Button>
           </Link>
           <a href={DATA_EDIT_URL} target="_blank" rel="noopener noreferrer">
             <Button variant="outline" size="sm" className="gap-2">
-              <Pencil className="w-4 h-4" />在 GitHub 上编辑
+              <Pencil className="w-4 h-4" />
+              {t('restaurants_detail_text_edit_on_github')}
             </Button>
           </a>
         </div>
@@ -51,12 +62,12 @@ export default async function RestaurantDetailPage({
               <div className="flex flex-wrap gap-2">
                 {restaurant.accessibility.deafFriendly && (
                   <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                    👂 听障友好
+                    👂 {t('restaurants_detail_text_hearing_friendly')}
                   </span>
                 )}
                 {restaurant.accessibility.blindFriendly && (
                   <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                    👁️ 视障友好
+                    👁️ {t('restaurants_detail_text_visual_friendly')}
                   </span>
                 )}
               </div>
@@ -73,7 +84,7 @@ export default async function RestaurantDetailPage({
             {restaurant.food?.[0] && (
               <div className="text-sm">
                 <span className="font-medium text-gray-700">
-                  美食类型
+                  {t('restaurants_detail_text_food_type')}
                   {': '}
                 </span>
                 {restaurant.food.map(({ name }) => name).join('、')}
@@ -83,7 +94,9 @@ export default async function RestaurantDetailPage({
             {/* Tags / features */}
             {restaurant.tags.length > 0 && (
               <div className="space-y-1">
-                <p className="text-sm font-medium text-gray-700">特色服务</p>
+                <p className="text-sm font-medium text-gray-700">
+                  {t('restaurants_detail_text_features')}
+                </p>
                 <ul className="flex flex-wrap gap-2">
                   {restaurant.tags.map((tag) => (
                     <li
@@ -124,7 +137,7 @@ export default async function RestaurantDetailPage({
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <MapPin className="w-5 h-5" />
-              餐厅位置
+              {t('restaurants_detail_text_restaurant_location')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -141,7 +154,7 @@ export default async function RestaurantDetailPage({
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <MessageSquare className="w-5 h-5" />
-              评论
+              {t('restaurants_detail_text_comments')}
             </CardTitle>
           </CardHeader>
           <CardContent>

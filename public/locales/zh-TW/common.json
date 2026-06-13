@@ -1,0 +1,61 @@
+{
+  "ui": {
+    "title": "開源活動截止日期"
+  },
+  "info": {
+    "description": "開源會議、競賽和活動重要截止日期概覽，不再錯過為社群貢獻、學習和交流的機會",
+    "timezone": "所有截止日期均預設轉換為北京時間，如果您不知道目前所在時區，請點擊時區選擇器右側的「自動檢測」",
+    "disclaimer": "*免責聲明：本站資料由人工維護，僅供參考"
+  },
+  "events": {
+    "notFound": "未找到任何活動",
+    "hint": "請嘗試調整篩選器或搜尋詞以查看更多活動。",
+    "loading": "正在載入活動...",
+    "ended": "已結束",
+    "outdated": "已過期",
+    "allDeadlinesPassed": "所有截止日期已過",
+    "nextDeadline": "下一個截止日期",
+    "timeline": "時間線",
+    "swipe": "滑動"
+  },
+  "filter": {
+    "searchPlaceholder": "輸入主題、地點、時間探索！",
+    "searchTimezone": "搜尋時區...",
+    "autoDetect": "自動檢測",
+    "onlyFavorites": "只看收藏",
+    "category": "類別",
+    "all": "全部",
+    "category_conference": "會議",
+    "category_competition": "競賽",
+    "category_activity": "活動",
+    "location": "地點"
+  },
+  "date": {
+    "days": "天",
+    "hours": "小時",
+    "minutes": "分鐘",
+    "seconds": "秒"
+  },
+  "calendar": {
+    "title": "日曆",
+    "download": "下載 .ics",
+    "google": "Google 日曆",
+    "outlook": "Outlook 日曆",
+    "yahoo": "Yahoo 日曆",
+    "apple": "Apple 日曆"
+  },
+  "ui_text": {
+    "search_placeholder": "搜尋...",
+    "github_repo": "GitHub 倉庫"
+  },
+  "detail": {
+    "back": "返回",
+    "viewDetails": "查看詳情",
+    "editOnGitHub": "在 GitHub 上編輯",
+    "location": "活動地點",
+    "comments": "評論",
+    "openInAmap": "在高德地圖中打開",
+    "loadingMap": "地圖載入中...",
+    "mapUnavailable": "地圖預覽暫不可用"
+  }
+}

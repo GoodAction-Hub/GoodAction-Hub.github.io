@@ -3,6 +3,9 @@
   "style": "new-york",
   "rsc": true,
   "tsx": true,
+  "registries": {
+    "@mobx-restful-shadcn": "https://mobx-restful-shadcn.idea2.app/r/{name}.json"
+  },
   "tailwind": {
     "config": "",
     "css": "app/globals.css",

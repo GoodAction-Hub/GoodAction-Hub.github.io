@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import { Globe } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useTranslation } from '@/i18n/useTranslation'
 import { useEventStore } from '@/lib/store'
-import { useTranslation } from 'react-i18next'
 
 export function TimezoneSelector() {
   const { displayTimezone, setDisplayTimezone, detectUserTimezone } =

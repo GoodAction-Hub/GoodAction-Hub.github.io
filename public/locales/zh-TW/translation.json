@@ -1,0 +1,64 @@
+{
+  "bites": {
+    "title": "無障礙友善美食指南",
+    "subtitle": "為每個人提供平等的美食體驗",
+    "about": {
+      "title": "關於無障礙美食",
+      "p1": "無障礙美食不僅僅是提供物理上的便利設施，更是一種尊重和包容的態度。這些餐廳透過專業的服務、貼心的設計和平等的理念，讓每一位顧客都能享受美好的用餐體驗。它們不僅為障礙人士提供了就業機會，也讓更多人了解和關注無障礙服務的重要性。",
+      "p2": "我們希望透過這份指南，幫助大家發現更多這樣有溫度的餐廳，同時也呼籲更多餐飲企業關注無障礙服務，共同營造更包容友善的社會環境。"
+    },
+    "filters": {
+      "all": "全部餐廳",
+      "hearing": "聽障友善",
+      "visual": "視障友善",
+      "wheelchair": "輪椅友善",
+      "cognitive": "認知障礙友善"
+    },
+    "tags": {
+      "hearing": "聽障友善",
+      "visual": "視障友善",
+      "wheelchair": "輪椅友善",
+      "cognitive": "認知障礙友善"
+    },
+    "labels": {
+      "features": "無障礙特色",
+      "food": "特色美食：",
+      "value": "社會價值：",
+      "address": "地址：",
+      "copy": "複製",
+      "copied": "已複製！",
+      "navigate": "導航",
+      "ai_recommend": "AI 美食推薦官",
+      "experience": "特色體驗：",
+      "highlights": "特色："
+    },
+    "ai_dialog": {
+      "title": "輸入地點與偏好，讓 AI 美食推薦官推薦餐廳",
+      "description": "基於星火大模型，推薦無障礙友善餐廳（手語服務、視障友善等）。",
+      "labels": {
+        "location": "地點",
+        "preferences": "美食偏好"
+      },
+      "placeholders": {
+        "location": "例如：武漢市江岸區 / 杭州市西湖區",
+        "preferences": "例如：咖啡、烘焙、川菜；或填寫預算、人均、是否連鎖、特色等"
+      },
+      "actions": {
+        "generate": "生成推薦",
+        "generating": "正在生成推薦",
+        "close": "關閉對話框"
+      },
+      "errors": {
+        "generic": "AI 推薦失敗，請稍後再試"
+      }
+    }
+  },
+  "calendar": {
+    "title": "日曆",
+    "download": "下載 .ics",
+    "google": "Google 日曆",
+    "outlook": "Outlook 日曆",
+    "yahoo": "Yahoo 日曆",
+    "apple": "Apple 日曆"
+  }
+}

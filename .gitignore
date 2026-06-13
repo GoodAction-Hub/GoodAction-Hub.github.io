@@ -80,3 +80,6 @@ __pycache__/
 
 # Secret environment files (local overrides)
 .env*.local
+
+# Shadcn UI components
+components/ui/

@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { DateTime } from 'luxon'
+import { useTranslation } from '@/i18n/useTranslation'
 import { useEventStore } from '@/lib/store'
-import { useTranslation } from 'react-i18next'
 
 interface CountdownTimerProps {
   deadline: DateTime

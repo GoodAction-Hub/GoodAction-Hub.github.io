@@ -1,15 +1,30 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { ArrowRight, Loader2, MapPin } from 'lucide-react';
+import { ArrowRight, MapPin } from 'lucide-react';
 import Link from 'next/link';
-import { useTranslation } from 'react-i18next';
+import { headers } from 'next/headers';
+
+import { createI18nStore, loadSSRLanguage } from '@/i18n';
 import FoodAIDialog from '@/components/FoodAIDialog';
-import SafeTranslation from '@/components/SafeTranslation';
+import { Pager } from '@/components/ui/mobx-restful-shadcn/pager';
 import { fetchBitesCatalog, BitesRestaurant } from '@/lib/bitesCatalog';
+import { parsePage } from '@/lib/pagination';
 import styles from './page.module.css';
 
 type FilterType = 'all' | 'hearing' | 'visual' | 'wheelchair' | 'cognitive';
+const FILTER_OPTIONS = [
+  'all',
+  'hearing',
+  'visual',
+  'wheelchair',
+  'cognitive',
+] as const satisfies readonly FilterType[];
+
+const PAGE_SIZE = 10;
+
+type PageSearchParams = Promise<{
+  pageIndex?: string;
+  keywords?: string;
+  filter?: string;
+}>;
 
 function getAccessibilityTypes(r: BitesRestaurant): FilterType[] {
   const types: FilterType[] = [];
@@ -21,91 +36,70 @@ function getAccessibilityTypes(r: BitesRestaurant): FilterType[] {
   return types;
 }
 
-export default function BarrierFreeBitesPage() {
-  const { t } = useTranslation('common');
-  const [filter, setFilter] = useState<FilterType>('all');
-  const [restaurants, setRestaurants] = useState<BitesRestaurant[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [navigationLoading, setNavigationLoading] = useState<string | null>(
-    null,
-  );
+function buildFilterHref(nextFilter: FilterType, keywords: string) {
+  const params = new URLSearchParams();
 
-  useEffect(() => {
-    fetchBitesCatalog().then((data) => {
-      setRestaurants(data);
-      setLoading(false);
-    });
-  }, []);
+  if (keywords) params.set('keywords', keywords);
+  if (nextFilter !== 'all') params.set('filter', nextFilter);
 
-  const filteredRestaurants = restaurants.filter((r) => {
-    if (filter === 'all') return true;
-    return getAccessibilityTypes(r).includes(filter);
+  return params + '' ? `/restaurants?${params}` : '/restaurants';
+}
+
+const isFilterType = (value: string): value is FilterType =>
+  FILTER_OPTIONS.includes(value as FilterType);
+
+function parseFilter(rawFilter?: string): FilterType {
+  const normalized = rawFilter?.trim().toLowerCase();
+  return normalized && isFilterType(normalized) ? normalized : 'all';
+}
+
+export default async function BarrierFreeBitesPage({
+  searchParams,
+}: {
+  searchParams: PageSearchParams;
+}) {
+  const rawSearchParams = await searchParams;
+  const {
+    pageIndex: rawPageIndex,
+    keywords: rawKeywords,
+    filter: rawFilter,
+  } = rawSearchParams;
+  const keywords = rawKeywords?.trim() ?? '';
+  const filter = parseFilter(rawFilter);
+  const headerStore = await headers();
+  const { language, languageMap } = await loadSSRLanguage({
+    cookie: headerStore.get('cookie') ?? '',
+    acceptLanguage: headerStore.get('accept-language') ?? '',
+    query: rawSearchParams,
+  });
+  const { t } = createI18nStore(language, languageMap);
+
+  const restaurants = await fetchBitesCatalog();
+
+  const filteredRestaurants = restaurants.filter((restaurant) => {
+    const matchesFilter =
+      filter === 'all' || getAccessibilityTypes(restaurant).includes(filter);
+
+    if (!matchesFilter) return false;
+    if (!keywords) return true;
+
+    const q = keywords.toLowerCase();
+    return (
+      restaurant.name.toLowerCase().includes(q) ||
+      restaurant.address.toLowerCase().includes(q) ||
+      restaurant.city.toLowerCase().includes(q) ||
+      restaurant.description.toLowerCase().includes(q) ||
+      restaurant.tags.some((tag) => tag.toLowerCase().includes(q))
+    );
   });
 
-  const openAmapNavigation = (restaurant: BitesRestaurant) => {
-    const { name, address, lat, lng } = restaurant;
-    setNavigationLoading(name);
-
-    if (lat && lng) {
-      const appUrl = `amapuri://route/plan/?dlat=${lat}&dlon=${lng}&dname=${encodeURIComponent(name)}&dev=0&t=0`;
-      const webUrl = `https://uri.amap.com/navigation?to=${lng},${lat},${encodeURIComponent(name)}&mode=car&policy=1&src=mypage`;
-
-      const tryOpenApp = () => {
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = appUrl;
-        document.body.appendChild(iframe);
-
-        const timeout = setTimeout(() => {
-          document.body.removeChild(iframe);
-          window.open(webUrl, '_blank', 'noopener,noreferrer');
-          setNavigationLoading(null);
-        }, 2000);
-
-        const handleVisibilityChange = () => {
-          if (document.hidden) {
-            clearTimeout(timeout);
-            document.body.removeChild(iframe);
-            document.removeEventListener(
-              'visibilitychange',
-              handleVisibilityChange,
-            );
-            setNavigationLoading(null);
-          }
-        };
-
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-
-        setTimeout(() => {
-          try {
-            if (iframe.parentNode) document.body.removeChild(iframe);
-            document.removeEventListener(
-              'visibilitychange',
-              handleVisibilityChange,
-            );
-          } catch {
-            // ignore cleanup errors
-          }
-        }, 3000);
-      };
-
-      const isMobile =
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-          navigator.userAgent,
-        );
-
-      if (isMobile) {
-        tryOpenApp();
-      } else {
-        window.open(webUrl, '_blank', 'noopener,noreferrer');
-        setNavigationLoading(null);
-      }
-    } else {
-      const markerUrl = `https://uri.amap.com/marker?address=${encodeURIComponent(address)}&name=${encodeURIComponent(name)}`;
-      window.open(markerUrl, '_blank', 'noopener,noreferrer');
-      setNavigationLoading(null);
-    }
-  };
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredRestaurants.length / PAGE_SIZE),
+  );
+  const currentPage = Math.min(parsePage(rawPageIndex), totalPages);
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const pagedRestaurants = filteredRestaurants.slice(start, start + PAGE_SIZE);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-cyan-50 relative overflow-hidden">
@@ -113,17 +107,10 @@ export default function BarrierFreeBitesPage() {
         <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
           <header className={styles.header}>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 bg-clip-text text-transparent mb-3">
-              🌟{' '}
-              <SafeTranslation
-                tKey="bites.title"
-                fallback="无障碍友好美食指南"
-              />
+              🌟 {t('restaurants_list_text_title')}
             </h1>
             <p className={styles.subtitle}>
-              <SafeTranslation
-                tKey="bites.subtitle"
-                fallback="发现包容性餐饮体验"
-              />
+              {t('restaurants_list_text_subtitle')}
             </p>
             <div className="mt-4 flex justify-center">
               <a
@@ -132,72 +119,55 @@ export default function BarrierFreeBitesPage() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-lg hover:from-green-600 hover:to-teal-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm font-medium"
               >
-                + 发布餐厅
+                {t('restaurants_list_text_publish_restaurant')}
               </a>
             </div>
           </header>
 
+          <form action="/restaurants" method="get" className="mb-4">
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                name="keywords"
+                defaultValue={keywords}
+                placeholder={t('restaurants_list_text_search_placeholder')}
+                className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm"
+              />
+              {filter !== 'all' && (
+                <input type="hidden" name="filter" value={filter} />
+              )}
+              <button
+                type="submit"
+                className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium"
+              >
+                {t('restaurants_list_text_search_button')}
+              </button>
+            </div>
+          </form>
+
           <div className={styles.filterSection}>
-            <button
-              className={`${styles.filterBtn} ${filter === 'all' ? styles.filterBtnActive : ''}`}
-              onClick={() => setFilter('all')}
-            >
-              <SafeTranslation tKey="bites.filters.all" fallback="全部" />
-            </button>
-            <button
-              className={`${styles.filterBtn} ${filter === 'hearing' ? styles.filterBtnActive : ''}`}
-              onClick={() => setFilter('hearing')}
-            >
-              <SafeTranslation
-                tKey="bites.filters.hearing"
-                fallback="听障友好"
-              />
-            </button>
-            <button
-              className={`${styles.filterBtn} ${filter === 'visual' ? styles.filterBtnActive : ''}`}
-              onClick={() => setFilter('visual')}
-            >
-              <SafeTranslation
-                tKey="bites.filters.visual"
-                fallback="视障友好"
-              />
-            </button>
-            <button
-              className={`${styles.filterBtn} ${filter === 'wheelchair' ? styles.filterBtnActive : ''}`}
-              onClick={() => setFilter('wheelchair')}
-            >
-              <SafeTranslation
-                tKey="bites.filters.wheelchair"
-                fallback="轮椅友好"
-              />
-            </button>
-            <button
-              className={`${styles.filterBtn} ${filter === 'cognitive' ? styles.filterBtnActive : ''}`}
-              onClick={() => setFilter('cognitive')}
-            >
-              <SafeTranslation
-                tKey="bites.filters.cognitive"
-                fallback="认知友好"
-              />
-            </button>
+            {FILTER_OPTIONS.map((item) => (
+              <Link
+                key={item}
+                href={buildFilterHref(item, keywords)}
+                className={`${styles.filterBtn} ${filter === item ? styles.filterBtnActive : ''}`}
+              >
+                {t(`restaurants_list_text_filters_${item}`)}
+              </Link>
+            ))}
           </div>
 
           <div className={styles.restaurantsGrid}>
-            {loading ? (
+            {pagedRestaurants.length === 0 ? (
               <div className="text-center py-12 text-gray-500">
-                <SafeTranslation tKey="bites.loading" fallback="加载中..." />
-              </div>
-            ) : filteredRestaurants.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                <SafeTranslation
-                  tKey="bites.no_results"
-                  fallback="暂无符合条件的餐厅"
-                />
+                {t('restaurants_list_text_no_results')}
               </div>
             ) : (
-              filteredRestaurants.map((restaurant) => {
+              pagedRestaurants.map((restaurant) => {
                 const types = getAccessibilityTypes(restaurant);
-                const isNavigating = navigationLoading === restaurant.name;
+                const { address, name } = restaurant;
+                const markerUrl = `https://uri.amap.com/marker?${new URLSearchParams({ address, name })}`;
+
                 return (
                   <div
                     className={styles.restaurantCard}
@@ -212,28 +182,19 @@ export default function BarrierFreeBitesPage() {
                         {restaurant.accessibility.deafFriendly && (
                           <span className={styles.tag}>
                             <span className={styles.icon}>👂</span>
-                            <SafeTranslation
-                              tKey="bites.tags.hearing"
-                              fallback="听障友好"
-                            />
+                            {t('restaurants_list_text_tags_hearing')}
                           </span>
                         )}
                         {restaurant.accessibility.blindFriendly && (
                           <span className={styles.tag}>
                             <span className={styles.icon}>👁️</span>
-                            <SafeTranslation
-                              tKey="bites.tags.visual"
-                              fallback="视障友好"
-                            />
+                            {t('restaurants_list_text_tags_visual')}
                           </span>
                         )}
                         {types.includes('wheelchair') && (
                           <span className={styles.tag}>
                             <span className={styles.icon}>♿</span>
-                            <SafeTranslation
-                              tKey="bites.tags.wheelchair"
-                              fallback="轮椅友好"
-                            />
+                            {t('restaurants_list_text_tags_wheelchair')}
                           </span>
                         )}
                       </div>
@@ -245,10 +206,7 @@ export default function BarrierFreeBitesPage() {
                       {restaurant.tags.length > 0 && (
                         <div className={styles.features}>
                           <h3 className={styles.featuresTitle}>
-                            <SafeTranslation
-                              tKey="bites.labels.features"
-                              fallback="特色服务"
-                            />
+                            {t('restaurants_list_text_labels_features')}
                           </h3>
                           <ul className={styles.featuresList}>
                             {restaurant.tags.map((tag, i) => (
@@ -260,10 +218,7 @@ export default function BarrierFreeBitesPage() {
                       {restaurant.food && restaurant.food.length > 0 && (
                         <div className={styles.infoItem}>
                           <span className={styles.infoLabel}>
-                            <SafeTranslation
-                              tKey="bites.labels.food"
-                              fallback="美食类型"
-                            />
+                            {t('restaurants_list_text_labels_food')}
                           </span>
                           <span>
                             {restaurant.food.map((f) => f.name).join('、')}
@@ -273,45 +228,30 @@ export default function BarrierFreeBitesPage() {
                       <div className={styles.infoSection}>
                         <div className={styles.infoItem}>
                           <span className={styles.infoLabel}>
-                            <SafeTranslation
-                              tKey="bites.labels.address"
-                              fallback="地址"
-                            />
+                            {t('restaurants_list_text_labels_address')}
                           </span>
                           <span>{restaurant.address}</span>
-                          <button
-                            aria-label="导航"
-                            className="ml-2 px-3 py-1 rounded-md text-white bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 hover:brightness-110 text-xs align-middle transition-all duration-200 flex items-center gap-1 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                            onClick={() => openAmapNavigation(restaurant)}
-                            disabled={isNavigating}
-                          >
-                            {isNavigating ? (
-                              <>
-                                <Loader2 className="animate-spin h-3 w-3" />
-                                <SafeTranslation
-                                  tKey="bites.labels.navigating"
-                                  fallback="导航中..."
-                                />
-                              </>
-                            ) : (
-                              <>
-                                <MapPin className="h-3 w-3" />
-                                <SafeTranslation
-                                  tKey="bites.labels.navigate"
-                                  fallback="导航"
-                                />
-                              </>
+                          <a
+                            aria-label={t(
+                              'restaurants_list_text_labels_navigate',
                             )}
-                          </button>
+                            className="ml-2 px-3 py-1 rounded-md text-white bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 hover:brightness-110 text-xs align-middle transition-all duration-200 flex items-center gap-1 shadow-sm hover:shadow-md"
+                            href={markerUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <MapPin className="h-3 w-3" />
+                            {t('restaurants_list_text_labels_navigate')}
+                          </a>
                         </div>
                       </div>
                       <div className={styles.detailButtonWrap}>
                         <Link
                           href={`/restaurants/${restaurant.id}`}
                           className={styles.detailButton}
-                          title={t('detail.viewDetails')}
+                          title={t('restaurants_list_text_view_details_title')}
                         >
-                          <span>{t('detail.viewDetails')}</span>
+                          <span>{t('restaurants_list_text_view_details')}</span>
                           <ArrowRight className="h-4 w-4" />
                         </Link>
                       </div>
@@ -322,37 +262,30 @@ export default function BarrierFreeBitesPage() {
             )}
           </div>
 
-          {/* 关于部分 */}
+          <div className="mt-8 flex justify-center">
+            <Pager
+              pageSize={PAGE_SIZE}
+              pageIndex={currentPage}
+              pageCount={totalPages}
+            />
+          </div>
+
           <div className={styles.aboutSection}>
             <div className={styles.aboutHeader}>
               <span className={styles.aboutIcon} aria-hidden="true">
                 🍽️
               </span>
               <h2 className={styles.aboutTitle}>
-                <SafeTranslation
-                  tKey="bites.about.title"
-                  fallback="关于无障碍美食"
-                />
+                {t('restaurants_list_text_about_title')}
               </h2>
             </div>
             <div className={styles.aboutContent}>
-              <p>
-                <SafeTranslation
-                  tKey="bites.about.p1"
-                  fallback="无障碍美食致力于为残障人士提供平等的用餐体验。我们精选了各地的无障碍友好餐厅，涵盖听障、视障、轮椅使用者和认知障碍人士的需求。"
-                />
-              </p>
-              <p>
-                <SafeTranslation
-                  tKey="bites.about.p2"
-                  fallback="每家餐厅都经过实地考察，确保提供真正的无障碍服务。我们希望通过这个平台，让更多人了解和支持无障碍餐饮，共同创造一个更包容的社会。"
-                />
-              </p>
+              <p>{t('restaurants_list_text_about_p1')}</p>
+              <p>{t('restaurants_list_text_about_p2')}</p>
             </div>
           </div>
         </div>
       </div>
-      {/* AI 美食推荐对话框触发器 */}
       <FoodAIDialog />
     </div>
   );
