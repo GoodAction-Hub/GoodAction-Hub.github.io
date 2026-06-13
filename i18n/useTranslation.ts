@@ -8,14 +8,14 @@ import { i18n, normalizeLanguageCode } from '.';
 export const useTranslation = (_namespace?: string) => {
   const [, update] = useState(0);
 
-  useEffect(
-    () =>
-      reaction(
-        () => [i18n.currentLanguage, i18n.currentMap, i18n.loading],
-        () => update((value) => value + 1),
-      ),
-    [],
-  );
+  useEffect(() => {
+    const dispose = reaction(
+      () => [i18n.currentLanguage, i18n.currentMap, i18n.loading],
+      () => update((value) => value + 1),
+    );
+
+    return dispose;
+  }, []);
 
   return {
     ready: !i18n.loading,

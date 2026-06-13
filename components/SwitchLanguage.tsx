@@ -11,7 +11,7 @@ export function SwitchLanguage() {
   const currentLng = i18n.language || 'zh-CN'
 
   const handleChange = (value: string) => {
-    void i18n.changeLanguage(value)
+    i18n.changeLanguage(value).catch(console.error)
   }
 
   return (
