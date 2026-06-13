@@ -1,26 +1,90 @@
 import {
-  loadLanguageMapFrom,
   TranslationMap,
   TranslationModel,
 } from 'mobx-i18n';
 import { DataObject } from 'mobx-restful';
 import { parseCookie } from 'web-utility';
 
+import commonEN from '@/public/locales/en/common.json';
+import translationEN from '@/public/locales/en/translation.json';
+import commonZhCN from '@/public/locales/zh-CN/common.json';
+import translationZhCN from '@/public/locales/zh-CN/translation.json';
+import commonZhTW from '@/public/locales/zh-TW/common.json';
+import translationZhTW from '@/public/locales/zh-TW/translation.json';
+
+import enUS from './en-US';
 import zhCN from './zh-CN';
+import zhTW from './zh-TW';
+
+type TranslationTree = Record<string, unknown>;
+
+const flattenLanguageMap = (
+  source: TranslationTree,
+  prefix = '',
+  result: Record<string, string> = {},
+) => {
+  for (const [key, value] of Object.entries(source)) {
+    const nextKey = prefix ? `${prefix}.${key}` : key;
+
+    if (typeof value === 'string') {
+      result[nextKey] = value;
+      continue;
+    }
+    if (Array.isArray(value) || !value || typeof value !== 'object') continue;
+
+    flattenLanguageMap(value as TranslationTree, nextKey, result);
+  }
+
+  return result;
+};
+
+const zhCNMap = {
+  ...flattenLanguageMap(commonZhCN),
+  ...flattenLanguageMap(translationZhCN),
+  ...zhCN,
+};
+const zhTWMap = {
+  ...flattenLanguageMap(commonZhTW),
+  ...flattenLanguageMap(translationZhTW),
+  ...zhTW,
+};
+const enMap = {
+  ...flattenLanguageMap(commonEN),
+  ...flattenLanguageMap(translationEN),
+  ...enUS,
+};
 
 const i18nData = {
-  'zh-CN': zhCN,
-  'zh-TW': () => import('./zh-TW'),
-  'en-US': () => import('./en-US'),
-};
+  'zh-CN': zhCNMap,
+  'zh-TW': zhTWMap,
+  en: enMap,
+  'en-US': enMap,
+} as const;
 export type LanguageCode = keyof typeof i18nData;
+
+export const supportedLngDisplayNames: Record<LanguageCode, string> = {
+  'zh-CN': '简体中文',
+  'zh-TW': '繁體中文',
+  en: 'English',
+  'en-US': 'English',
+};
 
 export interface I18nProps {
   language: LanguageCode;
-  languageMap: typeof zhCN;
+  languageMap: Record<string, string>;
 }
 
-type I18nTextKey = keyof typeof zhCN;
+type I18nTextKey = string;
+
+export const normalizeLanguageCode = (language = ''): LanguageCode | undefined => {
+  const normalized = language.trim().toLowerCase();
+
+  if (!normalized) return;
+  if (normalized.startsWith('zh-tw') || normalized.startsWith('zh-hk'))
+    return 'zh-TW';
+  if (normalized.startsWith('zh')) return 'zh-CN';
+  if (normalized.startsWith('en')) return 'en';
+};
 
 export const createI18nStore = <N extends LanguageCode>(
   language?: N,
@@ -42,6 +106,7 @@ export const i18n = createI18nStore();
 export const LanguageName: Record<LanguageCode, string> = {
   'zh-CN': '简体中文',
   'zh-TW': '繁體中文',
+  en: 'English',
   'en-US': 'English',
 };
 
@@ -72,15 +137,22 @@ export const loadSSRLanguage = async ({
   acceptLanguage = '',
   query = {},
 }: SSRI18nInput = {}) => {
-  const { language } = parseSSRContext<{ language?: LanguageCode }>(
+  const { language } = parseSSRContext<{ language?: string }>(
     { cookie, query },
     ['language'],
   );
-  const header = {
-    'accept-language': acceptLanguage,
-    cookie: language ? `language=${language}` : cookie,
-  };
-  const loaded = await loadLanguageMapFrom(i18nData, header);
+  const acceptedLanguages = acceptLanguage
+    .split(',')
+    .map((item) => item.split(';')[0]?.trim());
+  const normalizedLanguage = [
+    normalizeLanguageCode(pickFirstQueryValue(query.language)),
+    normalizeLanguageCode(language),
+    ...acceptedLanguages.map(normalizeLanguageCode),
+  ].find(Boolean);
+  const currentLanguage = normalizedLanguage ?? 'zh-CN';
 
-  return loaded || { language: 'zh-CN' as const, languageMap: zhCN };
+  return {
+    language: currentLanguage,
+    languageMap: i18nData[currentLanguage],
+  };
 };

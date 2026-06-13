@@ -2,9 +2,9 @@
 
 import { useEventStore } from '@/lib/store'
 import { Input } from '@/components/ui/input'
+import { useTranslation } from '@/i18n/useTranslation'
 import { Search, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useTranslation } from 'react-i18next'
 import { TimezoneSelector } from './TimezoneSelector'
 
 export function FilterBar() {

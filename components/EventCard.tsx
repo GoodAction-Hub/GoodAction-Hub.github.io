@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { DeadlineItem, EventData, isEventEnded } from '@/lib/data';
+import { useTranslation } from '@/i18n/useTranslation';
 import { useEventStore } from '@/lib/store';
 import { formatTimezoneToUTC } from '@/lib/utils';
 import {
@@ -19,7 +20,6 @@ import {
 import { DateTime } from 'luxon';
 import Link from 'next/link';
 import { FC, useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { AddToCalendar } from './AddToCalendar';
 
 interface EventCardProps {
