@@ -1,188 +1,114 @@
-'use client';
-
 import { EventCard } from '@/components/EventCard';
-import { FilterBar } from '@/components/FilterBar';
+import {
+  FavoriteEventItem,
+  FavoriteEventsToggle,
+} from '@/components/FavoriteEventsFilter';
 import { GitCodeIcon } from '@/components/icons/GitCodeIcon';
 import { GitHubIcon } from '@/components/icons/GitHubIcon';
-
+import { Pagination } from '@/components/Pagination';
+import { TimezoneSelector } from '@/components/TimezoneSelector';
+import { fetchActivities } from '@/lib/activities';
 import { DeadlineItem, EventData } from '@/lib/data';
-import { useEventStore } from '@/lib/store';
-import Fuse from 'fuse.js';
-
 import { DateTime } from 'luxon';
+import { Search } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+
+const PAGE_SIZE = 10;
+
+interface ActivitiesPageProps {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}
 
 interface FlatEvent {
   item: DeadlineItem;
   event: EventData;
   nextDeadline: DateTime;
   timeRemaining: number;
+  searchableText: string;
 }
 
-export default function Home() {
-  const {
-    items,
-    loading,
-    fetchItems,
-    selectedCategory,
-    selectedTags,
-    selectedLocations,
-    searchQuery,
-    favorites,
-    showOnlyFavorites,
-  } = useEventStore();
+const categories = [
+  { value: '', label: '全部' },
+  { value: 'conference', label: '会议' },
+  { value: 'competition', label: '竞赛' },
+  { value: 'activity', label: '活动' },
+];
 
-  useEffect(() => {
-    fetchItems();
-  }, [fetchItems]);
+const single = (value: string | string[] | undefined) =>
+  Array.isArray(value) ? value[0] : value;
 
-  const { t } = useTranslation();
+const pageNumber = (value: string | undefined) => {
+  const page = Number.parseInt(value || '1', 10);
+  return Number.isFinite(page) && page > 0 ? page : 1;
+};
 
-  const flatEvents: FlatEvent[] = useMemo(
-    () =>
-      items.flatMap((item) =>
-        item.events.map((event) => {
-          const now = DateTime.now().setZone('Asia/Shanghai');
-          const upcomingDeadlines = event.timeline
-            .map((t) => DateTime.fromISO(t.deadline, { zone: event.timezone }))
-            .filter((d) => d > now)
-            .sort((a, b) => a.toMillis() - b.toMillis());
+function flattenEvents(items: DeadlineItem[]): FlatEvent[] {
+  const now = DateTime.now().setZone('Asia/Shanghai');
 
-          const nextDeadline =
-            upcomingDeadlines[0] ||
-            DateTime.fromISO(
-              event.timeline[event.timeline.length - 1].deadline,
-              { zone: event.timezone },
-            );
-          const timeRemaining = nextDeadline.toMillis() - now.toMillis();
+  return items
+    .flatMap((item) =>
+      item.events.map((event) => {
+        const upcomingDeadlines = event.timeline
+          .map((t) => DateTime.fromISO(t.deadline, { zone: event.timezone }))
+          .filter((d) => d > now)
+          .sort((a, b) => a.toMillis() - b.toMillis());
 
-          return { item, event, nextDeadline, timeRemaining };
-        }),
-      ),
-    [items],
-  );
+        const nextDeadline =
+          upcomingDeadlines[0] ||
+          DateTime.fromISO(event.timeline[event.timeline.length - 1].deadline, {
+            zone: event.timezone,
+          });
+        const timeRemaining = nextDeadline.toMillis() - now.toMillis();
+        const searchableText = [
+          item.title,
+          item.description,
+          item.category,
+          item.tags.join(' '),
+          event.place,
+          nextDeadline.toFormat('yyyy-MM-dd MM yyyy'),
+        ]
+          .join(' ')
+          .toLowerCase();
 
-  // 为每个事件添加搜索用的日期字段
-  const eventsWithSearchDates = useMemo(() => {
-    return flatEvents.map((flatEvent) => ({
-      ...flatEvent,
-      searchableDate: flatEvent.nextDeadline.toFormat('yyyy-MM-dd'),
-      searchableMonth: flatEvent.nextDeadline.toFormat('MM'),
-      searchableYear: flatEvent.nextDeadline.toFormat('yyyy'),
-    }));
-  }, [flatEvents]);
-
-  const filteredEvents = useMemo(() => {
-    let filtered = eventsWithSearchDates;
-
-    // 分类过滤
-    if (selectedCategory) {
-      filtered = filtered.filter(
-        (flatEvent) => flatEvent.item.category === selectedCategory,
-      );
-    }
-
-    // 标签过滤
-    if (selectedTags.length > 0) {
-      filtered = filtered.filter((flatEvent) =>
-        selectedTags.some((tag) => flatEvent.item.tags?.includes(tag)),
-      );
-    }
-
-    // 地点过滤
-    if (selectedLocations.length > 0) {
-      filtered = filtered.filter((flatEvent) =>
-        selectedLocations.includes(flatEvent.event.place),
-      );
-    }
-
-    // 收藏过滤
-    if (showOnlyFavorites) {
-      console.log('Filtering favorites:', {
-        favorites,
-        showOnlyFavorites,
-        totalEvents: filtered.length,
-      });
-      filtered = filtered.filter((flatEvent) => {
-        const eventId = `${flatEvent.event.id}`;
-        const isFavorited = favorites.includes(eventId);
-        console.log(
-          `Event ${eventId}: ${isFavorited ? 'favorited' : 'not favorited'}`,
-        );
-        return isFavorited;
-      });
-      console.log('Filtered favorites result:', filtered.length);
-    }
-
-    // 搜索过滤
-    if (searchQuery.trim()) {
-      const fuse = new Fuse(filtered, {
-        keys: [
-          { name: 'item.title', weight: 0.4 },
-          { name: 'item.tags', weight: 0.3 },
-          { name: 'event.place', weight: 0.2 },
-          { name: 'searchableDate', weight: 0.1 },
-          { name: 'searchableMonth', weight: 0.1 },
-          { name: 'searchableYear', weight: 0.1 },
-        ],
-        threshold: 0.3,
-        includeScore: true,
-      });
-
-      const results = fuse.search(searchQuery);
-      filtered = results.map((result) => result.item);
-    }
-
-    // 排序逻辑：未结束的活动按 timeRemaining 升序，已结束的活动放在最后
-    return filtered.sort((a, b) => {
+        return { item, event, nextDeadline, timeRemaining, searchableText };
+      }),
+    )
+    .sort((a, b) => {
       const aCompleted = a.timeRemaining < 0;
       const bCompleted = b.timeRemaining < 0;
 
-      // 如果一个已结束，一个未结束，未结束的排在前面
       if (aCompleted && !bCompleted) return 1;
       if (!aCompleted && bCompleted) return -1;
-
-      // 如果都未结束，按 timeRemaining 升序（即将到期的在前）
-      if (!aCompleted && !bCompleted) {
-        return a.timeRemaining - b.timeRemaining;
-      }
-
-      // 如果都已结束，按 timeRemaining 降序（最近结束的在前）
+      if (!aCompleted && !bCompleted) return a.timeRemaining - b.timeRemaining;
       return b.timeRemaining - a.timeRemaining;
     });
-  }, [
-    eventsWithSearchDates,
-    selectedCategory,
-    selectedTags,
-    selectedLocations,
-    searchQuery,
-    showOnlyFavorites,
-    favorites,
-  ]);
+}
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-cyan-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
-          <p className="text-purple-700">{t('events.loading')}</p>
-        </div>
-      </div>
-    );
-  }
+export default async function ActivitiesPage({
+  searchParams,
+}: ActivitiesPageProps) {
+  const params = (await searchParams) ?? {};
+  const query = single(params.query)?.trim() ?? '';
+  const category = single(params.category)?.trim() ?? '';
+  const currentPage = pageNumber(single(params.page));
+
+  const events = flattenEvents(await fetchActivities()).filter((flatEvent) => {
+    if (category && flatEvent.item.category !== category) return false;
+    if (!query) return true;
+    return flatEvent.searchableText.includes(query.toLowerCase());
+  });
+
+  const totalPages = Math.max(1, Math.ceil(events.length / PAGE_SIZE));
+  const page = Math.min(currentPage, totalPages);
+  const pageEvents = events.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-cyan-50 relative overflow-hidden">
-      {/* 动态背景装饰 */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-cyan-400/20 to-purple-400/20 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-pink-300/10 to-cyan-300/10 rounded-full blur-3xl"></div>
       </div>
       <div className="container mx-auto px-4 py-8 relative z-10">
-        {/* Header Section */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 bg-clip-text text-transparent mb-4">
             公益慈善活动截止日期
@@ -218,41 +144,81 @@ export default function Home() {
           <p className="text-lg text-gray-700 mb-4 font-medium">
             公益慈善会议、竞赛和活动重要截止日期概览，不再错过参与公益事业、奉献爱心和社会服务的机会
           </p>
-          <div className="text-sm text-gray-600 space-y-1">
-            <p className="bg-white/60 backdrop-blur-sm rounded-lg px-4 py-2 inline-block">
-              所有截止日期均默认转换为北京时间，如果您不知道当前所在时区，请点击时区选择器右侧的&ldquo;自动检测&rdquo;
-            </p>
-            <p className="text-gray-500 bg-white/40 backdrop-blur-sm rounded-lg px-4 py-2 inline-block">
-              *免责声明：本站数据由人工维护，仅供参考
-            </p>
+        </div>
+
+        <form
+          method="GET"
+          className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 mb-8 space-y-4"
+        >
+          <div className="relative bg-white rounded-xl shadow-lg border-2 border-gray-200 focus-within:border-blue-500 transition-all duration-300">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-6 h-6" />
+            <input
+              type="search"
+              name="query"
+              defaultValue={query}
+              placeholder="输入主题、地点、时间探索"
+              className="w-full pl-14 pr-6 py-4 text-xl font-medium bg-transparent border-0 rounded-xl placeholder:text-gray-400 focus:ring-0 focus:outline-none text-gray-800"
+            />
           </div>
-        </div>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap gap-2">
+              {categories.map(({ value, label }) => (
+                <label
+                  key={value || 'all'}
+                  className={`cursor-pointer rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                    category === value
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-white text-gray-700 hover:bg-purple-50'
+                  }`}
+                >
+                  <input
+                    className="sr-only"
+                    type="radio"
+                    name="category"
+                    value={value}
+                    defaultChecked={category === value}
+                  />
+                  {label}
+                </label>
+              ))}
+              <button
+                type="submit"
+                className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
+              >
+                搜索
+              </button>
+              <FavoriteEventsToggle />
+            </div>
+            <TimezoneSelector />
+          </div>
+        </form>
 
-        {/* Filters */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 mb-8">
-          <FilterBar />
-        </div>
-
-        {/* Events List */}
         <div className="space-y-4">
-          {filteredEvents.map(({ item, event }) => (
-            <EventCard key={`${event.id}`} item={item} event={event} />
+          {pageEvents.map(({ item, event }) => (
+            <FavoriteEventItem key={`${event.id}`} eventId={`${event.id}`}>
+              <EventCard item={item} event={event} />
+            </FavoriteEventItem>
           ))}
         </div>
 
-        {filteredEvents.length === 0 && (
+        {events.length === 0 && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🔍</div>
             <h3 className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-              {t('events.notFound')}
+              没有找到活动
             </h3>
             <p className="text-gray-600 bg-white/60 backdrop-blur-sm rounded-lg px-4 py-2 inline-block">
-              {t('events.hint')}
+              请调整关键词或分类后重试
             </p>
           </div>
         )}
 
-        {/* Footer */}
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          searchParams={{ query, category }}
+        />
+
         <footer className="mt-16 text-center text-gray-600">
           <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 inline-block">
             <p className="text-sm">

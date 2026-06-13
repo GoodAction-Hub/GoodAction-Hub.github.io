@@ -55,3 +55,19 @@ export function transformItem(item: ExternalDeadlineItem): DeadlineItem {
     events: item.events.map(transformEvent),
   };
 }
+
+let _activitiesCache: DeadlineItem[] | null = null;
+
+export async function fetchActivities(): Promise<DeadlineItem[]> {
+  if (_activitiesCache) return _activitiesCache;
+  try {
+    const res = await fetch(ACTIVITIES_API_URL, { cache: 'force-cache' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const externalData = (await res.json()) as ExternalDeadlineItem[];
+    _activitiesCache = externalData.map(transformItem);
+    return _activitiesCache;
+  } catch (err) {
+    console.error('Failed to fetch activities from external API:', err);
+    return [];
+  }
+}

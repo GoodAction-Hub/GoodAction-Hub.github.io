@@ -1,6 +1,3 @@
-'use client';
-
-import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowRight,
@@ -9,40 +6,55 @@ import {
   GraduationCap,
   Search,
 } from 'lucide-react';
+import { Pagination } from '@/components/Pagination';
 import { fetchTutoringCatalog, TutoringCourse } from '@/lib/tutoring';
 
-export default function TutoringPage() {
-  const [courses, setCourses] = useState<TutoringCourse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState('');
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+const PAGE_SIZE = 10;
 
-  useEffect(() => {
-    fetchTutoringCatalog().then((data) => {
-      setCourses(data);
-      setLoading(false);
-    });
-  }, []);
+interface TutoringPageProps {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}
 
-  const allTags = useMemo(() => {
-    const set = new Set<string>();
-    courses.forEach((c) => c.tags.forEach((t) => set.add(t)));
-    return Array.from(set);
-  }, [courses]);
+const single = (value: string | string[] | undefined) =>
+  Array.isArray(value) ? value[0] : value;
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return courses.filter((c) => {
-      if (selectedTag && !c.tags.includes(selectedTag)) return false;
-      if (!q) return true;
-      return (
-        c.title.toLowerCase().includes(q) ||
-        c.summary.toLowerCase().includes(q) ||
-        c.tags.some((t) => t.toLowerCase().includes(q)) ||
-        (c.instructor ?? '').toLowerCase().includes(q)
-      );
-    });
-  }, [courses, query, selectedTag]);
+const pageNumber = (value: string | undefined) => {
+  const page = Number.parseInt(value || '1', 10);
+  return Number.isFinite(page) && page > 0 ? page : 1;
+};
+
+function matchesQuery(course: TutoringCourse, query: string) {
+  if (!query) return true;
+  const q = query.toLowerCase();
+  return (
+    course.title.toLowerCase().includes(q) ||
+    course.summary.toLowerCase().includes(q) ||
+    course.tags.some((t) => t.toLowerCase().includes(q)) ||
+    (course.instructor ?? '').toLowerCase().includes(q)
+  );
+}
+
+export default async function TutoringPage({
+  searchParams,
+}: TutoringPageProps) {
+  const params = (await searchParams) ?? {};
+  const query = single(params.query)?.trim() ?? '';
+  const selectedTag = single(params.tag)?.trim() ?? '';
+  const currentPage = pageNumber(single(params.page));
+
+  const courses = await fetchTutoringCatalog();
+  const allTags = Array.from(
+    new Set(courses.flatMap((course) => course.tags)),
+  ).sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'));
+
+  const filtered = courses.filter((course) => {
+    if (selectedTag && !course.tags.includes(selectedTag)) return false;
+    return matchesQuery(course, query);
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const page = Math.min(currentPage, totalPages);
+  const pageCourses = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-cyan-50 relative overflow-hidden">
@@ -71,54 +83,68 @@ export default function TutoringPage() {
           </div>
         </div>
 
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 mb-8">
+        <form
+          method="GET"
+          className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 mb-8"
+        >
           <div className="flex items-center gap-2 mb-4">
             <Search className="w-4 h-4 text-gray-500" />
             <input
-              type="text"
+              type="search"
+              name="query"
               placeholder="搜索课程标题、标签、讲师..."
               className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              defaultValue={query}
             />
           </div>
           {allTags.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setSelectedTag(null)}
+              <label
                 className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
                   !selectedTag
                     ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
+                <input
+                  className="sr-only"
+                  type="radio"
+                  name="tag"
+                  value=""
+                  defaultChecked={!selectedTag}
+                />
                 全部
-              </button>
+              </label>
               {allTags.map((tag) => (
-                <button
+                <label
                   key={tag}
-                  onClick={() =>
-                    setSelectedTag(tag === selectedTag ? null : tag)
-                  }
                   className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
                     tag === selectedTag
                       ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
+                  <input
+                    className="sr-only"
+                    type="radio"
+                    name="tag"
+                    value={tag}
+                    defaultChecked={tag === selectedTag}
+                  />
                   {tag}
-                </button>
+                </label>
               ))}
+              <button
+                type="submit"
+                className="px-3 py-1 rounded-full text-xs font-medium bg-cyan-600 text-white hover:bg-cyan-700 transition-all"
+              >
+                搜索
+              </button>
             </div>
           )}
-        </div>
+        </form>
 
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-500 mx-auto mb-4"></div>
-            <p className="text-purple-700">正在加载课程...</p>
-          </div>
-        ) : filtered.length === 0 ? (
+        {filtered.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">📚</div>
             <h3 className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
@@ -128,7 +154,7 @@ export default function TutoringPage() {
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((course) => (
+            {pageCourses.map((course) => (
               <Link
                 key={course.slug}
                 href={`/tutoring/${course.slug}`}
@@ -187,6 +213,12 @@ export default function TutoringPage() {
             ))}
           </div>
         )}
+
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          searchParams={{ query, tag: selectedTag }}
+        />
       </div>
     </div>
   );
