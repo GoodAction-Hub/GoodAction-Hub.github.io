@@ -107,11 +107,19 @@ export const loadSSRLanguage = async ({
     ['language'],
   );
 
-  return await loadLanguageMapFrom(i18nData, {
-    cookie: mergeCookieLanguage(
-      cookie,
-      normalizeLanguageCode(pickFirstQueryValue(query.language) ?? language),
-    ),
-    'accept-language': acceptLanguage,
-  });
+  const { language: currentLanguage, languageMap } = await loadLanguageMapFrom(
+    i18nData,
+    {
+      cookie: mergeCookieLanguage(
+        cookie,
+        normalizeLanguageCode(pickFirstQueryValue(query.language) ?? language),
+      ),
+      'accept-language': acceptLanguage,
+    },
+  );
+
+  return {
+    language: currentLanguage,
+    languageMap,
+  };
 };

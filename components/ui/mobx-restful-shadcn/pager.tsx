@@ -1,24 +1,34 @@
+'use client';
+
 import { MoreHorizontal } from 'lucide-react';
+import { observer } from 'mobx-react';
 import { ListModel } from 'mobx-restful';
-import { FC, MouseEvent } from 'react';
+import { MouseEvent, useContext } from 'react';
 import { buildURLData, parseURLData } from 'web-utility';
 
+import { I18nContext } from '@/i18n/context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-export type PageMeta = Pick<ListModel<{}>, 'pageSize' | 'pageIndex'>;
+export type PageMeta = Pick<
+  ListModel<Record<string, unknown>>,
+  'pageSize' | 'pageIndex'
+>;
 
 export interface PagerProps extends PageMeta {
   pageCount: number;
   onChange?: (meta: PageMeta) => void;
 }
 
-export const Pager: FC<PagerProps> = ({
+export const Pager = observer(function Pager({
   pageSize,
   pageIndex,
   pageCount,
   onChange,
-}) => {
+}: PagerProps) {
+  const i18n = useContext(I18nContext);
+  const t = (key: string) => i18n.t(key) ?? key;
+
   function propsOf(pageIndex = 1) {
     const pagination = { pageSize, pageIndex };
 
@@ -74,7 +84,11 @@ export const Pager: FC<PagerProps> = ({
       <nav className="flex items-center gap-1">
         {pageIndex > 1 && (
           <Button variant="outline" size="sm" asChild>
-            <a {...propsOf(1)} title="Go to first page">
+            <a
+              {...propsOf(1)}
+              title={t('pagination.first')}
+              aria-label={t('pagination.first')}
+            >
               1
             </a>
           </Button>
@@ -86,7 +100,11 @@ export const Pager: FC<PagerProps> = ({
         )}
         {pageIndex > 2 && (
           <Button variant="outline" size="sm" asChild>
-            <a {...propsOf(pageIndex - 1)} title="Go to previous page">
+            <a
+              {...propsOf(pageIndex - 1)}
+              title={t('pagination.previous')}
+              aria-label={t('pagination.previous')}
+            >
               {pageIndex - 1}
             </a>
           </Button>
@@ -96,7 +114,11 @@ export const Pager: FC<PagerProps> = ({
         </Button>
         {pageCount - pageIndex > 1 && (
           <Button variant="outline" size="sm" asChild>
-            <a {...propsOf(pageIndex + 1)} title="Go to next page">
+            <a
+              {...propsOf(pageIndex + 1)}
+              title={t('pagination.next')}
+              aria-label={t('pagination.next')}
+            >
               {pageIndex + 1}
             </a>
           </Button>
@@ -108,7 +130,11 @@ export const Pager: FC<PagerProps> = ({
         )}
         {pageIndex < pageCount && (
           <Button variant="outline" size="sm" asChild>
-            <a {...propsOf(pageCount)} title="Go to last page">
+            <a
+              {...propsOf(pageCount)}
+              title={t('pagination.last')}
+              aria-label={t('pagination.last')}
+            >
               {pageCount}
             </a>
           </Button>
@@ -116,6 +142,4 @@ export const Pager: FC<PagerProps> = ({
       </nav>
     </form>
   );
-};
-
-Pager.displayName = 'Pager';
+});
