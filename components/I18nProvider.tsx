@@ -18,8 +18,7 @@ export default class I18nProvider extends Component<Props> {
   componentDidUpdate(previousProps: Props) {
     const { language, languageMap } = this.props;
 
-    if (previousProps.language !== language)
-      this.i18nStore.currentLanguage = language as LanguageCode;
+    if (previousProps.language !== language) this.i18nStore.currentLanguage = language;
     if (previousProps.languageMap !== languageMap)
       this.i18nStore.currentMap = languageMap;
   }

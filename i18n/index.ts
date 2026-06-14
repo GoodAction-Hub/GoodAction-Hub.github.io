@@ -39,9 +39,9 @@ export const normalizeLanguageCode = (
   if (normalized.startsWith('en')) return 'en-US';
 };
 
-export const createI18nStore = <N extends LanguageCode, K extends string>(
+export const createI18nStore = <N extends LanguageCode>(
   language?: N,
-  data?: TranslationMap<K>,
+  data?: TranslationMap<I18nTextKey>,
 ) => {
   const store = new TranslationModel<LanguageCode, I18nTextKey>({
     ...i18nData,
