@@ -72,7 +72,7 @@ export const Pager = observer(function Pager({
         className="w-20"
         type="number"
         name="pageIndex"
-        defaultValue={pageIndex || 1}
+        defaultValue={pageIndex ?? 1}
         min={1}
         max={pageCount}
         required

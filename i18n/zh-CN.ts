@@ -76,7 +76,7 @@ const BASE_TEXT = {
   'bites.labels.copy': '复制',
   'bites.labels.copied': '已复制！',
   'bites.labels.navigate': '导航',
-  'bites.labels.ai_recommend': 'AI美食推荐官',
+  'bites.labels.ai_recommend': 'AI 美食推荐官',
   'bites.labels.experience': '特色体验：',
   'bites.labels.highlights': '特色：',
   'bites.ai_dialog.title': '输入地点与偏好，让 AI 美食推荐官推荐餐厅',
