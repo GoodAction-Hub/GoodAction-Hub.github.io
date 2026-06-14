@@ -82,4 +82,6 @@ __pycache__/
 .env*.local
 
 # Shadcn UI components
-components/ui/
+components/ui/*
+!components/ui/mobx-restful-shadcn/
+!components/ui/mobx-restful-shadcn/pager.tsx

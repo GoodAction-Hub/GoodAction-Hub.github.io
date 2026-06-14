@@ -1,57 +1,64 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { DateTime } from 'luxon'
-import { useTranslation } from '@/i18n/useTranslation'
-import { useEventStore } from '@/lib/store'
+import { I18nContext } from '@/i18n/context';
+import { DateTime } from 'luxon';
+import { observer } from 'mobx-react';
+import { useContext, useEffect, useState } from 'react';
+import { useEventStore } from '@/lib/store';
 
 interface CountdownTimerProps {
-  deadline: DateTime
+  deadline: DateTime;
 }
 
-export function CountdownTimer({ deadline }: CountdownTimerProps) {
+export const CountdownTimer = observer(function CountdownTimer({
+  deadline,
+}: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState<{
-    days: number
-    hours: number
-    minutes: number
-    seconds: number
-  } | null>(null)
-
-  const { t } = useTranslation('common');
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  } | null>(null);
+  const i18n = useContext(I18nContext);
+  const t = (key: string) => i18n.t(key) ?? key;
 
   // 从全局状态获取显示时区
-  const displayTimezone = useEventStore(state => state.displayTimezone)
+  const displayTimezone = useEventStore((state) => state.displayTimezone);
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const now = DateTime.now().setZone(displayTimezone)
-      const targetDeadline = deadline.setZone(displayTimezone)
-      const difference = targetDeadline.toMillis() - now.toMillis()
+      const now = DateTime.now().setZone(displayTimezone);
+      const targetDeadline = deadline.setZone(displayTimezone);
+      const difference = targetDeadline.toMillis() - now.toMillis();
 
       if (difference > 0) {
-        const days = Math.floor(difference / (1000 * 60 * 60 * 24))
-        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60))
-        const seconds = Math.floor((difference % (1000 * 60)) / 1000)
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor(
+          (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+        );
+        const minutes = Math.floor(
+          (difference % (1000 * 60 * 60)) / (1000 * 60),
+        );
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
-        setTimeLeft({ days, hours, minutes, seconds })
+        setTimeLeft({ days, hours, minutes, seconds });
       } else {
-        setTimeLeft(null)
+        setTimeLeft(null);
       }
-    }
+    };
 
-    calculateTimeLeft()
-    const timer = setInterval(calculateTimeLeft, 1000)
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
 
-    return () => clearInterval(timer)
-  }, [deadline, displayTimezone])
+    return () => clearInterval(timer);
+  }, [deadline, displayTimezone]);
 
   if (!timeLeft) {
     return (
       <div className="text-sm font-bold text-red-600 bg-red-100 px-3 py-2 rounded-lg">
-        {t("events.outdated")}
+        {t('events.outdated')}
       </div>
-    )
+    );
   }
 
   return (
@@ -61,27 +68,35 @@ export function CountdownTimer({ deadline }: CountdownTimerProps) {
           <div className="bg-gradient-to-b from-orange-500 to-orange-600 text-white px-2 sm:px-2.5 py-1.5 sm:py-2 rounded-lg font-bold text-sm sm:text-base min-w-[35px] sm:min-w-[40px] shadow-md">
             {timeLeft.days.toString().padStart(2, '0')}
           </div>
-          <div className="text-xs text-orange-700 mt-1 font-medium">{t("date.days")}</div>
+          <div className="text-xs text-orange-700 mt-1 font-medium">
+            {t('date.days')}
+          </div>
         </div>
       )}
       <div className="text-center">
         <div className="bg-gradient-to-b from-orange-500 to-orange-600 text-white px-2 sm:px-2.5 py-1.5 sm:py-2 rounded-lg font-bold text-sm sm:text-base min-w-[35px] sm:min-w-[40px] shadow-md">
           {timeLeft.hours.toString().padStart(2, '0')}
         </div>
-        <div className="text-xs text-orange-700 mt-1 font-medium">{t("date.hours")}</div>
+        <div className="text-xs text-orange-700 mt-1 font-medium">
+          {t('date.hours')}
+        </div>
       </div>
       <div className="text-center">
         <div className="bg-gradient-to-b from-orange-500 to-orange-600 text-white px-2 sm:px-2.5 py-1.5 sm:py-2 rounded-lg font-bold text-sm sm:text-base min-w-[35px] sm:min-w-[40px] shadow-md">
           {timeLeft.minutes.toString().padStart(2, '0')}
         </div>
-        <div className="text-xs text-orange-700 mt-1 font-medium">{t("date.minutes")}</div>
+        <div className="text-xs text-orange-700 mt-1 font-medium">
+          {t('date.minutes')}
+        </div>
       </div>
       <div className="text-center">
         <div className="bg-gradient-to-b from-orange-500 to-orange-600 text-white px-2 sm:px-2.5 py-1.5 sm:py-2 rounded-lg font-bold text-sm sm:text-base min-w-[35px] sm:min-w-[40px] shadow-md countdown-pulse">
           {timeLeft.seconds.toString().padStart(2, '0')}
         </div>
-        <div className="text-xs text-orange-700 mt-1 font-medium">{t("date.seconds")}</div>
+        <div className="text-xs text-orange-700 mt-1 font-medium">
+          {t('date.seconds')}
+        </div>
       </div>
     </div>
-  )
-}
+  );
+});

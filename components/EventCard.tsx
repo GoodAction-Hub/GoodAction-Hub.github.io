@@ -5,8 +5,8 @@ import { TimelineItem } from '@/components/TimelineItem';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { I18nContext } from '@/i18n/context';
 import { DeadlineItem, EventData, isEventEnded } from '@/lib/data';
-import { useTranslation } from '@/i18n/useTranslation';
 import { useEventStore } from '@/lib/store';
 import { formatTimezoneToUTC } from '@/lib/utils';
 import {
@@ -18,8 +18,9 @@ import {
   Star,
 } from 'lucide-react';
 import { DateTime } from 'luxon';
+import { observer } from 'mobx-react';
 import Link from 'next/link';
-import { FC, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { AddToCalendar } from './AddToCalendar';
 
 interface EventCardProps {
@@ -27,8 +28,12 @@ interface EventCardProps {
   event: EventData;
 }
 
-export const EventCard: FC<EventCardProps> = ({ item, event }) => {
-  const { t } = useTranslation('common');
+export const EventCard = observer(function EventCard({
+  item,
+  event,
+}: EventCardProps) {
+  const i18n = useContext(I18nContext);
+  const t = (key: string) => i18n.t(key) ?? key;
   const { favorites, toggleFavorite, mounted, displayTimezone } =
     useEventStore();
 
@@ -434,4 +439,4 @@ export const EventCard: FC<EventCardProps> = ({ item, event }) => {
       </CardContent>
     </Card>
   );
-};
+});

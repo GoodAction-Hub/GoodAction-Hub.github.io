@@ -1,20 +1,27 @@
-'use client'
+'use client';
 
-import { supportedLngDisplayNames } from '@/i18n'
-import { useTranslation } from '@/i18n/useTranslation'
-import { ChevronDownIcon } from '@radix-ui/react-icons'
-import * as Select from '@radix-ui/react-select'
-import { Globe } from 'lucide-react'
+import { normalizeLanguageCode, supportedLngDisplayNames } from '@/i18n';
+import { I18nContext } from '@/i18n/context';
+import { ChevronDownIcon } from '@radix-ui/react-icons';
+import * as Select from '@radix-ui/react-select';
+import { Globe } from 'lucide-react';
+import { observer } from 'mobx-react';
+import { useRouter } from 'next/navigation';
+import { useContext } from 'react';
 
-export function SwitchLanguage() {
-  const { i18n } = useTranslation()
-  const currentLng = i18n.language || 'zh-CN'
+export const SwitchLanguage = observer(function SwitchLanguage() {
+  const i18n = useContext(I18nContext);
+  const router = useRouter();
+  const currentLng = i18n.currentLanguage || 'zh-CN';
 
-  const handleChange = (value: string) => {
-    i18n
-      .changeLanguage(value)
-      .catch((error) => console.error('Failed to change language:', error))
-  }
+  const handleChange = async (value: string) => {
+    try {
+      await i18n.loadLanguages(normalizeLanguageCode(value) || 'zh-CN');
+      router.refresh();
+    } catch (error) {
+      console.error('Failed to change language:', error);
+    }
+  };
 
   return (
     <Select.Root value={currentLng} onValueChange={handleChange}>
@@ -51,5 +58,5 @@ export function SwitchLanguage() {
         </Select.Content>
       </Select.Portal>
     </Select.Root>
-  )
-}
+  );
+});

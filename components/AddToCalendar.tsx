@@ -1,35 +1,37 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { useTranslation } from '@/i18n/useTranslation';
+import { Button } from '@/components/ui/button';
+import { I18nContext } from '@/i18n/context';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { google, outlook, yahoo } from "calendar-link";
+} from '@/components/ui/dropdown-menu';
+import { google, outlook, yahoo } from 'calendar-link';
 import {
   Apple,
   Calendar,
   CalendarDays,
   CalendarRange,
   Mail,
-} from "lucide-react";
-import { DateTime } from "luxon";
+} from 'lucide-react';
+import { DateTime } from 'luxon';
+import { observer } from 'mobx-react';
+import { useContext } from 'react';
 
 interface AddToCalendarProps {
   title: string;
   description?: string;
   location?: string;
   startDate: string; // YYYY-MM-DD
-  endDate: string;   // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
   startTime?: string; // HH:mm
-  endTime?: string;   // HH:mm
-  timeZone: string;   // e.g. "Asia/Shanghai"
+  endTime?: string; // HH:mm
+  timeZone: string; // e.g. "Asia/Shanghai"
 }
 
-export function AddToCalendar({
+export const AddToCalendar = observer(function AddToCalendar({
   title,
   description,
   location,
@@ -40,14 +42,12 @@ export function AddToCalendar({
   timeZone,
 }: AddToCalendarProps) {
   // 组合 ISO 格式时间
-  const startLuxon = DateTime.fromISO(
-    `${startDate}T${startTime ?? "00:00"}`,
-    { zone: timeZone }
-  );
-  const endLuxon = DateTime.fromISO(
-    `${endDate}T${endTime ?? "23:59"}`,
-    { zone: timeZone }
-  );
+  const startLuxon = DateTime.fromISO(`${startDate}T${startTime ?? '00:00'}`, {
+    zone: timeZone,
+  });
+  const endLuxon = DateTime.fromISO(`${endDate}T${endTime ?? '23:59'}`, {
+    zone: timeZone,
+  });
 
   // For ICS export (UTC format)
   const start = startLuxon.toUTC().toFormat("yyyyMMdd'T'HHmmss'Z'");
@@ -62,7 +62,6 @@ export function AddToCalendar({
     end: endLuxon.toISO(),
   };
 
-
   const handleDownloadICS = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -74,29 +73,32 @@ UID:${Date.now()}-${Math.random().toString(36).substring(2, 11)}@example.com
 DTSTAMP:${DateTime.now().toUTC().toFormat("yyyyMMdd'T'HHmmss'Z'")}
 DTSTART:${start}
 DTEND:${end}
-SUMMARY:${title.replace(/[\n\r]/g, "\\n")}
-${description ? `DESCRIPTION:${description.replace(/[\n\r]/g, "\\n")}` : ""}
-${location ? `LOCATION:${location.replace(/[\n\r]/g, "\\n")}` : ""}
+SUMMARY:${title.replace(/[\n\r]/g, '\\n')}
+${description ? `DESCRIPTION:${description.replace(/[\n\r]/g, '\\n')}` : ''}
+${location ? `LOCATION:${location.replace(/[\n\r]/g, '\\n')}` : ''}
 END:VEVENT
 END:VCALENDAR`;
 
-    const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+    const blob = new Blob([icsContent], {
+      type: 'text/calendar;charset=utf-8',
+    });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
     a.download = `${title}_${startDate}.ics`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
-  const { t } = useTranslation();
+  const i18n = useContext(I18nContext);
+  const t = (key: string) => i18n.t(key) ?? key;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="flex items-center gap-2">
           <Calendar className="h-4 w-4" />
-          {t("calendar.title")}
+          {t('calendar.title')}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
@@ -107,7 +109,7 @@ END:VCALENDAR`;
             rel="noopener noreferrer"
             className="flex items-center gap-2"
           >
-            <CalendarDays className="h-4 w-4" /> 谷歌日历
+            <CalendarDays className="h-4 w-4" /> {t('calendar.google')}
           </a>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
@@ -117,7 +119,7 @@ END:VCALENDAR`;
             rel="noopener noreferrer"
             className="flex items-center gap-2"
           >
-            <Mail className="h-4 w-4" /> Outlook日历
+            <Mail className="h-4 w-4" /> {t('calendar.outlook')}
           </a>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
@@ -127,16 +129,17 @@ END:VCALENDAR`;
             rel="noopener noreferrer"
             className="flex items-center gap-2"
           >
-            <CalendarRange className="h-4 w-4" /> 雅虎日历
+            <CalendarRange className="h-4 w-4" /> {t('calendar.yahoo')}
           </a>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={handleDownloadICS}
           className="flex items-center gap-2 cursor-pointer"
         >
-          <Apple className="h-4 w-4" /> 苹果日历 ({t("calendar.download")})
+          <Apple className="h-4 w-4" /> {t('calendar.apple')} (
+          {t('calendar.download')})
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+});

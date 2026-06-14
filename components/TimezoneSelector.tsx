@@ -1,67 +1,70 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Globe } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { useTranslation } from '@/i18n/useTranslation'
-import { useEventStore } from '@/lib/store'
+import { I18nContext } from '@/i18n/context';
+import { Globe } from 'lucide-react';
+import { observer } from 'mobx-react';
+import { useContext, useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useEventStore } from '@/lib/store';
 
-export function TimezoneSelector() {
+export const TimezoneSelector = observer(function TimezoneSelector() {
   const { displayTimezone, setDisplayTimezone, detectUserTimezone } =
-    useEventStore()
-  const { t } = useTranslation('common')
+    useEventStore();
+  const i18n = useContext(I18nContext);
+  const t = (key: string) => i18n.t(key) ?? key;
 
   // 时区选择器相关状态
   const [timezones, setTimezones] = useState<string[]>(() => {
     try {
-      const tzs = Intl.supportedValuesOf('timeZone')
-      if (tzs && tzs.length > 0) return tzs
+      const tzs = Intl.supportedValuesOf('timeZone');
+      if (tzs && tzs.length > 0) return tzs;
     } catch {}
-    return []
-  })
-  const [searchTimeZone, setSearchTimeZone] = useState('')
-  const [showTimezoneDropdown, setShowTimezoneDropdown] = useState(false)
+    return [];
+  });
+  const [searchTimeZone, setSearchTimeZone] = useState('');
+  const [showTimezoneDropdown, setShowTimezoneDropdown] = useState(false);
 
   // 初始加载时区列表（浏览器API不可用时从远程获取）
   useEffect(() => {
-    if (timezones.length > 0) return
+    if (timezones.length > 0) return;
     // 如果浏览器API不可用，从timeapi.io获取
     fetch('https://www.timeapi.io/api/timezone/availabletimezones')
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
-          setTimezones(data)
+          setTimezones(data);
         }
       })
       .catch((err) => {
-        console.error('Failed to fetch timezones:', err)
+        console.error('Failed to fetch timezones:', err);
         // 设置一些常见的时区作为备选
-        setTimezones(['Asia/Shanghai'])
-      })
-  }, [timezones.length])
+        setTimezones(['Asia/Shanghai']);
+      });
+  }, [timezones.length]);
 
   // 点击外部关闭下拉菜单
   useEffect(() => {
     if (showTimezoneDropdown) {
       const handleClickOutside = (event: MouseEvent) => {
-        const target = event.target as HTMLElement
+        const target = event.target as HTMLElement;
         if (!target.closest('.timezone-selector-container')) {
-          setShowTimezoneDropdown(false)
+          setShowTimezoneDropdown(false);
         }
-      }
+      };
 
-      document.addEventListener('mousedown', handleClickOutside)
-      return () => document.removeEventListener('mousedown', handleClickOutside)
+      document.addEventListener('mousedown', handleClickOutside);
+      return () =>
+        document.removeEventListener('mousedown', handleClickOutside);
     }
-  }, [showTimezoneDropdown])
+  }, [showTimezoneDropdown]);
 
   // 根据搜索过滤时区
   const filteredTimezones = searchTimeZone
     ? timezones.filter((tz) =>
         tz.toLowerCase().includes(searchTimeZone.toLowerCase()),
       )
-    : timezones
+    : timezones;
 
   return (
     <div className="relative timezone-selector-container">
@@ -96,8 +99,8 @@ export function TimezoneSelector() {
                           : ''
                       }`}
                       onClick={() => {
-                        setDisplayTimezone(tz)
-                        setShowTimezoneDropdown(false)
+                        setDisplayTimezone(tz);
+                        setShowTimezoneDropdown(false);
                       }}
                     >
                       {tz}
@@ -113,8 +116,8 @@ export function TimezoneSelector() {
           variant="outline"
           size="sm"
           onClick={() => {
-            detectUserTimezone()
-            setShowTimezoneDropdown(false)
+            detectUserTimezone();
+            setShowTimezoneDropdown(false);
           }}
           className="whitespace-nowrap"
         >
@@ -122,5 +125,5 @@ export function TimezoneSelector() {
         </Button>
       </div>
     </div>
-  )
-}
+  );
+});
