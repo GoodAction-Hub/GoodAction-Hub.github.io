@@ -40,15 +40,13 @@ export const TimezoneSelector: FC<TimezoneSelectorProps> = observer(
     const [showTimezoneDropdown, setShowTimezoneDropdown] = useState(false);
 
     useEffect(() => {
-      let active = true;
+      const controller = new AbortController();
 
-      loadSupportedTimezones().then((loadedTimezones) => {
-        if (active) setTimezones(loadedTimezones);
+      loadSupportedTimezones(controller.signal).then((loadedTimezones) => {
+        if (!controller.signal.aborted) setTimezones(loadedTimezones);
       });
 
-      return () => {
-        active = false;
-      };
+      return () => controller.abort();
     }, []);
 
     // 点击外部关闭下拉菜单

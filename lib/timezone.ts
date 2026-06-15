@@ -12,17 +12,22 @@ export const getSupportedTimezones = () => {
   }
 };
 
-export const loadSupportedTimezones = async () => {
+export const loadSupportedTimezones = async (signal?: AbortSignal) => {
   const timezones = getSupportedTimezones();
 
   if (timezones.length > 0) return timezones;
 
   try {
-    const response = await fetch(TIMEZONE_API_URL);
+    const response = await fetch(TIMEZONE_API_URL, { signal });
+
+    if (!response.ok) throw new Error(response.statusText);
+
     const data = await response.json();
 
     return Array.isArray(data) && data.length > 0 ? data : FALLBACK_TIMEZONES;
   } catch {
+    if (signal?.aborted) return [];
+
     return FALLBACK_TIMEZONES;
   }
 };
