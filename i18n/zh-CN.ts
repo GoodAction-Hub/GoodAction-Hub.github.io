@@ -53,7 +53,8 @@ const BASE_TEXT = {
   'detail.openInAmap': '在高德地图中打开',
   'detail.loadingMap': '地图加载中...',
   'detail.mapUnavailable': '地图预览暂不可用',
-  original_timezone: '原始时区：{timezone}',
+  original_timezone: ({ timezone }: { timezone: string }) =>
+    `（${timezone}，原始时区）`,
   'bites.title': '无障碍友好美食指南',
   'bites.subtitle': '为每个人提供平等的美食体验',
   'bites.about.title': '关于无障碍美食',

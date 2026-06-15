@@ -29,9 +29,9 @@ export function Aggregation() {
           type="text"
           placeholder="搜索..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') handleSearch()
+          onChange={({ target }) => setSearchQuery(target.value)}
+          onKeyDown={({ key }) => {
+            if (key === 'Enter') handleSearch()
           }}
           className="flex-1 bg-transparent placeholder-white/60 text-white text-lg md:text-xl outline-none px-6"
         />
@@ -48,4 +48,3 @@ export function Aggregation() {
     </div>
   )
 }
-

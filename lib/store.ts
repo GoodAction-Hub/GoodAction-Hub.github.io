@@ -72,9 +72,7 @@ export const useEventStore = create<AppState>()(
 
       // 检测用户本地时区
       detectUserTimezone: () => {
-        const userTimezone = detectCurrentTimezone();
-
-        if (userTimezone) set({ displayTimezone: userTimezone });
+        set({ displayTimezone: detectCurrentTimezone() });
       },
 
       setCategory: (category) => set({ selectedCategory: category }),

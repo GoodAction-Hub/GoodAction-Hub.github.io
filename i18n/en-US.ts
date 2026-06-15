@@ -55,7 +55,8 @@ const BASE_TEXT = {
   'detail.openInAmap': 'Open in Amap',
   'detail.loadingMap': 'Loading map...',
   'detail.mapUnavailable': 'Map preview unavailable',
-  original_timezone: 'Original timezone: {timezone}',
+  original_timezone: ({ timezone }: { timezone: string }) =>
+    `(Original timezone: ${timezone})`,
   'bites.title': 'Barrier-Free Dining Guide',
   'bites.subtitle': 'Equal dining experiences for everyone',
   'bites.about.title': 'About Barrier‑Free Dining',

@@ -105,7 +105,7 @@ export const FoodAIDialog = observer(() => {
               <Input
                 id="bf-location"
                 value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                onChange={({ target }) => setLocation(target.value)}
                 placeholder={t('bites.ai_dialog.placeholders.location')}
               />
             </div>
@@ -117,7 +117,7 @@ export const FoodAIDialog = observer(() => {
               <textarea
                 id="bf-preferences"
                 value={preferences}
-                onChange={(e) => setPreferences(e.target.value)}
+                onChange={({ target }) => setPreferences(target.value)}
                 placeholder={t('bites.ai_dialog.placeholders.preferences')}
                 className={cn(
                   'min-h-[90px] rounded-xl border border-white/20 bg-white/80 px-3 py-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',

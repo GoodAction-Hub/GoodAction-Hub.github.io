@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { I18nContext } from '@/i18n/context';
 import { useEventStore } from '@/lib/store';
-import { detectCurrentTimezone, getSupportedTimezones } from '@/lib/timezone';
+import { detectCurrentTimezone, loadSupportedTimezones } from '@/lib/timezone';
 
 interface TimezoneSelectorProps {
   timezone?: string;
@@ -35,27 +35,21 @@ export const TimezoneSelector: FC<TimezoneSelectorProps> = observer(
     const currentTimezone = timezone ?? displayTimezone;
 
     // 时区选择器相关状态
-    const [timezones, setTimezones] = useState<string[]>(getSupportedTimezones);
+    const [timezones, setTimezones] = useState<string[]>([]);
     const [searchTimeZone, setSearchTimeZone] = useState('');
     const [showTimezoneDropdown, setShowTimezoneDropdown] = useState(false);
 
-    // 初始加载时区列表（浏览器API不可用时从远程获取）
     useEffect(() => {
-      if (timezones.length > 0) return;
-      // 如果浏览器API不可用，从timeapi.io获取
-      fetch('https://www.timeapi.io/api/timezone/availabletimezones')
-        .then((res) => res.json())
-        .then((data) => {
-          if (Array.isArray(data)) {
-            setTimezones(data);
-          }
-        })
-        .catch((err) => {
-          console.error('Failed to fetch timezones:', err);
-          // 设置一些常见的时区作为备选
-          setTimezones(['Asia/Shanghai']);
-        });
-    }, [timezones.length]);
+      let active = true;
+
+      loadSupportedTimezones().then((loadedTimezones) => {
+        if (active) setTimezones(loadedTimezones);
+      });
+
+      return () => {
+        active = false;
+      };
+    }, []);
 
     // 点击外部关闭下拉菜单
     useEffect(() => {
@@ -96,7 +90,7 @@ export const TimezoneSelector: FC<TimezoneSelectorProps> = observer(
                     type="text"
                     placeholder={t('filter.searchTimezone')}
                     value={searchTimeZone}
-                    onChange={(e) => setSearchTimeZone(e.target.value)}
+                    onChange={({ target }) => setSearchTimeZone(target.value)}
                     className="mb-2"
                   />
                   <div className="grid gap-1">
@@ -127,11 +121,8 @@ export const TimezoneSelector: FC<TimezoneSelectorProps> = observer(
             variant="outline"
             size="sm"
             onClick={() => {
-              if (onChange) {
-                const detectedTimezone = detectCurrentTimezone();
-
-                if (detectedTimezone) onChange(detectedTimezone);
-              } else detectUserTimezone();
+              if (onChange) onChange(detectCurrentTimezone());
+              else detectUserTimezone();
 
               setShowTimezoneDropdown(false);
             }}
