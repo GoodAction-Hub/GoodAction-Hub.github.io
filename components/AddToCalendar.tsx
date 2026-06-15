@@ -48,9 +48,7 @@ export const AddToCalendar: FC<AddToCalendarProps> = observer(
     // 组合 ISO 格式时间
     const startLuxon = DateTime.fromISO(
       `${startDate}T${startTime ?? '00:00'}`,
-      {
-        zone: timeZone,
-      },
+      { zone: timeZone },
     );
     const endLuxon = DateTime.fromISO(`${endDate}T${endTime ?? '23:59'}`, {
       zone: timeZone,
