@@ -13,8 +13,7 @@ export default observer(function Home() {
     fetchItems();
   }, [fetchItems]);
 
-  const i18n = useContext(I18nContext);
-  const t = (key: string) => i18n.t(key) ?? key;
+  const { t } = useContext(I18nContext);
 
   // Filtered events for display (currently unused in this page)
   // const filteredEvents = useMemo(() => {
@@ -51,7 +50,9 @@ export default observer(function Home() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">{t('events.loading')}</p>
+          <p className="text-slate-600">
+            {t('events.loading') ?? 'events.loading'}
+          </p>
         </div>
       </div>
     );

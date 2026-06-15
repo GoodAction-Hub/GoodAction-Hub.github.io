@@ -11,8 +11,8 @@ import { useEventStore } from '@/lib/store';
 export const TimezoneSelector = observer(function TimezoneSelector() {
   const { displayTimezone, setDisplayTimezone, detectUserTimezone } =
     useEventStore();
-  const i18n = useContext(I18nContext);
-  const t = (key: string) => i18n.t(key) ?? key;
+  const { t } = useContext(I18nContext);
+  const translate = (key: string) => t(key) ?? key;
 
   // 时区选择器相关状态
   const [timezones, setTimezones] = useState<string[]>(() => {
@@ -84,7 +84,7 @@ export const TimezoneSelector = observer(function TimezoneSelector() {
               <div className="p-2">
                 <Input
                   type="text"
-                  placeholder={t('filter.searchTimezone')}
+                  placeholder={translate('filter.searchTimezone')}
                   value={searchTimeZone}
                   onChange={(e) => setSearchTimeZone(e.target.value)}
                   className="mb-2"
@@ -121,7 +121,7 @@ export const TimezoneSelector = observer(function TimezoneSelector() {
           }}
           className="whitespace-nowrap"
         >
-          {t('filter.autoDetect')}
+          {translate('filter.autoDetect')}
         </Button>
       </div>
     </div>

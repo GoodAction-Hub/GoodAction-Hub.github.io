@@ -1,6 +1,6 @@
 'use client';
 
-import { normalizeLanguageCode, supportedLngDisplayNames } from '@/i18n';
+import { supportedLngDisplayNames, type LanguageCode } from '@/i18n';
 import { I18nContext } from '@/i18n/context';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import * as Select from '@radix-ui/react-select';
@@ -10,13 +10,13 @@ import { useRouter } from 'next/navigation';
 import { useContext } from 'react';
 
 export const SwitchLanguage = observer(function SwitchLanguage() {
-  const i18n = useContext(I18nContext);
+  const { currentLanguage, loadLanguages } = useContext(I18nContext);
   const router = useRouter();
-  const currentLng = i18n.currentLanguage || 'zh-CN';
+  const currentLng = currentLanguage || 'zh-CN';
 
-  const handleChange = async (value: string) => {
+  const handleChange = async (value: LanguageCode) => {
     try {
-      await i18n.loadLanguages(normalizeLanguageCode(value) || 'zh-CN');
+      await loadLanguages(value);
       router.refresh();
     } catch (error) {
       console.error('Failed to change language:', error);
@@ -24,7 +24,10 @@ export const SwitchLanguage = observer(function SwitchLanguage() {
   };
 
   return (
-    <Select.Root value={currentLng} onValueChange={handleChange}>
+    <Select.Root
+      value={currentLng}
+      onValueChange={(value) => handleChange(value as LanguageCode)}
+    >
       <Select.Trigger
         className="inline-flex items-center justify-between rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary transition min-w-[120px]"
         aria-label="语言"

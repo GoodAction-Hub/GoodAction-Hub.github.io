@@ -20,11 +20,6 @@ const i18nData: Record<LanguageCode, TranslationData> = {
   'en-US': () => import('./en-US'),
 };
 
-export interface I18nProps {
-  language: LanguageCode;
-  languageMap: TranslationMap<string>;
-}
-
 type I18nTextKey = string;
 
 export const normalizeLanguageCode = (

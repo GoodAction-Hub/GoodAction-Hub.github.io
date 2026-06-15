@@ -8,7 +8,7 @@ export default observer(function SafeTranslation({
   tKey,
   fallback,
 }: Record<'tKey' | 'fallback', string>) {
-  const i18n = useContext(I18nContext);
+  const { loading, t } = useContext(I18nContext);
 
-  return <>{!i18n.loading ? (i18n.t(tKey) ?? tKey) : fallback}</>;
+  return <>{!loading ? (t(tKey) ?? tKey) : fallback}</>;
 });

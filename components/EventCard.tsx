@@ -20,7 +20,7 @@ import {
 import { DateTime } from 'luxon';
 import { observer } from 'mobx-react';
 import Link from 'next/link';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { type FC, useContext, useEffect, useRef, useState } from 'react';
 import { AddToCalendar } from './AddToCalendar';
 
 interface EventCardProps {
@@ -28,12 +28,9 @@ interface EventCardProps {
   event: EventData;
 }
 
-export const EventCard = observer(function EventCard({
-  item,
-  event,
-}: EventCardProps) {
-  const i18n = useContext(I18nContext);
-  const t = (key: string) => i18n.t(key) ?? key;
+export const EventCard: FC<EventCardProps> = observer(({ item, event }) => {
+  const { t } = useContext(I18nContext);
+  const translate = (key: string) => t(key) ?? key;
   const { favorites, toggleFavorite, mounted, displayTimezone } =
     useEventStore();
 
@@ -135,7 +132,7 @@ export const EventCard = observer(function EventCard({
                           'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
                         }`}
                       >
-                        {t(`filter.category_${item.category}`)}
+                        {translate(`filter.category_${item.category}`)}
                       </div>
                     </div>
                     <div className="flex items-start gap-2 flex-wrap">
@@ -156,7 +153,7 @@ export const EventCard = observer(function EventCard({
                         </Badge>
                         {ended && (
                           <Badge variant="secondary" className="text-xs">
-                            {t('events.ended')}
+                            {translate('events.ended')}
                           </Badge>
                         )}
                         {mounted && (
@@ -214,7 +211,7 @@ export const EventCard = observer(function EventCard({
                 <div className="flex items-center gap-2 flex-nowrap">
                   <Clock className="w-4 h-4" />
                   <span className="text-sm font-medium">
-                    {t('events.timeline')}
+                    {translate('events.timeline')}
                   </span>
                   {!ended && nextDeadline && (
                     <div className="ml-auto">
@@ -265,7 +262,7 @@ export const EventCard = observer(function EventCard({
                     {/* 左侧文本信息 */}
                     <div className="space-y-1 text-center lg:text-left">
                       <div className="text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                        {t('events.nextDeadline')}
+                        {translate('events.nextDeadline')}
                       </div>
                       <div className="text-sm font-bold text-gray-800 leading-tight break-words">
                         {nextDeadline.comment}
@@ -288,10 +285,10 @@ export const EventCard = observer(function EventCard({
                 <div className="p-3 bg-gradient-to-br from-gray-100/80 to-gray-200/80 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg">
                   <div className="text-center">
                     <div className="text-sm font-bold bg-gradient-to-r from-gray-600 to-gray-700 bg-clip-text text-transparent mb-1">
-                      {t('events.ended')}
+                      {translate('events.ended')}
                     </div>
                     <div className="text-xs text-gray-500">
-                      {t('events.allDeadlinesPassed')}
+                      {translate('events.allDeadlinesPassed')}
                     </div>
                   </div>
                 </div>
@@ -301,9 +298,9 @@ export const EventCard = observer(function EventCard({
                 <Link
                   href={`/activities/${event.id}`}
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-purple-700 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
-                  title={t('detail.viewDetails')}
+                  title={translate('detail.viewDetails')}
                 >
-                  <span>{t('detail.viewDetails')}</span>
+                  <span>{translate('detail.viewDetails')}</span>
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
@@ -318,7 +315,7 @@ export const EventCard = observer(function EventCard({
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
               <span className="text-sm font-medium">
-                {t('events.timeline')}
+                {translate('events.timeline')}
               </span>
               {!ended && nextDeadline && (
                 <div className="mt-2 ml-auto">
@@ -379,7 +376,7 @@ export const EventCard = observer(function EventCard({
               {showScrollHint && (
                 <div className="absolute right-2 bottom-2 flex items-center z-30 animate-bounce">
                   <span className="text-xs text-gray-400 mr-1">
-                    {t('events.swipe')}
+                    {translate('events.swipe')}
                   </span>
                   <ArrowRight className="w-4 h-4 text-gray-400" />
                 </div>
@@ -394,7 +391,7 @@ export const EventCard = observer(function EventCard({
                 <div className="text-center space-y-3">
                   <div className="space-y-1">
                     <div className="text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-1">
-                      {t('events.nextDeadline')}
+                      {translate('events.nextDeadline')}
                     </div>
                     <div className="text-base font-bold text-gray-800 leading-tight break-words">
                       {nextDeadline.comment}
@@ -415,10 +412,10 @@ export const EventCard = observer(function EventCard({
               <div className="p-4 bg-gradient-to-br from-gray-100/80 to-gray-200/80 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg">
                 <div className="text-center">
                   <div className="text-sm font-bold bg-gradient-to-r from-gray-600 to-gray-700 bg-clip-text text-transparent mb-1">
-                    {t('events.ended')}
+                    {translate('events.ended')}
                   </div>
                   <div className="text-xs text-gray-500">
-                    {t('events.allDeadlinesPassed')}
+                    {translate('events.allDeadlinesPassed')}
                   </div>
                 </div>
               </div>
@@ -429,9 +426,9 @@ export const EventCard = observer(function EventCard({
             <Link
               href={`/activities/${event.id}`}
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-purple-700 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
-              title={t('detail.viewDetails')}
+              title={translate('detail.viewDetails')}
             >
-              <span>{t('detail.viewDetails')}</span>
+              <span>{translate('detail.viewDetails')}</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

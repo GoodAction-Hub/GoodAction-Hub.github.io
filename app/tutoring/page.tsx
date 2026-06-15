@@ -10,15 +10,15 @@ import {
 
 import { createI18nStore, loadSSRLanguage } from '@/i18n';
 import { Pager } from '@/components/ui/mobx-restful-shadcn/pager';
-import { parsePage } from '@/lib/pagination';
+import { parsePage, pickFirstSearchParam } from '@/lib/pagination';
 import { fetchTutoringCatalog } from '@/lib/tutoring';
 
 const PAGE_SIZE = 10;
 
 type PageSearchParams = Promise<{
-  pageIndex?: string;
-  keywords?: string;
-  tag?: string;
+  pageIndex?: string | string[];
+  keywords?: string | string[];
+  tag?: string | string[];
 }>;
 
 function buildTagHref(nextTag: string, keywords: string): string {
@@ -40,8 +40,8 @@ export default async function TutoringPage({
     keywords: rawKeywords,
     tag: rawTag,
   } = rawSearchParams;
-  const keywords = rawKeywords?.trim() ?? '';
-  const selectedTag = rawTag?.trim() ?? '';
+  const keywords = pickFirstSearchParam(rawKeywords)?.trim() ?? '';
+  const selectedTag = pickFirstSearchParam(rawTag)?.trim() ?? '';
   const headerStore = await headers();
   const { language, languageMap } = await loadSSRLanguage({
     cookie: headerStore.get('cookie') ?? '',

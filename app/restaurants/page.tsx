@@ -6,7 +6,7 @@ import { createI18nStore, loadSSRLanguage } from '@/i18n';
 import FoodAIDialog from '@/components/FoodAIDialog';
 import { Pager } from '@/components/ui/mobx-restful-shadcn/pager';
 import { fetchBitesCatalog, BitesRestaurant } from '@/lib/bitesCatalog';
-import { parsePage } from '@/lib/pagination';
+import { parsePage, pickFirstSearchParam } from '@/lib/pagination';
 import styles from './page.module.css';
 
 type FilterType = 'all' | 'hearing' | 'visual' | 'wheelchair' | 'cognitive';
@@ -21,9 +21,9 @@ const FILTER_OPTIONS = [
 const PAGE_SIZE = 10;
 
 type PageSearchParams = Promise<{
-  pageIndex?: string;
-  keywords?: string;
-  filter?: string;
+  pageIndex?: string | string[];
+  keywords?: string | string[];
+  filter?: string | string[];
 }>;
 
 function getAccessibilityTypes(r: BitesRestaurant): FilterType[] {
@@ -64,8 +64,8 @@ export default async function BarrierFreeBitesPage({
     keywords: rawKeywords,
     filter: rawFilter,
   } = rawSearchParams;
-  const keywords = rawKeywords?.trim() ?? '';
-  const filter = parseFilter(rawFilter);
+  const keywords = pickFirstSearchParam(rawKeywords)?.trim() ?? '';
+  const filter = parseFilter(pickFirstSearchParam(rawFilter));
   const headerStore = await headers();
   const { language, languageMap } = await loadSSRLanguage({
     cookie: headerStore.get('cookie') ?? '',

@@ -90,15 +90,15 @@ END:VCALENDAR`;
     URL.revokeObjectURL(url);
   };
 
-  const i18n = useContext(I18nContext);
-  const t = (key: string) => i18n.t(key) ?? key;
+  const { t } = useContext(I18nContext);
+  const translate = (key: string) => t(key) ?? key;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="flex items-center gap-2">
           <Calendar className="h-4 w-4" />
-          {t('calendar.title')}
+          {translate('calendar.title')}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
@@ -109,7 +109,7 @@ END:VCALENDAR`;
             rel="noopener noreferrer"
             className="flex items-center gap-2"
           >
-            <CalendarDays className="h-4 w-4" /> {t('calendar.google')}
+            <CalendarDays className="h-4 w-4" /> {translate('calendar.google')}
           </a>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
@@ -119,7 +119,7 @@ END:VCALENDAR`;
             rel="noopener noreferrer"
             className="flex items-center gap-2"
           >
-            <Mail className="h-4 w-4" /> {t('calendar.outlook')}
+            <Mail className="h-4 w-4" /> {translate('calendar.outlook')}
           </a>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
@@ -129,15 +129,15 @@ END:VCALENDAR`;
             rel="noopener noreferrer"
             className="flex items-center gap-2"
           >
-            <CalendarRange className="h-4 w-4" /> {t('calendar.yahoo')}
+            <CalendarRange className="h-4 w-4" /> {translate('calendar.yahoo')}
           </a>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={handleDownloadICS}
           className="flex items-center gap-2 cursor-pointer"
         >
-          <Apple className="h-4 w-4" /> {t('calendar.apple')} (
-          {t('calendar.download')})
+          <Apple className="h-4 w-4" /> {translate('calendar.apple')} (
+          {translate('calendar.download')})
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

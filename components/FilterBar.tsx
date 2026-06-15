@@ -20,8 +20,8 @@ export const FilterBar = observer(function FilterBar() {
     mounted,
   } = useEventStore();
 
-  const i18n = useContext(I18nContext);
-  const t = (key: string) => i18n.t(key) ?? key;
+  const { t } = useContext(I18nContext);
+  const translate = (key: string) => t(key) ?? key;
 
   const categories = ['conference', 'competition', 'activity'];
 
@@ -34,7 +34,7 @@ export const FilterBar = observer(function FilterBar() {
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-6 h-6 group-hover:text-blue-500 group-focus-within:text-blue-600 transition-colors duration-300" />
           <Input
             type="text"
-            placeholder={t('filter.searchPlaceholder')}
+            placeholder={translate('filter.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-14 pr-6 py-3 sm:py-4 text-base sm:text-xl md:text-2xl font-medium bg-transparent border-0 rounded-xl placeholder:text-base sm:placeholder:text-xl md:placeholder:text-2xl placeholder:text-gray-400 focus:ring-0 focus:outline-none h-12 sm:h-14 md:h-16 text-gray-800"
@@ -70,7 +70,9 @@ export const FilterBar = observer(function FilterBar() {
                   : 'text-yellow-500 hover:text-yellow-600'
               }`}
             />
-            <span className="font-medium">{t('filter.onlyFavorites')}</span>
+            <span className="font-medium">
+              {translate('filter.onlyFavorites')}
+            </span>
             {showOnlyFavorites && (
               <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-orange-500/20 animate-pulse" />
             )}
@@ -83,7 +85,9 @@ export const FilterBar = observer(function FilterBar() {
 
       {/* Categories */}
       <div>
-        <h3 className="text-sm font-medium mb-2">{t('filter.category')}</h3>
+        <h3 className="text-sm font-medium mb-2">
+          {translate('filter.category')}
+        </h3>
         <div className="flex flex-wrap gap-2">
           <Button
             variant={selectedCategory === null ? 'default' : 'outline'}
@@ -95,7 +99,7 @@ export const FilterBar = observer(function FilterBar() {
             } hover:cursor-pointer`}
             onClick={() => setCategory(null)}
           >
-            {t('filter.all')}
+            {translate('filter.all')}
           </Button>
           {categories.map((category) => (
             <Button
@@ -109,7 +113,7 @@ export const FilterBar = observer(function FilterBar() {
               } capitalize hover:cursor-pointer`}
               onClick={() => setCategory(category)}
             >
-              {t(`filter.category_${category}`)}
+              {translate(`filter.category_${category}`)}
             </Button>
           ))}
         </div>

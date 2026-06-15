@@ -19,8 +19,8 @@ export const CountdownTimer = observer(function CountdownTimer({
     minutes: number;
     seconds: number;
   } | null>(null);
-  const i18n = useContext(I18nContext);
-  const t = (key: string) => i18n.t(key) ?? key;
+  const { t } = useContext(I18nContext);
+  const translate = (key: string) => t(key) ?? key;
 
   // 从全局状态获取显示时区
   const displayTimezone = useEventStore((state) => state.displayTimezone);
@@ -56,7 +56,7 @@ export const CountdownTimer = observer(function CountdownTimer({
   if (!timeLeft) {
     return (
       <div className="text-sm font-bold text-red-600 bg-red-100 px-3 py-2 rounded-lg">
-        {t('events.outdated')}
+        {translate('events.outdated')}
       </div>
     );
   }
@@ -69,7 +69,7 @@ export const CountdownTimer = observer(function CountdownTimer({
             {timeLeft.days.toString().padStart(2, '0')}
           </div>
           <div className="text-xs text-orange-700 mt-1 font-medium">
-            {t('date.days')}
+            {translate('date.days')}
           </div>
         </div>
       )}
@@ -78,7 +78,7 @@ export const CountdownTimer = observer(function CountdownTimer({
           {timeLeft.hours.toString().padStart(2, '0')}
         </div>
         <div className="text-xs text-orange-700 mt-1 font-medium">
-          {t('date.hours')}
+          {translate('date.hours')}
         </div>
       </div>
       <div className="text-center">
@@ -86,7 +86,7 @@ export const CountdownTimer = observer(function CountdownTimer({
           {timeLeft.minutes.toString().padStart(2, '0')}
         </div>
         <div className="text-xs text-orange-700 mt-1 font-medium">
-          {t('date.minutes')}
+          {translate('date.minutes')}
         </div>
       </div>
       <div className="text-center">
@@ -94,7 +94,7 @@ export const CountdownTimer = observer(function CountdownTimer({
           {timeLeft.seconds.toString().padStart(2, '0')}
         </div>
         <div className="text-xs text-orange-700 mt-1 font-medium">
-          {t('date.seconds')}
+          {translate('date.seconds')}
         </div>
       </div>
     </div>

@@ -1,26 +1,35 @@
 'use client';
 
-import { Component, type ReactNode } from 'react';
+import { TranslationMap } from 'mobx-i18n';
+import { observer } from 'mobx-react';
+import { ObservedComponent, reaction } from 'mobx-react-helper';
+import { type PropsWithChildren } from 'react';
 
 import { I18nContext } from '@/i18n/context';
-import { createI18nStore, type I18nProps, type LanguageCode } from '@/i18n';
+import { createI18nStore, type LanguageCode } from '@/i18n';
 
-type Props = I18nProps & {
-  children: ReactNode;
-};
+export interface I18nProps {
+  language: LanguageCode;
+  languageMap: TranslationMap<string>;
+}
 
-export default class I18nProvider extends Component<Props> {
+@observer
+export default class I18nProvider extends ObservedComponent<
+  PropsWithChildren<I18nProps>
+> {
   readonly i18nStore = createI18nStore(
     this.props.language,
     this.props.languageMap,
   );
 
-  componentDidUpdate(previousProps: Props) {
-    const { language, languageMap } = this.props;
+  @reaction(({ observedProps }) => observedProps.language)
+  updateLanguage(language: LanguageCode) {
+    this.i18nStore.currentLanguage = language;
+  }
 
-    if (previousProps.language !== language) this.i18nStore.currentLanguage = language;
-    if (previousProps.languageMap !== languageMap)
-      this.i18nStore.currentMap = languageMap;
+  @reaction(({ observedProps }) => observedProps.languageMap)
+  updateLanguageMap(languageMap: TranslationMap<string>) {
+    this.i18nStore.currentMap = languageMap;
   }
 
   render() {

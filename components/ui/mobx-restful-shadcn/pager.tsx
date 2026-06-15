@@ -1,17 +1,15 @@
 'use client';
 
 import { MoreHorizontal } from 'lucide-react';
-import { observer } from 'mobx-react';
 import { ListModel } from 'mobx-restful';
-import { MouseEvent, useContext } from 'react';
+import { FC, MouseEvent } from 'react';
 import { buildURLData, parseURLData } from 'web-utility';
 
-import { I18nContext } from '@/i18n/context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export type PageMeta = Pick<
-  ListModel<Record<string, unknown>>,
+  ListModel<Record<string, never>>,
   'pageSize' | 'pageIndex'
 >;
 
@@ -20,15 +18,12 @@ export interface PagerProps extends PageMeta {
   onChange?: (meta: PageMeta) => void;
 }
 
-export const Pager = observer(function Pager({
+export const Pager: FC<PagerProps> = ({
   pageSize,
   pageIndex,
   pageCount,
   onChange,
-}: PagerProps) {
-  const i18n = useContext(I18nContext);
-  const t = (key: string) => i18n.t(key) ?? key;
-
+}) => {
   function propsOf(pageIndex = 1) {
     const pagination = { pageSize, pageIndex };
 
@@ -49,10 +44,7 @@ export const Pager = observer(function Pager({
       className="m-0 flex items-center gap-2"
       onSubmit={
         onChange &&
-        ((event) => {
-          event.preventDefault();
-          event.stopPropagation();
-        })
+        ((event) => (event.preventDefault(), event.stopPropagation()))
       }
     >
       <Input
@@ -72,7 +64,7 @@ export const Pager = observer(function Pager({
         className="w-20"
         type="number"
         name="pageIndex"
-        defaultValue={pageIndex ?? 1}
+        defaultValue={pageIndex || 1}
         min={1}
         max={pageCount}
         required
@@ -84,11 +76,7 @@ export const Pager = observer(function Pager({
       <nav className="flex items-center gap-1">
         {pageIndex > 1 && (
           <Button variant="outline" size="sm" asChild>
-            <a
-              {...propsOf(1)}
-              title={t('pagination.first')}
-              aria-label={t('pagination.first')}
-            >
+            <a {...propsOf(1)} title="Go to first page">
               1
             </a>
           </Button>
@@ -100,11 +88,7 @@ export const Pager = observer(function Pager({
         )}
         {pageIndex > 2 && (
           <Button variant="outline" size="sm" asChild>
-            <a
-              {...propsOf(pageIndex - 1)}
-              title={t('pagination.previous')}
-              aria-label={t('pagination.previous')}
-            >
+            <a {...propsOf(pageIndex - 1)} title="Go to previous page">
               {pageIndex - 1}
             </a>
           </Button>
@@ -114,11 +98,7 @@ export const Pager = observer(function Pager({
         </Button>
         {pageCount - pageIndex > 1 && (
           <Button variant="outline" size="sm" asChild>
-            <a
-              {...propsOf(pageIndex + 1)}
-              title={t('pagination.next')}
-              aria-label={t('pagination.next')}
-            >
+            <a {...propsOf(pageIndex + 1)} title="Go to next page">
               {pageIndex + 1}
             </a>
           </Button>
@@ -130,11 +110,7 @@ export const Pager = observer(function Pager({
         )}
         {pageIndex < pageCount && (
           <Button variant="outline" size="sm" asChild>
-            <a
-              {...propsOf(pageCount)}
-              title={t('pagination.last')}
-              aria-label={t('pagination.last')}
-            >
+            <a {...propsOf(pageCount)} title="Go to last page">
               {pageCount}
             </a>
           </Button>
@@ -142,4 +118,6 @@ export const Pager = observer(function Pager({
       </nav>
     </form>
   );
-});
+};
+
+Pager.displayName = 'Pager';

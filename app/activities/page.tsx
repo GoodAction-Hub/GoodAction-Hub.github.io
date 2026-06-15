@@ -13,7 +13,7 @@ import {
   transformItem,
   ExternalDeadlineItem,
 } from '@/lib/activities';
-import { parsePage } from '@/lib/pagination';
+import { parsePage, pickFirstSearchParam } from '@/lib/pagination';
 
 interface FlatEvent {
   item: ReturnType<typeof transformItem>;
@@ -28,9 +28,9 @@ const ACTIVITY_CATEGORIES = ['conference', 'competition', 'activity'] as const;
 type ActivityCategory = (typeof ACTIVITY_CATEGORIES)[number];
 
 type PageSearchParams = Promise<{
-  pageIndex?: string;
-  keywords?: string;
-  category?: string;
+  pageIndex?: string | string[];
+  keywords?: string | string[];
+  category?: string | string[];
   tag?: string | string[];
 }>;
 
@@ -115,8 +115,8 @@ export default async function ActivitiesPage({
     category: rawCategory,
     tag: rawTag,
   } = rawSearchParams;
-  const keywords = rawKeywords?.trim() ?? '';
-  const selectedCategory = parseCategory(rawCategory);
+  const keywords = pickFirstSearchParam(rawKeywords)?.trim() ?? '';
+  const selectedCategory = parseCategory(pickFirstSearchParam(rawCategory));
   const selectedTags = parseTags(rawTag);
   const headerStore = await headers();
   const { language, languageMap } = await loadSSRLanguage({
