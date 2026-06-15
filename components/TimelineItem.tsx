@@ -1,8 +1,17 @@
 'use client';
 
-import { TimelineEvent } from '@/lib/data';
 import { DateTime } from 'luxon';
-import { useState, useRef, useEffect, forwardRef } from 'react';
+import {
+  forwardRef,
+  type MutableRefObject,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+
+import { I18nContext } from '@/i18n/context';
+import { TimelineEvent } from '@/lib/data';
 import { useEventStore } from '@/lib/store';
 import { formatTimezoneToUTC } from '@/lib/utils';
 
@@ -18,7 +27,7 @@ export interface TimelineItemProps {
 }
 
 export const TimelineItem = forwardRef<HTMLDivElement, TimelineItemProps>(
-  function TimelineItem(props, ref) {
+  (props, ref) => {
     const {
       event,
       timezone,
@@ -29,6 +38,7 @@ export const TimelineItem = forwardRef<HTMLDivElement, TimelineItemProps>(
       totalEvents,
       index,
     } = props;
+    const { t } = useContext(I18nContext);
     const [showTooltip, setShowTooltip] = useState(false);
     const [tooltipStyle, setTooltipStyle] = useState({
       left: 0,
@@ -55,7 +65,7 @@ export const TimelineItem = forwardRef<HTMLDivElement, TimelineItemProps>(
       localRef.current = node;
       if (typeof ref === 'function') ref(node);
       else if (ref)
-        (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+        (ref as MutableRefObject<HTMLDivElement | null>).current = node;
     }
 
     // 计算并调整tooltip位置
@@ -158,8 +168,8 @@ export const TimelineItem = forwardRef<HTMLDivElement, TimelineItemProps>(
                 ({displayTimezoneUTC})
               </div>
               <div className="text-gray-300">
-                {deadlineDate.toFormat('yyyy-MM-dd HH:mm:ss')} (
-                {originalTimezoneUTC}, 原始时区)
+                {deadlineDate.toFormat('yyyy-MM-dd HH:mm:ss')}{' '}
+                {t('original_timezone', { timezone: originalTimezoneUTC })}
               </div>
 
               {/* Arrow (desktop only) */}

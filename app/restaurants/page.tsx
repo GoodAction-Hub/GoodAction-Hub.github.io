@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { headers } from 'next/headers';
 
 import { createI18nStore, loadSSRLanguage } from '@/i18n';
-import FoodAIDialog from '@/components/FoodAIDialog';
+import { FoodAIDialog } from '@/components/FoodAIDialog';
 import { Pager } from '@/components/ui/mobx-restful-shadcn/pager';
 import { fetchBitesCatalog, BitesRestaurant } from '@/lib/bitesCatalog';
 import { parsePage, pickFirstSearchParam } from '@/lib/pagination';

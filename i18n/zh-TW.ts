@@ -53,6 +53,7 @@ const BASE_TEXT = {
   'detail.openInAmap': '在高德地圖中打開',
   'detail.loadingMap': '地圖載入中...',
   'detail.mapUnavailable': '地圖預覽暫不可用',
+  original_timezone: '原始時區：{timezone}',
   'bites.title': '無障礙友善美食指南',
   'bites.subtitle': '為每個人提供平等的美食體驗',
   'bites.about.title': '關於無障礙美食',
@@ -90,7 +91,10 @@ const BASE_TEXT = {
   'bites.ai_dialog.actions.generate': '生成推薦',
   'bites.ai_dialog.actions.generating': '正在生成推薦',
   'bites.ai_dialog.actions.close': '關閉對話框',
+  'bites.ai_dialog.errors.empty': '未找到符合條件的推薦',
   'bites.ai_dialog.errors.generic': 'AI 推薦失敗，請稍後再試',
+  'bites.ai_dialog.errors.unavailable_with_results':
+    'AI 服務暫不可用，已為您展示推薦',
 } as const;
 
 const ACTIVITIES_LIST_TEXT = {

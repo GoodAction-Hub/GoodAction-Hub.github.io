@@ -55,6 +55,7 @@ const BASE_TEXT = {
   'detail.openInAmap': 'Open in Amap',
   'detail.loadingMap': 'Loading map...',
   'detail.mapUnavailable': 'Map preview unavailable',
+  original_timezone: 'Original timezone: {timezone}',
   'bites.title': 'Barrier-Free Dining Guide',
   'bites.subtitle': 'Equal dining experiences for everyone',
   'bites.about.title': 'About Barrier‑Free Dining',
@@ -94,8 +95,11 @@ const BASE_TEXT = {
   'bites.ai_dialog.actions.generate': 'Generate AI Recommendations',
   'bites.ai_dialog.actions.generating': 'Generating Recommendations',
   'bites.ai_dialog.actions.close': 'Close',
+  'bites.ai_dialog.errors.empty': 'No matching recommendations were found',
   'bites.ai_dialog.errors.generic':
     'AI recommendation failed. Please try again later.',
+  'bites.ai_dialog.errors.unavailable_with_results':
+    'AI recommendation is unavailable right now, so fallback suggestions are shown.',
   'bites.restaurants.peige.name': 'Peige Chimney Cake Bakery',
   'bites.restaurants.peige.description':
     'A specialty bakery dedicated to warm service for Deaf customers, renowned for its unique chimney cakes and barrier‑free communication. Professional sign‑language service helps every guest order with ease.',
