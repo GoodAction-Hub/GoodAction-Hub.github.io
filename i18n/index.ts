@@ -1,3 +1,4 @@
+import { configure } from 'mobx';
 import {
   loadLanguageMapFrom,
   TranslationMap,
@@ -7,6 +8,8 @@ import { DataObject } from 'mobx-restful';
 import { parseCookie } from 'web-utility';
 
 import zhCN from './zh-CN';
+
+configure({ enforceActions: 'never' });
 
 export type LanguageCode = 'zh-CN' | 'zh-TW' | 'en-US';
 
@@ -49,7 +52,7 @@ export const createI18nStore = <N extends LanguageCode>(
   return store;
 };
 
-export const i18n = createI18nStore('zh-CN', zhCN);
+export const i18n = createI18nStore();
 
 export const LanguageName: Record<LanguageCode, string> = {
   'zh-CN': '简体中文',

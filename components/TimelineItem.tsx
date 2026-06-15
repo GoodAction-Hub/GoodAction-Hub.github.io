@@ -168,11 +168,10 @@ export const TimelineItem = forwardRef<HTMLDivElement, TimelineItemProps>(
                 ({displayTimezoneUTC})
               </div>
               <div className="text-gray-300">
-                {deadlineDate.toFormat('yyyy-MM-dd HH:mm:ss')}{' '}
-                {t('original_timezone', { timezone: originalTimezoneUTC })}
+                {deadlineDate.toFormat('yyyy-MM-dd HH:mm:ss')} (
+                {t('original_timezone')} {originalTimezoneUTC})
               </div>
-
-              {/* Arrow (desktop only) */}
+              D{/* Arrow (desktop only) */}
               <div
                 className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 hidden md:block"
                 style={{ marginLeft: `${tooltipStyle.arrowOffset}px` }}
@@ -184,3 +183,4 @@ export const TimelineItem = forwardRef<HTMLDivElement, TimelineItemProps>(
     );
   },
 );
+TimelineItem.displayName = 'TimelineItem';

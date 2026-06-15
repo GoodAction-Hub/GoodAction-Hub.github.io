@@ -2,9 +2,10 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { headers } from 'next/headers';
 import { type PropsWithChildren } from 'react';
+import Script from 'next/script';
 
-import { I18nProvider } from '@/components/I18nProvider';
 import { loadSSRLanguage } from '@/i18n';
+import { I18nProvider } from '@/components/I18nProvider';
 import { MainNav } from '@/components/MainNav';
 import './globals.css';
 
@@ -37,11 +38,11 @@ export default async function RootLayout({
   return (
     <html lang={language}>
       <head>
-        <script
-          defer
+        <Script
           src="https://umami.rkd.icu/script.js"
           data-website-id="78225323-cc05-46af-9a51-6c670b9a804a"
-        ></script>
+          strategy="afterInteractive"
+        />
       </head>
       <body className={`${inter.variable} ${fontMono.variable} antialiased`}>
         <I18nProvider language={language} languageMap={languageMap}>
