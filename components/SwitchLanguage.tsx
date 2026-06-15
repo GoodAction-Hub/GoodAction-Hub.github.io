@@ -1,7 +1,5 @@
 'use client';
 
-import { supportedLngDisplayNames, type LanguageCode } from '@/i18n';
-import { I18nContext } from '@/i18n/context';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import * as Select from '@radix-ui/react-select';
 import { Globe } from 'lucide-react';
@@ -9,14 +7,18 @@ import { observer } from 'mobx-react';
 import { useRouter } from 'next/navigation';
 import { useContext } from 'react';
 
+import { supportedLngDisplayNames, type LanguageCode } from '@/i18n';
+import { I18nContext } from '@/i18n/context';
+
 export const SwitchLanguage = observer(function SwitchLanguage() {
-  const { currentLanguage, loadLanguages } = useContext(I18nContext);
+  const i18n = useContext(I18nContext);
+  const { currentLanguage } = i18n;
   const router = useRouter();
-  const currentLng = currentLanguage || 'zh-CN';
+  const currentLng = currentLanguage as LanguageCode;
 
   const handleChange = async (value: LanguageCode) => {
     try {
-      await loadLanguages(value);
+      await i18n.loadLanguages(value);
       router.refresh();
     } catch (error) {
       console.error('Failed to change language:', error);
@@ -34,12 +36,7 @@ export const SwitchLanguage = observer(function SwitchLanguage() {
       >
         <div className="flex items-center gap-2">
           <Globe className="h-4 w-4 text-slate-700" aria-hidden="true" />
-          <Select.Value
-            placeholder={
-              supportedLngDisplayNames[currentLng] ||
-              supportedLngDisplayNames['zh-CN']
-            }
-          />
+          <Select.Value placeholder={supportedLngDisplayNames[currentLng]} />
         </div>
         <Select.Icon>
           <ChevronDownIcon className="ml-2 h-4 w-4" />

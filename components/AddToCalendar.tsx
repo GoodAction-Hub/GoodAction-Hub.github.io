@@ -1,13 +1,5 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { I18nContext } from '@/i18n/context';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { google, outlook, yahoo } from 'calendar-link';
 import {
   Apple,
@@ -19,6 +11,15 @@ import {
 import { DateTime } from 'luxon';
 import { observer } from 'mobx-react';
 import { useContext } from 'react';
+
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { I18nContext } from '@/i18n/context';
 
 interface AddToCalendarProps {
   title: string;
@@ -89,16 +90,14 @@ END:VCALENDAR`;
     a.click();
     URL.revokeObjectURL(url);
   };
-
   const { t } = useContext(I18nContext);
-  const translate = (key: string) => t(key) ?? key;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="flex items-center gap-2">
           <Calendar className="h-4 w-4" />
-          {translate('calendar.title')}
+          {t('calendar.title')}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
@@ -109,7 +108,7 @@ END:VCALENDAR`;
             rel="noopener noreferrer"
             className="flex items-center gap-2"
           >
-            <CalendarDays className="h-4 w-4" /> {translate('calendar.google')}
+            <CalendarDays className="h-4 w-4" /> {t('calendar.google')}
           </a>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
@@ -119,7 +118,7 @@ END:VCALENDAR`;
             rel="noopener noreferrer"
             className="flex items-center gap-2"
           >
-            <Mail className="h-4 w-4" /> {translate('calendar.outlook')}
+            <Mail className="h-4 w-4" /> {t('calendar.outlook')}
           </a>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
@@ -129,15 +128,15 @@ END:VCALENDAR`;
             rel="noopener noreferrer"
             className="flex items-center gap-2"
           >
-            <CalendarRange className="h-4 w-4" /> {translate('calendar.yahoo')}
+            <CalendarRange className="h-4 w-4" /> {t('calendar.yahoo')}
           </a>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={handleDownloadICS}
           className="flex items-center gap-2 cursor-pointer"
         >
-          <Apple className="h-4 w-4" /> {translate('calendar.apple')} (
-          {translate('calendar.download')})
+          <Apple className="h-4 w-4" /> {t('calendar.apple')} (
+          {t('calendar.download')})
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

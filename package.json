@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "install": "npx shadcn-helper install",
+    "install": "corepack enable && npx shadcn-helper install",
     "dev": "next dev",
     "build": "next build",
     "build:static": "set COREPACK_ENABLE_AUTO_PIN=0 && next build",

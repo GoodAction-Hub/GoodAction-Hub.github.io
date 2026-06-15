@@ -1,9 +1,10 @@
 'use client';
 
-import { I18nContext } from '@/i18n/context';
 import { DateTime } from 'luxon';
 import { observer } from 'mobx-react';
 import { useContext, useEffect, useState } from 'react';
+
+import { I18nContext } from '@/i18n/context';
 import { useEventStore } from '@/lib/store';
 
 interface CountdownTimerProps {
@@ -20,7 +21,6 @@ export const CountdownTimer = observer(function CountdownTimer({
     seconds: number;
   } | null>(null);
   const { t } = useContext(I18nContext);
-  const translate = (key: string) => t(key) ?? key;
 
   // 从全局状态获取显示时区
   const displayTimezone = useEventStore((state) => state.displayTimezone);
@@ -56,7 +56,7 @@ export const CountdownTimer = observer(function CountdownTimer({
   if (!timeLeft) {
     return (
       <div className="text-sm font-bold text-red-600 bg-red-100 px-3 py-2 rounded-lg">
-        {translate('events.outdated')}
+        {t('events.outdated')}
       </div>
     );
   }
@@ -69,7 +69,7 @@ export const CountdownTimer = observer(function CountdownTimer({
             {timeLeft.days.toString().padStart(2, '0')}
           </div>
           <div className="text-xs text-orange-700 mt-1 font-medium">
-            {translate('date.days')}
+            {t('date.days')}
           </div>
         </div>
       )}
@@ -78,7 +78,7 @@ export const CountdownTimer = observer(function CountdownTimer({
           {timeLeft.hours.toString().padStart(2, '0')}
         </div>
         <div className="text-xs text-orange-700 mt-1 font-medium">
-          {translate('date.hours')}
+          {t('date.hours')}
         </div>
       </div>
       <div className="text-center">
@@ -86,7 +86,7 @@ export const CountdownTimer = observer(function CountdownTimer({
           {timeLeft.minutes.toString().padStart(2, '0')}
         </div>
         <div className="text-xs text-orange-700 mt-1 font-medium">
-          {translate('date.minutes')}
+          {t('date.minutes')}
         </div>
       </div>
       <div className="text-center">
@@ -94,7 +94,7 @@ export const CountdownTimer = observer(function CountdownTimer({
           {timeLeft.seconds.toString().padStart(2, '0')}
         </div>
         <div className="text-xs text-orange-700 mt-1 font-medium">
-          {translate('date.seconds')}
+          {t('date.seconds')}
         </div>
       </div>
     </div>

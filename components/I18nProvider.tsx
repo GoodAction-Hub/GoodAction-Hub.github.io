@@ -1,6 +1,6 @@
 'use client';
 
-import { TranslationMap } from 'mobx-i18n';
+import { type TranslationMap } from 'mobx-i18n';
 import { observer } from 'mobx-react';
 import { ObservedComponent, reaction } from 'mobx-react-helper';
 import { type PropsWithChildren } from 'react';
@@ -14,7 +14,7 @@ export interface I18nProps {
 }
 
 @observer
-export default class I18nProvider extends ObservedComponent<
+export class I18nProvider extends ObservedComponent<
   PropsWithChildren<I18nProps>
 > {
   readonly i18nStore = createI18nStore(

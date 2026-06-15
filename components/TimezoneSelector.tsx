@@ -1,18 +1,18 @@
 'use client';
 
-import { I18nContext } from '@/i18n/context';
 import { Globe } from 'lucide-react';
 import { observer } from 'mobx-react';
 import { useContext, useEffect, useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { I18nContext } from '@/i18n/context';
 import { useEventStore } from '@/lib/store';
 
 export const TimezoneSelector = observer(function TimezoneSelector() {
   const { displayTimezone, setDisplayTimezone, detectUserTimezone } =
     useEventStore();
   const { t } = useContext(I18nContext);
-  const translate = (key: string) => t(key) ?? key;
 
   // 时区选择器相关状态
   const [timezones, setTimezones] = useState<string[]>(() => {
@@ -84,7 +84,7 @@ export const TimezoneSelector = observer(function TimezoneSelector() {
               <div className="p-2">
                 <Input
                   type="text"
-                  placeholder={translate('filter.searchTimezone')}
+                  placeholder={t('filter.searchTimezone')}
                   value={searchTimeZone}
                   onChange={(e) => setSearchTimeZone(e.target.value)}
                   className="mb-2"
@@ -121,7 +121,7 @@ export const TimezoneSelector = observer(function TimezoneSelector() {
           }}
           className="whitespace-nowrap"
         >
-          {translate('filter.autoDetect')}
+          {t('filter.autoDetect')}
         </Button>
       </div>
     </div>

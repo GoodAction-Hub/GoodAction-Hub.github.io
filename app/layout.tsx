@@ -1,9 +1,9 @@
-import I18nProvider from '@/components/I18nProvider';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { headers } from 'next/headers';
 import './globals.css';
 
+import { I18nProvider } from '@/components/I18nProvider';
 import { loadSSRLanguage } from '@/i18n';
 import { MainNav } from '@/components/MainNav';
 

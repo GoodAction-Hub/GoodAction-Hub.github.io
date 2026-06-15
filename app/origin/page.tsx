@@ -1,10 +1,11 @@
 'use client';
 
+import { observer } from 'mobx-react';
+import { useContext, useEffect } from 'react';
+
 import { Aggregation } from '@/components/Aggregation';
 import { I18nContext } from '@/i18n/context';
 import { useEventStore } from '@/lib/store';
-import { observer } from 'mobx-react';
-import { useContext, useEffect } from 'react';
 
 export default observer(function Home() {
   const { loading, fetchItems } = useEventStore();
@@ -50,9 +51,7 @@ export default observer(function Home() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">
-            {t('events.loading') ?? 'Loading...'}
-          </p>
+          <p className="text-slate-600">{t('events.loading')}</p>
         </div>
       </div>
     );

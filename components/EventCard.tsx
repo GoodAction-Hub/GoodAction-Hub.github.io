@@ -1,14 +1,5 @@
 'use client';
 
-import { CountdownTimer } from '@/components/CountdownTimer';
-import { TimelineItem } from '@/components/TimelineItem';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { I18nContext } from '@/i18n/context';
-import { DeadlineItem, EventData, isEventEnded } from '@/lib/data';
-import { useEventStore } from '@/lib/store';
-import { formatTimezoneToUTC } from '@/lib/utils';
 import {
   ArrowRight,
   Calendar,
@@ -21,6 +12,16 @@ import { DateTime } from 'luxon';
 import { observer } from 'mobx-react';
 import Link from 'next/link';
 import { type FC, useContext, useEffect, useRef, useState } from 'react';
+
+import { CountdownTimer } from '@/components/CountdownTimer';
+import { TimelineItem } from '@/components/TimelineItem';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { I18nContext } from '@/i18n/context';
+import { DeadlineItem, EventData, isEventEnded } from '@/lib/data';
+import { useEventStore } from '@/lib/store';
+import { formatTimezoneToUTC } from '@/lib/utils';
 import { AddToCalendar } from './AddToCalendar';
 
 interface EventCardProps {
@@ -30,7 +31,6 @@ interface EventCardProps {
 
 export const EventCard: FC<EventCardProps> = observer(({ item, event }) => {
   const { t } = useContext(I18nContext);
-  const translate = (key: string) => t(key) ?? key;
   const { favorites, toggleFavorite, mounted, displayTimezone } =
     useEventStore();
 
@@ -132,7 +132,7 @@ export const EventCard: FC<EventCardProps> = observer(({ item, event }) => {
                           'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
                         }`}
                       >
-                        {translate(`filter.category_${item.category}`)}
+                        {t(`filter.category_${item.category}`)}
                       </div>
                     </div>
                     <div className="flex items-start gap-2 flex-wrap">
@@ -153,7 +153,7 @@ export const EventCard: FC<EventCardProps> = observer(({ item, event }) => {
                         </Badge>
                         {ended && (
                           <Badge variant="secondary" className="text-xs">
-                            {translate('events.ended')}
+                            {t('events.ended')}
                           </Badge>
                         )}
                         {mounted && (
@@ -211,7 +211,7 @@ export const EventCard: FC<EventCardProps> = observer(({ item, event }) => {
                 <div className="flex items-center gap-2 flex-nowrap">
                   <Clock className="w-4 h-4" />
                   <span className="text-sm font-medium">
-                    {translate('events.timeline')}
+                    {t('events.timeline')}
                   </span>
                   {!ended && nextDeadline && (
                     <div className="ml-auto">
@@ -262,7 +262,7 @@ export const EventCard: FC<EventCardProps> = observer(({ item, event }) => {
                     {/* 左侧文本信息 */}
                     <div className="space-y-1 text-center lg:text-left">
                       <div className="text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                        {translate('events.nextDeadline')}
+                        {t('events.nextDeadline')}
                       </div>
                       <div className="text-sm font-bold text-gray-800 leading-tight break-words">
                         {nextDeadline.comment}
@@ -285,10 +285,10 @@ export const EventCard: FC<EventCardProps> = observer(({ item, event }) => {
                 <div className="p-3 bg-gradient-to-br from-gray-100/80 to-gray-200/80 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg">
                   <div className="text-center">
                     <div className="text-sm font-bold bg-gradient-to-r from-gray-600 to-gray-700 bg-clip-text text-transparent mb-1">
-                      {translate('events.ended')}
+                      {t('events.ended')}
                     </div>
                     <div className="text-xs text-gray-500">
-                      {translate('events.allDeadlinesPassed')}
+                      {t('events.allDeadlinesPassed')}
                     </div>
                   </div>
                 </div>
@@ -298,9 +298,9 @@ export const EventCard: FC<EventCardProps> = observer(({ item, event }) => {
                 <Link
                   href={`/activities/${event.id}`}
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-purple-700 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
-                  title={translate('detail.viewDetails')}
+                  title={t('detail.viewDetails')}
                 >
-                  <span>{translate('detail.viewDetails')}</span>
+                  <span>{t('detail.viewDetails')}</span>
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
@@ -315,7 +315,7 @@ export const EventCard: FC<EventCardProps> = observer(({ item, event }) => {
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
               <span className="text-sm font-medium">
-                {translate('events.timeline')}
+                {t('events.timeline')}
               </span>
               {!ended && nextDeadline && (
                 <div className="mt-2 ml-auto">
@@ -376,7 +376,7 @@ export const EventCard: FC<EventCardProps> = observer(({ item, event }) => {
               {showScrollHint && (
                 <div className="absolute right-2 bottom-2 flex items-center z-30 animate-bounce">
                   <span className="text-xs text-gray-400 mr-1">
-                    {translate('events.swipe')}
+                    {t('events.swipe')}
                   </span>
                   <ArrowRight className="w-4 h-4 text-gray-400" />
                 </div>
@@ -391,7 +391,7 @@ export const EventCard: FC<EventCardProps> = observer(({ item, event }) => {
                 <div className="text-center space-y-3">
                   <div className="space-y-1">
                     <div className="text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-1">
-                      {translate('events.nextDeadline')}
+                      {t('events.nextDeadline')}
                     </div>
                     <div className="text-base font-bold text-gray-800 leading-tight break-words">
                       {nextDeadline.comment}
@@ -412,10 +412,10 @@ export const EventCard: FC<EventCardProps> = observer(({ item, event }) => {
               <div className="p-4 bg-gradient-to-br from-gray-100/80 to-gray-200/80 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg">
                 <div className="text-center">
                   <div className="text-sm font-bold bg-gradient-to-r from-gray-600 to-gray-700 bg-clip-text text-transparent mb-1">
-                    {translate('events.ended')}
+                    {t('events.ended')}
                   </div>
                   <div className="text-xs text-gray-500">
-                    {translate('events.allDeadlinesPassed')}
+                    {t('events.allDeadlinesPassed')}
                   </div>
                 </div>
               </div>
@@ -426,9 +426,9 @@ export const EventCard: FC<EventCardProps> = observer(({ item, event }) => {
             <Link
               href={`/activities/${event.id}`}
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-purple-700 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
-              title={translate('detail.viewDetails')}
+              title={t('detail.viewDetails')}
             >
-              <span>{translate('detail.viewDetails')}</span>
+              <span>{t('detail.viewDetails')}</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
