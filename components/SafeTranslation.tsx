@@ -11,5 +11,5 @@ export default observer(function SafeTranslation({
 }: Record<'tKey' | 'fallback', string>) {
   const { loading, t } = useContext(I18nContext);
 
-  return <>{!loading ? t(tKey) : fallback}</>;
+  return <>{!loading ? (t(tKey) ?? tKey) : fallback}</>;
 });

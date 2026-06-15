@@ -49,7 +49,7 @@ export const createI18nStore = <N extends LanguageCode>(
   return store;
 };
 
-export const i18n = createI18nStore();
+export const i18n = createI18nStore('zh-CN', zhCN);
 
 export const LanguageName: Record<LanguageCode, string> = {
   'zh-CN': '简体中文',
