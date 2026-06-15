@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export type PageMeta = Pick<
-  ListModel<Record<string, never>>,
+  ListModel<Record<string, unknown>>,
   'pageSize' | 'pageIndex'
 >;
 
@@ -64,7 +64,7 @@ export const Pager: FC<PagerProps> = ({
         className="w-20"
         type="number"
         name="pageIndex"
-        defaultValue={pageIndex || 1}
+        defaultValue={pageIndex ?? 1}
         min={1}
         max={pageCount}
         required
@@ -76,7 +76,11 @@ export const Pager: FC<PagerProps> = ({
       <nav className="flex items-center gap-1">
         {pageIndex > 1 && (
           <Button variant="outline" size="sm" asChild>
-            <a {...propsOf(1)} title="Go to first page">
+            <a
+              {...propsOf(1)}
+              title="Go to first page"
+              aria-label="Go to first page"
+            >
               1
             </a>
           </Button>
@@ -88,7 +92,11 @@ export const Pager: FC<PagerProps> = ({
         )}
         {pageIndex > 2 && (
           <Button variant="outline" size="sm" asChild>
-            <a {...propsOf(pageIndex - 1)} title="Go to previous page">
+            <a
+              {...propsOf(pageIndex - 1)}
+              title="Go to previous page"
+              aria-label="Go to previous page"
+            >
               {pageIndex - 1}
             </a>
           </Button>
@@ -98,7 +106,11 @@ export const Pager: FC<PagerProps> = ({
         </Button>
         {pageCount - pageIndex > 1 && (
           <Button variant="outline" size="sm" asChild>
-            <a {...propsOf(pageIndex + 1)} title="Go to next page">
+            <a
+              {...propsOf(pageIndex + 1)}
+              title="Go to next page"
+              aria-label="Go to next page"
+            >
               {pageIndex + 1}
             </a>
           </Button>
@@ -110,7 +122,11 @@ export const Pager: FC<PagerProps> = ({
         )}
         {pageIndex < pageCount && (
           <Button variant="outline" size="sm" asChild>
-            <a {...propsOf(pageCount)} title="Go to last page">
+            <a
+              {...propsOf(pageCount)}
+              title="Go to last page"
+              aria-label="Go to last page"
+            >
               {pageCount}
             </a>
           </Button>
