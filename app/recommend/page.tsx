@@ -1,10 +1,11 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState, Suspense } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { DateTime } from 'luxon';
-import { EventCard } from '@/components/EventCard';
 import Fuse from 'fuse.js';
+
+import { EventCard } from '@/components/EventCard';
 
 export interface TimelineEvent {
   deadline: string;

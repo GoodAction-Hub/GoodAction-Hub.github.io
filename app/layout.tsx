@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { headers } from 'next/headers';
-import './globals.css';
+import { type PropsWithChildren } from 'react';
 
 import { I18nProvider } from '@/components/I18nProvider';
-import { loadSSRLanguage } from '@/i18n';
 import { MainNav } from '@/components/MainNav';
+import { loadSSRLanguage } from '@/i18n';
+import './globals.css';
 
 const inter = Inter({
   variable: '--font-inter',
@@ -26,9 +27,7 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<PropsWithChildren>) {
   const headerStore = await headers();
   const { language, languageMap } = await loadSSRLanguage({
     cookie: headerStore.get('cookie') ?? '',

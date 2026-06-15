@@ -42,9 +42,7 @@ export const TimezoneSelector: FC<TimezoneSelectorProps> = observer(
     useEffect(() => {
       const controller = new AbortController();
 
-      loadSupportedTimezones(controller.signal).then((loadedTimezones) => {
-        if (!controller.signal.aborted) setTimezones(loadedTimezones);
-      });
+      loadSupportedTimezones(controller.signal).then(setTimezones);
 
       return () => controller.abort();
     }, []);

@@ -1,5 +1,6 @@
 'use client';
 
+import { fileSave } from 'browser-fs-access';
 import { google, outlook, yahoo } from 'calendar-link';
 import {
   Apple,
@@ -10,7 +11,7 @@ import {
 } from 'lucide-react';
 import { DateTime } from 'luxon';
 import { observer } from 'mobx-react';
-import { useContext } from 'react';
+import { type MouseEvent, useContext } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -20,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { I18nContext } from '@/i18n/context';
+import { createICalendarEvent } from '@/lib/calendar';
 
 interface AddToCalendarProps {
   title: string;
@@ -32,113 +34,109 @@ interface AddToCalendarProps {
   timeZone: string; // e.g. "Asia/Shanghai"
 }
 
-export const AddToCalendar = observer(function AddToCalendar({
-  title,
-  description,
-  location,
-  startDate,
-  endDate,
-  startTime,
-  endTime,
-  timeZone,
-}: AddToCalendarProps) {
-  // 组合 ISO 格式时间
-  const startLuxon = DateTime.fromISO(`${startDate}T${startTime ?? '00:00'}`, {
-    zone: timeZone,
-  });
-  const endLuxon = DateTime.fromISO(`${endDate}T${endTime ?? '23:59'}`, {
-    zone: timeZone,
-  });
-
-  // For ICS export (UTC format)
-  const start = startLuxon.toUTC().toFormat("yyyyMMdd'T'HHmmss'Z'");
-  const end = endLuxon.toUTC().toFormat("yyyyMMdd'T'HHmmss'Z'");
-
-  // For Google/Outlook/Yahoo (ISO format)
-  const event = {
+export const AddToCalendar = observer(
+  ({
     title,
     description,
     location,
-    start: startLuxon.toISO(),
-    end: endLuxon.toISO(),
-  };
-
-  const handleDownloadICS = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const icsContent = `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//YourApp//EN
-BEGIN:VEVENT
-UID:${Date.now()}-${Math.random().toString(36).substring(2, 11)}@example.com
-DTSTAMP:${DateTime.now().toUTC().toFormat("yyyyMMdd'T'HHmmss'Z'")}
-DTSTART:${start}
-DTEND:${end}
-SUMMARY:${title.replace(/[\n\r]/g, '\\n')}
-${description ? `DESCRIPTION:${description.replace(/[\n\r]/g, '\\n')}` : ''}
-${location ? `LOCATION:${location.replace(/[\n\r]/g, '\\n')}` : ''}
-END:VEVENT
-END:VCALENDAR`;
-
-    const blob = new Blob([icsContent], {
-      type: 'text/calendar;charset=utf-8',
+    startDate,
+    endDate,
+    startTime,
+    endTime,
+    timeZone,
+  }: AddToCalendarProps) => {
+    // 组合 ISO 格式时间
+    const startLuxon = DateTime.fromISO(
+      `${startDate}T${startTime ?? '00:00'}`,
+      {
+        zone: timeZone,
+      },
+    );
+    const endLuxon = DateTime.fromISO(`${endDate}T${endTime ?? '23:59'}`, {
+      zone: timeZone,
     });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${title}_${startDate}.ics`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-  const { t } = useContext(I18nContext);
 
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
-          <Calendar className="h-4 w-4" />
-          {t('calendar.title')}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuItem asChild>
-          <a
-            href={google(event)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2"
+    // For Google/Outlook/Yahoo (ISO format)
+    const calendarEvent = {
+      title,
+      description,
+      location,
+      start: startLuxon.toISO(),
+      end: endLuxon.toISO(),
+    };
+
+    const handleDownloadICS = async (
+      mouseEvent: MouseEvent<HTMLDivElement>,
+    ) => {
+      mouseEvent.preventDefault();
+      mouseEvent.stopPropagation();
+      const icsContent = createICalendarEvent({
+        title,
+        description,
+        location,
+        start: startLuxon,
+        end: endLuxon,
+      });
+      const blob = new Blob([icsContent], {
+        type: 'text/calendar;charset=utf-8',
+      });
+
+      await fileSave(blob, {
+        fileName: `${title}_${startDate}.ics`,
+        description: 'iCalendar file',
+        extensions: ['.ics'],
+      });
+    };
+    const { t } = useContext(I18nContext);
+
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            {t('calendar.title')}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem asChild>
+            <a
+              href={google(calendarEvent)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2"
+            >
+              <CalendarDays className="h-4 w-4" /> {t('calendar.google')}
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <a
+              href={outlook(calendarEvent)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2"
+            >
+              <Mail className="h-4 w-4" /> {t('calendar.outlook')}
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <a
+              href={yahoo(calendarEvent)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2"
+            >
+              <CalendarRange className="h-4 w-4" /> {t('calendar.yahoo')}
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={handleDownloadICS}
+            className="flex items-center gap-2 cursor-pointer"
           >
-            <CalendarDays className="h-4 w-4" /> {t('calendar.google')}
-          </a>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <a
-            href={outlook(event)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2"
-          >
-            <Mail className="h-4 w-4" /> {t('calendar.outlook')}
-          </a>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <a
-            href={yahoo(event)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2"
-          >
-            <CalendarRange className="h-4 w-4" /> {t('calendar.yahoo')}
-          </a>
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={handleDownloadICS}
-          className="flex items-center gap-2 cursor-pointer"
-        >
-          <Apple className="h-4 w-4" /> {t('calendar.apple')} (
-          {t('calendar.download')})
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-});
+            <Apple className="h-4 w-4" /> {t('calendar.apple')} (
+            {t('calendar.download')})
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  },
+);

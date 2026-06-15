@@ -7,7 +7,7 @@ import { Aggregation } from '@/components/Aggregation';
 import { I18nContext } from '@/i18n/context';
 import { useEventStore } from '@/lib/store';
 
-export default observer(function Home() {
+const Home = observer(() => {
   const { loading, fetchItems } = useEventStore();
 
   useEffect(() => {
@@ -84,3 +84,5 @@ export default observer(function Home() {
     </div>
   );
 });
+
+export default Home;

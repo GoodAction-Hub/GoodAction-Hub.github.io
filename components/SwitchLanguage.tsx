@@ -10,7 +10,7 @@ import { useContext } from 'react';
 import { supportedLngDisplayNames, type LanguageCode } from '@/i18n';
 import { I18nContext } from '@/i18n/context';
 
-export const SwitchLanguage = observer(function SwitchLanguage() {
+export const SwitchLanguage = observer(() => {
   const i18n = useContext(I18nContext);
   const { currentLanguage } = i18n;
   const router = useRouter();
