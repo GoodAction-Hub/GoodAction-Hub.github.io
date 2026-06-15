@@ -57,7 +57,7 @@ export const FilterBar = observer(function FilterBar({
     if (nextTimezone && nextTimezone !== DEFAULT_TIMEZONE)
       params.set('timezone', nextTimezone);
 
-    return params + '' ? `/activities?${params}` : '/activities';
+    return params.size > 0 ? `/activities?${params}` : '/activities';
   };
 
   return (
