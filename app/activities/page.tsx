@@ -5,6 +5,7 @@ import { headers } from 'next/headers';
 
 import { createI18nStore, loadSSRLanguage } from '@/i18n';
 import { EventCard } from '@/components/EventCard';
+import { FilterBar } from '@/components/FilterBar';
 import { GitCodeIcon } from '@/components/icons/GitCodeIcon';
 import { GitHubIcon } from '@/components/icons/GitHubIcon';
 import { Pager } from '@/components/ui/mobx-restful-shadcn/pager';
@@ -24,6 +25,7 @@ interface FlatEvent {
 
 const PAGE_SIZE = 10;
 const ACTIVITY_CATEGORIES = ['conference', 'competition', 'activity'] as const;
+const DEFAULT_TIMEZONE = 'Asia/Shanghai';
 
 type ActivityCategory = (typeof ACTIVITY_CATEGORIES)[number];
 
@@ -32,6 +34,7 @@ type PageSearchParams = Promise<{
   keywords?: string | string[];
   category?: string | string[];
   tag?: string | string[];
+  timezone?: string | string[];
 }>;
 
 const isActivityCategory = (value: string): value is ActivityCategory =>
@@ -50,25 +53,12 @@ function parseTags(rawTag?: string | string[]) {
     .filter(Boolean);
 }
 
-function buildActivitiesHref({
-  pageIndex,
-  keywords,
-  category,
-  tags,
-}: {
-  pageIndex?: number;
-  keywords: string;
-  category?: ActivityCategory | null;
-  tags: string[];
-}) {
-  const params = new URLSearchParams();
+function parseTimezone(rawTimezone?: string) {
+  const timezone = rawTimezone?.trim();
 
-  if (pageIndex && pageIndex > 1) params.set('pageIndex', String(pageIndex));
-  if (keywords) params.set('keywords', keywords);
-  if (category) params.set('category', category);
-  for (const tag of tags) params.append('tag', tag);
-
-  return params + '' ? `/activities?${params}` : '/activities';
+  return timezone && DateTime.now().setZone(timezone).isValid
+    ? timezone
+    : DEFAULT_TIMEZONE;
 }
 
 async function getFlatEvents(): Promise<FlatEvent[]> {
@@ -114,10 +104,12 @@ export default async function ActivitiesPage({
     keywords: rawKeywords,
     category: rawCategory,
     tag: rawTag,
+    timezone: rawTimezone,
   } = rawSearchParams;
   const keywords = pickFirstSearchParam(rawKeywords)?.trim() ?? '';
   const selectedCategory = parseCategory(pickFirstSearchParam(rawCategory));
   const selectedTags = parseTags(rawTag);
+  const timezone = parseTimezone(pickFirstSearchParam(rawTimezone));
   const headerStore = await headers();
   const { language, languageMap } = await loadSSRLanguage({
     cookie: headerStore.get('cookie') ?? '',
@@ -167,8 +159,6 @@ export default async function ActivitiesPage({
   const currentPage = Math.min(parsePage(rawPageIndex), totalPages);
   const start = (currentPage - 1) * PAGE_SIZE;
   const pagedEvents = filteredEvents.slice(start, start + PAGE_SIZE);
-
-  const clearHref = '/activities';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-cyan-50 relative overflow-hidden">
@@ -223,115 +213,24 @@ export default async function ActivitiesPage({
           </div>
         </div>
 
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 mb-8 space-y-5">
-          <form action={clearHref} method="get" className="space-y-4">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="text"
-                name="keywords"
-                defaultValue={keywords}
-                placeholder={t('activities_list_text_search_placeholder')}
-                className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm bg-white"
-              />
-              {selectedCategory && (
-                <input type="hidden" name="category" value={selectedCategory} />
-              )}
-              {selectedTags.map((tag) => (
-                <input key={tag} type="hidden" name="tag" value={tag} />
-              ))}
-              <button
-                type="submit"
-                className="px-5 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium"
-              >
-                {t('activities_list_text_search_button')}
-              </button>
-              <Link
-                href={clearHref}
-                className="px-5 py-3 rounded-xl bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200 transition-colors text-center"
-              >
-                {t('activities_list_text_filter_reset')}
-              </Link>
-            </div>
-          </form>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold text-gray-700">
-                {t('activities_list_text_filter_category')}
-              </h2>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Link
-                href={buildActivitiesHref({
-                  keywords,
-                  tags: selectedTags,
-                })}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                  !selectedCategory
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {t('activities_list_text_filter_all')}
-              </Link>
-              {ACTIVITY_CATEGORIES.map((category) => (
-                <Link
-                  key={category}
-                  href={buildActivitiesHref({
-                    keywords,
-                    category: selectedCategory === category ? null : category,
-                    tags: selectedTags,
-                  })}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                    selectedCategory === category
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {t(`activities_detail_text_category_${category}`)}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {allTags.length > 0 && (
-            <div className="space-y-3">
-              <h2 className="text-sm font-semibold text-gray-700">
-                {t('activities_list_text_filter_tags')}
-              </h2>
-              <div className="flex flex-wrap gap-2 max-h-36 overflow-auto pr-1">
-                {allTags.map((tag) => {
-                  const active = selectedTags.includes(tag);
-                  const nextTags = active
-                    ? selectedTags.filter((value) => value !== tag)
-                    : [...selectedTags, tag];
-
-                  return (
-                    <Link
-                      key={tag}
-                      href={buildActivitiesHref({
-                        keywords,
-                        category: selectedCategory,
-                        tags: nextTags,
-                      })}
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                        active
-                          ? 'bg-purple-100 border-purple-300 text-purple-700'
-                          : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
-                      }`}
-                    >
-                      {tag}
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 mb-8">
+          <FilterBar
+            keywords={keywords}
+            selectedCategory={selectedCategory}
+            selectedTags={selectedTags}
+            allTags={allTags}
+            timezone={timezone}
+          />
         </div>
 
         <div className="space-y-4">
           {pagedEvents.map(({ item, event }) => (
-            <EventCard key={`${event.id}`} item={item} event={event} />
+            <EventCard
+              key={`${event.id}`}
+              item={item}
+              event={event}
+              displayTimezone={timezone}
+            />
           ))}
         </div>
 

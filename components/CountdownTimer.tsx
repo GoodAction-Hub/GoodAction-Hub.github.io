@@ -9,10 +9,12 @@ import { useEventStore } from '@/lib/store';
 
 interface CountdownTimerProps {
   deadline: DateTime;
+  displayTimezone?: string;
 }
 
 export const CountdownTimer = observer(function CountdownTimer({
   deadline,
+  displayTimezone,
 }: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState<{
     days: number;
@@ -23,12 +25,15 @@ export const CountdownTimer = observer(function CountdownTimer({
   const { t } = useContext(I18nContext);
 
   // 从全局状态获取显示时区
-  const displayTimezone = useEventStore((state) => state.displayTimezone);
+  const displayTimezoneFromStore = useEventStore(
+    (state) => state.displayTimezone,
+  );
+  const currentTimezone = displayTimezone ?? displayTimezoneFromStore;
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const now = DateTime.now().setZone(displayTimezone);
-      const targetDeadline = deadline.setZone(displayTimezone);
+      const now = DateTime.now().setZone(currentTimezone);
+      const targetDeadline = deadline.setZone(currentTimezone);
       const difference = targetDeadline.toMillis() - now.toMillis();
 
       if (difference > 0) {
@@ -51,7 +56,7 @@ export const CountdownTimer = observer(function CountdownTimer({
     const timer = setInterval(calculateTimeLeft, 1000);
 
     return () => clearInterval(timer);
-  }, [deadline, displayTimezone]);
+  }, [currentTimezone, deadline]);
 
   if (!timeLeft) {
     return (

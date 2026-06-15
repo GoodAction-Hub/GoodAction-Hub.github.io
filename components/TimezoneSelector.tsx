@@ -9,10 +9,20 @@ import { Input } from '@/components/ui/input';
 import { I18nContext } from '@/i18n/context';
 import { useEventStore } from '@/lib/store';
 
-export const TimezoneSelector = observer(function TimezoneSelector() {
-  const { displayTimezone, setDisplayTimezone, detectUserTimezone } =
-    useEventStore();
+interface TimezoneSelectorProps {
+  timezone?: string;
+  onChange?: (timezone: string) => void;
+}
+
+export const TimezoneSelector = observer(function TimezoneSelector({
+  timezone,
+  onChange,
+}: TimezoneSelectorProps) {
+  const displayTimezone = useEventStore((state) => state.displayTimezone);
+  const setDisplayTimezone = useEventStore((state) => state.setDisplayTimezone);
+  const detectUserTimezone = useEventStore((state) => state.detectUserTimezone);
   const { t } = useContext(I18nContext);
+  const currentTimezone = timezone ?? displayTimezone;
 
   // 时区选择器相关状态
   const [timezones, setTimezones] = useState<string[]>(() => {
@@ -76,7 +86,7 @@ export const TimezoneSelector = observer(function TimezoneSelector() {
             onClick={() => setShowTimezoneDropdown(!showTimezoneDropdown)}
           >
             <Globe className="w-4 h-4" />
-            <span>{displayTimezone}</span>
+            <span>{currentTimezone}</span>
           </Button>
 
           {showTimezoneDropdown && (
@@ -94,12 +104,13 @@ export const TimezoneSelector = observer(function TimezoneSelector() {
                     <div
                       key={tz}
                       className={`px-3 py-2 text-sm rounded-md cursor-pointer hover:bg-gray-100 ${
-                        displayTimezone === tz
+                        currentTimezone === tz
                           ? 'bg-primary/10 font-medium'
                           : ''
                       }`}
                       onClick={() => {
-                        setDisplayTimezone(tz);
+                        if (onChange) onChange(tz);
+                        else setDisplayTimezone(tz);
                         setShowTimezoneDropdown(false);
                       }}
                     >
@@ -116,7 +127,17 @@ export const TimezoneSelector = observer(function TimezoneSelector() {
           variant="outline"
           size="sm"
           onClick={() => {
-            detectUserTimezone();
+            if (onChange) {
+              try {
+                const detectedTimezone =
+                  Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+                if (detectedTimezone) onChange(detectedTimezone);
+              } catch (error) {
+                console.error('Failed to detect user timezone:', error);
+              }
+            } else detectUserTimezone();
+
             setShowTimezoneDropdown(false);
           }}
           className="whitespace-nowrap"
