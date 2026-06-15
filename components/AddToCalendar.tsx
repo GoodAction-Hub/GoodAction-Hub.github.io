@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { DateTime } from 'luxon';
 import { observer } from 'mobx-react';
-import { type MouseEvent, useContext } from 'react';
+import { type FC, type MouseEvent, useContext } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -34,7 +34,7 @@ interface AddToCalendarProps {
   timeZone: string; // e.g. "Asia/Shanghai"
 }
 
-export const AddToCalendar = observer(
+export const AddToCalendar: FC<AddToCalendarProps> = observer(
   ({
     title,
     description,
@@ -44,7 +44,7 @@ export const AddToCalendar = observer(
     startTime,
     endTime,
     timeZone,
-  }: AddToCalendarProps) => {
+  }) => {
     // 组合 ISO 格式时间
     const startLuxon = DateTime.fromISO(
       `${startDate}T${startTime ?? '00:00'}`,

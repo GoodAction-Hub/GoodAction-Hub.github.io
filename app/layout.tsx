@@ -4,8 +4,8 @@ import { headers } from 'next/headers';
 import { type PropsWithChildren } from 'react';
 
 import { I18nProvider } from '@/components/I18nProvider';
-import { MainNav } from '@/components/MainNav';
 import { loadSSRLanguage } from '@/i18n';
+import { MainNav } from '@/components/MainNav';
 import './globals.css';
 
 const inter = Inter({

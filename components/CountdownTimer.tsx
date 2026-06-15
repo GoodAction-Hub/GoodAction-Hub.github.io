@@ -2,7 +2,7 @@
 
 import { DateTime } from 'luxon';
 import { observer } from 'mobx-react';
-import { useContext, useEffect, useState } from 'react';
+import { type FC, useContext, useEffect, useState } from 'react';
 
 import { I18nContext } from '@/i18n/context';
 import { useEventStore } from '@/lib/store';
@@ -12,14 +12,12 @@ interface CountdownTimerProps {
   displayTimezone?: string;
 }
 
-export const CountdownTimer = observer(
-  ({ deadline, displayTimezone }: CountdownTimerProps) => {
-    const [timeLeft, setTimeLeft] = useState<{
-      days: number;
-      hours: number;
-      minutes: number;
-      seconds: number;
-    } | null>(null);
+export const CountdownTimer: FC<CountdownTimerProps> = observer(
+  ({ deadline, displayTimezone }) => {
+    const [timeLeft, setTimeLeft] = useState<Record<
+      'days' | 'hours' | 'minutes' | 'seconds',
+      number
+    > | null>(null);
     const { t } = useContext(I18nContext);
 
     // 从全局状态获取显示时区
@@ -56,13 +54,12 @@ export const CountdownTimer = observer(
       return () => clearInterval(timer);
     }, [currentTimezone, deadline]);
 
-    if (!timeLeft) {
+    if (!timeLeft)
       return (
         <div className="text-sm font-bold text-red-600 bg-red-100 px-3 py-2 rounded-lg">
           {t('events.outdated')}
         </div>
       );
-    }
 
     return (
       <div className="flex items-center justify-center gap-1 sm:gap-1.5 flex-wrap">
