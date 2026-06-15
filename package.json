@@ -5,13 +5,13 @@
   "scripts": {
     "install": "npx shadcn-helper install",
     "dev": "next dev",
-    "build": "npm run install  &&  next build",
+    "build": "npm run install && next build",
     "build:static": "set COREPACK_ENABLE_AUTO_PIN=0 && next build",
     "build:github": "next build",
     "build:huawei": "npm run build:static",
     "build:netlify": "next build",
     "start": "next start",
-    "test": "next typegen  &&  tsc --noEmit",
+    "test": "next typegen && tsc --noEmit",
     "knip": "knip",
     "prepare": "husky"
   },
