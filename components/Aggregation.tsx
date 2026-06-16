@@ -1,13 +1,15 @@
-'use client';
-
 import { Search } from 'lucide-react';
-import { useContext } from 'react';
+interface AggregationProps {
+  searchLabel: string;
+  searchPlaceholder: string;
+  searchAriaLabel: string;
+}
 
-import { I18nContext } from '@/i18n/context';
-
-export const Aggregation = () => {
-  const { t } = useContext(I18nContext);
-
+export const Aggregation = ({
+  searchLabel,
+  searchPlaceholder,
+  searchAriaLabel,
+}: AggregationProps) => {
   return (
     <form className="w-full" action="/recommend">
       {/* Search bar — large, rounded, translucent */}
@@ -15,7 +17,7 @@ export const Aggregation = () => {
         {/* Left label */}
         <div className="flex items-center gap-3 pl-3">
           <span className="text-white/90 text-lg md:text-xl">
-            {t('home.search.label')}
+            {searchLabel}
           </span>
         </div>
 
@@ -23,13 +25,13 @@ export const Aggregation = () => {
         <input
           type="text"
           name="keywords"
-          placeholder={t('ui_text.search_placeholder')}
+          placeholder={searchPlaceholder}
           className="flex-1 bg-transparent placeholder-white/60 text-white text-lg md:text-xl outline-none px-6"
         />
         {/* Submit button */}
         <button
           type="submit"
-          aria-label={t('home.search.aria')}
+          aria-label={searchAriaLabel}
           className="ml-4 rounded-full bg-white/20 hover:bg-white/30 p-3 flex items-center justify-center transition-colors"
         >
           <Search className="w-5 h-5 text-white" />

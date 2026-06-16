@@ -1,15 +1,12 @@
-'use client';
-
+import { Calendar, GraduationCap, Utensils } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useContext } from 'react';
+
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, GraduationCap, Utensils } from 'lucide-react';
+import { loadSSRI18nFromRequest } from '@/i18n/server';
 
-import { I18nContext } from '@/i18n/context';
-
-export default function HomeSelector() {
-  const { t } = useContext(I18nContext);
+export default async function HomeSelectorPage() {
+  const { t } = await loadSSRI18nFromRequest();
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-pink-100 via-white to-purple-100">
@@ -86,7 +83,6 @@ export default function HomeSelector() {
         </div>
       </div>
 
-      {/* 群二维码 */}
       <div className="flex justify-center mt-12 mb-8">
         <Image
           src="/Lark-group.png"
