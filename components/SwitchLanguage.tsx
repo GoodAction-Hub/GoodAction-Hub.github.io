@@ -7,14 +7,13 @@ import { observer } from 'mobx-react';
 import { useRouter } from 'next/navigation';
 import { useContext } from 'react';
 
-import { supportedLngDisplayNames, type LanguageCode } from '@/i18n';
+import { LanguageName, type LanguageCode } from '@/i18n';
 import { I18nContext } from '@/i18n/context';
 
 export const SwitchLanguage = observer(() => {
   const i18n = useContext(I18nContext);
   const { currentLanguage } = i18n;
   const router = useRouter();
-  const currentLng = currentLanguage as LanguageCode;
 
   const handleChange = async (value: LanguageCode) => {
     try {
@@ -27,7 +26,7 @@ export const SwitchLanguage = observer(() => {
 
   return (
     <Select.Root
-      value={currentLng}
+      value={currentLanguage}
       onValueChange={(value) => handleChange(value as LanguageCode)}
     >
       <Select.Trigger
@@ -36,7 +35,7 @@ export const SwitchLanguage = observer(() => {
       >
         <div className="flex items-center gap-2">
           <Globe className="h-4 w-4 text-slate-700" aria-hidden="true" />
-          <Select.Value placeholder={supportedLngDisplayNames[currentLng]} />
+          <Select.Value placeholder={LanguageName[currentLanguage]} />
         </div>
         <Select.Icon>
           <ChevronDownIcon className="ml-2 h-4 w-4" />
@@ -45,7 +44,7 @@ export const SwitchLanguage = observer(() => {
       <Select.Portal>
         <Select.Content className="rounded-lg border border-slate-200 bg-white shadow-lg z-50">
           <Select.Viewport className="p-1">
-            {Object.entries(supportedLngDisplayNames).map(([lng, label]) => (
+            {Object.entries(LanguageName).map(([lng, label]) => (
               <Select.Item
                 key={lng}
                 value={lng}

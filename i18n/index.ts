@@ -25,18 +25,6 @@ const i18nData: Record<LanguageCode, TranslationData> = {
 
 type I18nTextKey = string;
 
-export const normalizeLanguageCode = (
-  language = '',
-): LanguageCode | undefined => {
-  const normalized = language.trim().toLowerCase();
-
-  if (!normalized) return;
-  if (normalized.startsWith('zh-tw') || normalized.startsWith('zh-hk'))
-    return 'zh-TW';
-  if (normalized.startsWith('zh')) return 'zh-CN';
-  if (normalized.startsWith('en')) return 'en-US';
-};
-
 export const createI18nStore = <N extends LanguageCode>(
   language?: N,
   data?: TranslationMap<I18nTextKey>,
@@ -60,8 +48,6 @@ export const LanguageName: Record<LanguageCode, string> = {
   'en-US': 'English',
 };
 
-export const supportedLngDisplayNames = LanguageName;
-
 type SSRI18nInput = {
   cookie?: string;
   acceptLanguage?: string;
@@ -71,7 +57,7 @@ type SSRI18nInput = {
 const pickFirstQueryValue = (value?: string | string[]) =>
   Array.isArray(value) ? value[0] : value;
 
-const mergeCookieLanguage = (cookie: string, language?: LanguageCode) => {
+const mergeCookieLanguage = (cookie: string, language?: string) => {
   const items = cookie
     .split(';')
     .map((item) => item.trim())
@@ -110,7 +96,7 @@ export const loadSSRLanguage = async ({
     {
       cookie: mergeCookieLanguage(
         cookie,
-        normalizeLanguageCode(pickFirstQueryValue(query.language) ?? language),
+        pickFirstQueryValue(query.language) ?? language,
       ),
       'accept-language': acceptLanguage,
     },

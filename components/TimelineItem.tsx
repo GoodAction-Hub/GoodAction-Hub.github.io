@@ -3,7 +3,7 @@
 import { DateTime } from 'luxon';
 import {
   forwardRef,
-  type MutableRefObject,
+  RefObject,
   useContext,
   useEffect,
   useRef,
@@ -64,8 +64,7 @@ export const TimelineItem = forwardRef<HTMLDivElement, TimelineItemProps>(
     function setMergedRef(node: HTMLDivElement | null) {
       localRef.current = node;
       if (typeof ref === 'function') ref(node);
-      else if (ref)
-        (ref as MutableRefObject<HTMLDivElement | null>).current = node;
+      else if (ref) (ref as RefObject<HTMLDivElement | null>).current = node;
     }
 
     // 计算并调整tooltip位置
