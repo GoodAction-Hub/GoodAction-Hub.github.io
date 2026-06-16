@@ -1,33 +1,41 @@
-'use client'
+'use client';
 
-import i18next, { supportedLngDisplayNames } from '@/i18n/config'
-import { ChevronDownIcon } from '@radix-ui/react-icons'
-import * as Select from '@radix-ui/react-select'
-import { useTranslation } from 'react-i18next'
-import { Globe } from 'lucide-react'
+import { ChevronDownIcon } from '@radix-ui/react-icons';
+import * as Select from '@radix-ui/react-select';
+import { Globe } from 'lucide-react';
+import { observer } from 'mobx-react';
+import { useRouter } from 'next/navigation';
+import { useContext } from 'react';
 
-export function SwitchLanguage() {
-  const { i18n } = useTranslation()
-  const currentLng = i18n.language || 'zh-CN'
+import { LanguageName, type LanguageCode } from '@/i18n';
+import { I18nContext } from '@/i18n/context';
 
-  const handleChange = (value: string) => {
-    i18next.changeLanguage(value)
-  }
+export const SwitchLanguage = observer(() => {
+  const i18n = useContext(I18nContext);
+  const { currentLanguage } = i18n;
+  const router = useRouter();
+
+  const handleChange = async (value: LanguageCode) => {
+    try {
+      await i18n.loadLanguages(value);
+      router.refresh();
+    } catch (error) {
+      console.error('Failed to change language:', error);
+    }
+  };
 
   return (
-    <Select.Root value={currentLng} onValueChange={handleChange}>
+    <Select.Root
+      value={currentLanguage}
+      onValueChange={(value) => handleChange(value as LanguageCode)}
+    >
       <Select.Trigger
         className="inline-flex items-center justify-between rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary transition min-w-[120px]"
-        aria-label="语言"
+        aria-label={i18n.t('ui.language')}
       >
         <div className="flex items-center gap-2">
           <Globe className="h-4 w-4 text-slate-700" aria-hidden="true" />
-          <Select.Value
-            placeholder={
-              supportedLngDisplayNames[currentLng] ||
-              supportedLngDisplayNames['zh-CN']
-            }
-          />
+          <Select.Value placeholder={LanguageName[currentLanguage]} />
         </div>
         <Select.Icon>
           <ChevronDownIcon className="ml-2 h-4 w-4" />
@@ -36,10 +44,10 @@ export function SwitchLanguage() {
       <Select.Portal>
         <Select.Content className="rounded-lg border border-slate-200 bg-white shadow-lg z-50">
           <Select.Viewport className="p-1">
-            {Object.entries(supportedLngDisplayNames).map(([lng, label]) => (
+            {Object.entries(LanguageName).map(([language, label]) => (
               <Select.Item
-                key={lng}
-                value={lng}
+                key={language}
+                value={language}
                 className="relative flex cursor-pointer select-none items-center rounded-md px-3 py-2 text-sm text-slate-900 outline-none hover:bg-slate-100 data-[state=checked]:bg-primary/10"
               >
                 <Select.ItemText>{label}</Select.ItemText>
@@ -49,5 +57,5 @@ export function SwitchLanguage() {
         </Select.Content>
       </Select.Portal>
     </Select.Root>
-  )
-}
+  );
+});

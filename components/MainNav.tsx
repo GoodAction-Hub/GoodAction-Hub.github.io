@@ -2,21 +2,24 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Fragment, useState } from 'react';
+import { Fragment, useContext, useState } from 'react';
 import { Menu, X } from 'lucide-react';
-import { SwitchLanguage } from '@/components/SwitchLanguage';
 
-const links = [
-  { href: '/activities', label: '公益慈善活动截止日期' },
-  { href: '/restaurants', label: '无障碍友好美食指南' },
-  { href: '/tutoring', label: '志愿辅导课程' },
-];
+import { I18nContext } from '@/i18n/context';
+import { SwitchLanguage } from '@/components/SwitchLanguage';
 
 const linkClass =
   'font-semibold bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 bg-clip-text text-transparent hover:brightness-110 whitespace-nowrap';
 
 export function MainNav() {
   const [open, setOpen] = useState(false);
+  const { t } = useContext(I18nContext);
+
+  const links = [
+    { href: '/activities', label: t('activities_list_text_title') },
+    { href: '/restaurants', label: t('restaurants_list_text_title') },
+    { href: '/tutoring', label: t('tutoring_list_text_title') },
+  ];
 
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm shadow-sm border-b border-white/20">
@@ -63,7 +66,9 @@ export function MainNav() {
         <button
           type="button"
           className="lg:hidden inline-flex items-center justify-center p-2 rounded-lg text-pink-600 hover:bg-pink-50 transition-colors shrink-0"
-          aria-label={open ? '关闭菜单' : '打开菜单'}
+          aria-label={
+            open ? t('mainnav.mobile.close') : t('mainnav.mobile.open')
+          }
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
         >

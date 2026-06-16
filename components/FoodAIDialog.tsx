@@ -1,6 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { Loader2, WandSparkles } from 'lucide-react';
+import { observer } from 'mobx-react';
+import { useContext, useState } from 'react';
+
 import {
   Dialog,
   DialogContent,
@@ -11,13 +14,12 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { I18nContext } from '@/i18n/context';
 import { cn } from '@/lib/utils';
-import { Loader2, WandSparkles } from 'lucide-react';
-import SafeTranslation from '@/components/SafeTranslation';
 
 interface Recommendation {
   name: string;
@@ -27,13 +29,14 @@ interface Recommendation {
   description?: string;
 }
 
-export default function FoodAIDialog() {
+export const FoodAIDialog = observer(() => {
   const [open, setOpen] = useState(false);
   const [location, setLocation] = useState('');
   const [preferences, setPreferences] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<Recommendation[]>([]);
+  const { t } = useContext(I18nContext);
 
   const onSubmit = async () => {
     setError(null);
@@ -58,14 +61,14 @@ export default function FoodAIDialog() {
       if (recs.length > 0) {
         setResults(recs);
         if (data?.source && data.source !== 'spark') {
-          setError('AI服务暂不可用，已为您展示推荐');
+          setError(t('bites.ai_dialog.errors.unavailable_with_results'));
         }
         return;
       }
 
-      setError('未找到符合条件的推荐');
+      setError(t('bites.ai_dialog.errors.empty'));
     } catch {
-      setError('AI服务暂不可用，请稍后重试');
+      setError(t('bites.ai_dialog.errors.generic'));
     } finally {
       setLoading(false);
     }
@@ -77,62 +80,45 @@ export default function FoodAIDialog() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button
-            aria-label="AI美食推荐官"
+            aria-label={t('bites.labels.ai_recommend')}
             className="fixed bottom-6 right-6 z-50 shadow-xl"
             onClick={() => setOpen(true)}
           >
             <WandSparkles className="mr-2 h-4 w-4" />
-            <SafeTranslation
-              tKey="bites.labels.ai_recommend"
-              fallback="AI美食推荐官"
-            />
+            {t('bites.labels.ai_recommend')}
           </Button>
         </DialogTrigger>
 
         <DialogContent className="max-w-xl">
           <DialogHeader>
-            <DialogTitle>
-              <SafeTranslation
-                tKey="bites.ai_dialog.title"
-                fallback="AI美食推荐"
-              />
-            </DialogTitle>
+            <DialogTitle>{t('bites.ai_dialog.title')}</DialogTitle>
             <DialogDescription>
-              <SafeTranslation
-                tKey="bites.ai_dialog.description"
-                fallback="告诉我您的位置和偏好，我将为您推荐合适的无障碍餐厅"
-              />
+              {t('bites.ai_dialog.description')}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="grid gap-2">
               <Label htmlFor="bf-location">
-                <SafeTranslation
-                  tKey="bites.ai_dialog.labels.location"
-                  fallback="位置"
-                />
+                {t('bites.ai_dialog.labels.location')}
               </Label>
               <Input
                 id="bf-location"
                 value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="请输入您的位置"
+                onChange={({ target }) => setLocation(target.value)}
+                placeholder={t('bites.ai_dialog.placeholders.location')}
               />
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="bf-preferences">
-                <SafeTranslation
-                  tKey="bites.ai_dialog.labels.preferences"
-                  fallback="偏好"
-                />
+                {t('bites.ai_dialog.labels.preferences')}
               </Label>
               <textarea
                 id="bf-preferences"
                 value={preferences}
-                onChange={(e) => setPreferences(e.target.value)}
-                placeholder="请描述您的饮食偏好和无障碍需求"
+                onChange={({ target }) => setPreferences(target.value)}
+                placeholder={t('bites.ai_dialog.placeholders.preferences')}
                 className={cn(
                   'min-h-[90px] rounded-xl border border-white/20 bg-white/80 px-3 py-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
                   'dark:bg-gray-800/80',
@@ -145,24 +131,15 @@ export default function FoodAIDialog() {
                 {loading ? (
                   <>
                     <Loader2 className="size-4 animate-spin" />{' '}
-                    <SafeTranslation
-                      tKey="bites.ai_dialog.actions.generating"
-                      fallback="生成中..."
-                    />
+                    {t('bites.ai_dialog.actions.generating')}
                   </>
                 ) : (
-                  <SafeTranslation
-                    tKey="bites.ai_dialog.actions.generate"
-                    fallback="生成推荐"
-                  />
+                  t('bites.ai_dialog.actions.generate')
                 )}
               </Button>
               <DialogClose asChild>
                 <Button variant="secondary">
-                  <SafeTranslation
-                    tKey="bites.ai_dialog.actions.close"
-                    fallback="关闭"
-                  />
+                  {t('bites.ai_dialog.actions.close')}
                 </Button>
               </DialogClose>
             </div>
@@ -200,4 +177,4 @@ export default function FoodAIDialog() {
       </Dialog>
     </div>
   );
-}
+});

@@ -21,6 +21,12 @@ export interface ExternalDeadlineItem {
   events: ExternalEventData[];
 }
 
+export async function fetchActivitiesCatalog() {
+  const res = await fetch(ACTIVITIES_API_URL, { cache: 'force-cache' });
+  if (!res.ok) throw new URIError(`Failed to fetch activities: ${res.status}`);
+  return (await res.json()) as ExternalDeadlineItem[];
+}
+
 export function transformEvent(event: ExternalEventData): EventData {
   const startTime = event.start_time ?? event.timeline[0]?.deadline ?? '';
   const startDate = startTime ? new Date(startTime.replace(' ', 'T')) : null;
