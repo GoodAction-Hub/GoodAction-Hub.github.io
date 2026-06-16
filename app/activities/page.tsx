@@ -1,9 +1,8 @@
 import Fuse from 'fuse.js';
 import { DateTime } from 'luxon';
 import Link from 'next/link';
-import { headers } from 'next/headers';
 
-import { createI18nStore, loadSSRLanguage } from '@/i18n';
+import { loadSSRI18nFromRequest } from '@/i18n/server';
 import { EventCard } from '@/components/EventCard';
 import { FilterBar } from '@/components/FilterBar';
 import { GitCodeIcon } from '@/components/icons/GitCodeIcon';
@@ -110,19 +109,13 @@ export default async function ActivitiesPage({
   const selectedCategory = parseCategory(pickFirstSearchParam(rawCategory));
   const selectedTags = parseTags(rawTag);
   const timezone = parseTimezone(pickFirstSearchParam(rawTimezone));
-  const headerStore = await headers();
-  const { language, languageMap } = await loadSSRLanguage({
-    cookie: headerStore.get('cookie') ?? '',
-    acceptLanguage: headerStore.get('accept-language') ?? '',
-    query: rawSearchParams,
-  });
-  const { t } = createI18nStore(language, languageMap);
+  const { currentLanguage, t } = await loadSSRI18nFromRequest(rawSearchParams);
 
   const flatEvents = await getFlatEvents();
 
   const allTags = [
     ...new Set(flatEvents.flatMap(({ item }) => item.tags)),
-  ].sort((a, b) => a.localeCompare(b, language));
+  ].sort((a, b) => a.localeCompare(b, currentLanguage));
 
   let filteredEvents = flatEvents.filter(({ item }) => {
     if (selectedCategory && item.category !== selectedCategory) return false;
@@ -197,7 +190,7 @@ export default async function ActivitiesPage({
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-lg hover:from-green-600 hover:to-teal-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
-              + 发布活动
+              {t('activities_list_text_publish_activity')}
             </Link>
           </div>
           <p className="text-lg text-gray-700 mb-4 font-medium">
@@ -205,10 +198,10 @@ export default async function ActivitiesPage({
           </p>
           <div className="text-sm text-gray-600 space-y-1">
             <p className="bg-white/60 backdrop-blur-sm rounded-lg px-4 py-2 inline-block">
-              所有截止日期均默认转换为北京时间，如果您不知道当前所在时区，请点击时区选择器右侧的&ldquo;自动检测&rdquo;
+              {t('activities_list_text_timezone_note')}
             </p>
             <p className="text-gray-500 bg-white/40 backdrop-blur-sm rounded-lg px-4 py-2 inline-block">
-              *免责声明：本站数据由人工维护，仅供参考
+              {t('activities_list_text_disclaimer')}
             </p>
           </div>
         </div>
@@ -256,9 +249,7 @@ export default async function ActivitiesPage({
 
         <footer className="mt-16 text-center text-gray-600">
           <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 inline-block">
-            <p className="text-sm">
-              公益慈善活动追踪平台 - 让爱心传递，让公益更简单
-            </p>
+            <p className="text-sm">{t('activities_list_text_footer')}</p>
           </div>
         </footer>
       </div>

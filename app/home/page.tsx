@@ -2,25 +2,28 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useContext } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, GraduationCap, Utensils } from 'lucide-react';
 
+import { I18nContext } from '@/i18n/context';
+
 export default function HomeSelector() {
+  const { t } = useContext(I18nContext);
+
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-pink-100 via-white to-purple-100">
       <div className="max-w-5xl mx-auto px-6 py-12">
         <div className="text-center mb-10">
           <h1 className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 bg-clip-text text-transparent">
-            GoodAction Hub 首页
+            {t('home.selector.title')}
           </h1>
           <p className="mt-3 text-sm md:text-base text-gray-600">
-            请选择进入模块：公益慈善活动截止日期、无障碍友好美食指南 或
-            志愿辅导课程
+            {t('home.selector.subtitle')}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-          {/* 公益慈善活动截止日期 */}
           <Link href="/activities" className="group block h-full">
             <Card className="h-full min-h-[200px] overflow-hidden border-pink-200 hover:border-pink-400 transition-colors">
               <CardContent className="p-6 h-full">
@@ -30,10 +33,10 @@ export default function HomeSelector() {
                   </div>
                   <div className="flex-1">
                     <div className="text-lg md:text-xl font-bold bg-gradient-to-r from-pink-600 to-pink-500 bg-clip-text text-transparent">
-                      公益慈善活动截止日期
+                      {t('activities_list_text_title')}
                     </div>
                     <div className="mt-1 text-gray-600 text-sm">
-                      汇总各类公益赛事与活动的时间线与截止日期。
+                      {t('activities_list_text_subtitle')}
                     </div>
                   </div>
                 </div>
@@ -41,7 +44,6 @@ export default function HomeSelector() {
             </Card>
           </Link>
 
-          {/* 无障碍友好美食指南 */}
           <Link href="/restaurants" className="group block h-full">
             <Card className="h-full min-h-[200px] overflow-hidden border-purple-200 hover:border-purple-400 transition-colors">
               <CardContent className="p-6 h-full">
@@ -51,10 +53,10 @@ export default function HomeSelector() {
                   </div>
                   <div className="flex-1">
                     <div className="text-lg md:text-xl font-bold bg-gradient-to-r from-purple-600 to-purple-500 bg-clip-text text-transparent">
-                      无障碍友好美食指南
+                      {t('restaurants_list_text_title')}
                     </div>
                     <div className="mt-1 text-gray-600 text-sm">
-                      探索更友好的餐饮空间与无障碍觅食导航。
+                      {t('restaurants_list_text_subtitle')}
                     </div>
                   </div>
                 </div>
@@ -62,7 +64,6 @@ export default function HomeSelector() {
             </Card>
           </Link>
 
-          {/* 志愿辅导课程 */}
           <Link href="/tutoring" className="group block h-full">
             <Card className="h-full min-h-[200px] overflow-hidden border-cyan-200 hover:border-cyan-400 transition-colors">
               <CardContent className="p-6 h-full">
@@ -72,10 +73,10 @@ export default function HomeSelector() {
                   </div>
                   <div className="flex-1">
                     <div className="text-lg md:text-xl font-bold bg-gradient-to-r from-cyan-600 to-cyan-500 bg-clip-text text-transparent">
-                      志愿辅导课程
+                      {t('tutoring_list_text_title')}
                     </div>
                     <div className="mt-1 text-gray-600 text-sm">
-                      志愿者老师的备课资料库，含教案与音视频素材。
+                      {t('tutoring_list_text_subtitle')}
                     </div>
                   </div>
                 </div>
@@ -89,7 +90,7 @@ export default function HomeSelector() {
       <div className="flex justify-center mt-12 mb-8">
         <Image
           src="/Lark-group.png"
-          alt="GoodActionHub 益行汇群二维码"
+          alt={t('home.qr.alt')}
           width={192}
           height={192}
           className="w-48 object-contain"

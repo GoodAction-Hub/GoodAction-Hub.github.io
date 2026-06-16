@@ -9,12 +9,11 @@ import {
   Volume2,
 } from 'lucide-react';
 import Link from 'next/link';
-import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-import { createI18nStore, loadSSRLanguage } from '@/i18n';
+import { loadSSRI18nFromRequest } from '@/i18n/server';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { fetchTutoringBody, fetchTutoringCatalog } from '@/lib/tutoring';
@@ -29,12 +28,7 @@ export default async function TutoringDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const headerStore = await headers();
-  const { language, languageMap } = await loadSSRLanguage({
-    cookie: headerStore.get('cookie') ?? '',
-    acceptLanguage: headerStore.get('accept-language') ?? '',
-  });
-  const { t } = createI18nStore(language, languageMap);
+  const { t } = await loadSSRI18nFromRequest();
 
   const catalog = await fetchTutoringCatalog();
   const course = catalog.find((c) => c.slug === slug);

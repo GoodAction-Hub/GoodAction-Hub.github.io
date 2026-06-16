@@ -1,8 +1,7 @@
 import { ArrowRight, MapPin } from 'lucide-react';
 import Link from 'next/link';
-import { headers } from 'next/headers';
 
-import { createI18nStore, loadSSRLanguage } from '@/i18n';
+import { loadSSRI18nFromRequest } from '@/i18n/server';
 import { FoodAIDialog } from '@/components/FoodAIDialog';
 import { Pager } from '@/components/ui/mobx-restful-shadcn/pager';
 import { fetchBitesCatalog, BitesRestaurant } from '@/lib/bitesCatalog';
@@ -66,13 +65,7 @@ export default async function BarrierFreeBitesPage({
   } = rawSearchParams;
   const keywords = pickFirstSearchParam(rawKeywords)?.trim() ?? '';
   const filter = parseFilter(pickFirstSearchParam(rawFilter));
-  const headerStore = await headers();
-  const { language, languageMap } = await loadSSRLanguage({
-    cookie: headerStore.get('cookie') ?? '',
-    acceptLanguage: headerStore.get('accept-language') ?? '',
-    query: rawSearchParams,
-  });
-  const { t } = createI18nStore(language, languageMap);
+  const { t } = await loadSSRI18nFromRequest(rawSearchParams);
 
   const restaurants = await fetchBitesCatalog();
 

@@ -170,7 +170,7 @@ export const TimelineItem = forwardRef<HTMLDivElement, TimelineItemProps>(
                 {deadlineDate.toFormat('yyyy-MM-dd HH:mm:ss')} (
                 {t('original_timezone')} {originalTimezoneUTC})
               </div>
-              D{/* Arrow (desktop only) */}
+              {/* Arrow (desktop only) */}
               <div
                 className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 hidden md:block"
                 style={{ marginLeft: `${tooltipStyle.arrowOffset}px` }}

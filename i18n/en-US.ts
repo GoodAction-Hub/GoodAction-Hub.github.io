@@ -45,8 +45,15 @@ const BASE_TEXT = {
   'calendar.outlook': 'Outlook.com',
   'calendar.yahoo': 'Yahoo',
   'calendar.apple': 'Apple / iCal',
+  'calendar.saveDescription': 'iCalendar file',
   'ui_text.search_placeholder': 'Search ...',
   'ui_text.github_repo': 'GitHub Repo',
+  'home.selector.title': 'GoodAction Hub Home',
+  'home.selector.subtitle':
+    'Choose a module to enter: charity activity deadlines, accessible dining guide, or volunteer tutoring courses.',
+  'home.search.label': 'Explore',
+  'home.search.aria': 'Search recommendations',
+  'home.qr.alt': 'GoodActionHub community QR code',
   'detail.back': 'Back',
   'detail.viewDetails': 'View details',
   'detail.editOnGitHub': 'Edit on GitHub',
@@ -55,6 +62,8 @@ const BASE_TEXT = {
   'detail.openInAmap': 'Open in Amap',
   'detail.loadingMap': 'Loading map...',
   'detail.mapUnavailable': 'Map preview unavailable',
+  'recommend.loadFailed': 'Failed to load data',
+  'recommend.fetchError': 'Failed to fetch data',
   original_timezone: 'Original timezone',
   'bites.title': 'Barrier-Free Dining Guide',
   'bites.subtitle': 'Equal dining experiences for everyone',
@@ -220,6 +229,13 @@ const ACTIVITIES_LIST_TEXT = {
   activities_list_text_filter_tags: 'Tags',
   activities_list_text_filter_all: 'All',
   activities_list_text_filter_reset: 'Reset',
+  activities_list_text_publish_activity: '+ Publish Activity',
+  activities_list_text_timezone_note:
+    'All deadlines are converted to Beijing Time by default. If you are unsure of your current time zone, please click "Auto Detect" next to the time zone selector.',
+  activities_list_text_disclaimer:
+    '*Disclaimer: The data on this site is manually maintained and for reference only.',
+  activities_list_text_footer:
+    'Charity activity tracking platform - making care easier to pass along and public good simpler to take part in',
   activities_list_text_no_result_title: 'No results found',
   activities_list_text_no_result_tip: 'Try a different keyword',
   activities_list_text_previous_page: 'Previous',

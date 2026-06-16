@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { headers } from 'next/headers';
 import {
   ArrowRight,
   BookOpen,
@@ -8,7 +7,7 @@ import {
   Search,
 } from 'lucide-react';
 
-import { createI18nStore, loadSSRLanguage } from '@/i18n';
+import { loadSSRI18nFromRequest } from '@/i18n/server';
 import { Pager } from '@/components/ui/mobx-restful-shadcn/pager';
 import { parsePage, pickFirstSearchParam } from '@/lib/pagination';
 import { fetchTutoringCatalog } from '@/lib/tutoring';
@@ -42,13 +41,7 @@ export default async function TutoringPage({
   } = rawSearchParams;
   const keywords = pickFirstSearchParam(rawKeywords)?.trim() ?? '';
   const selectedTag = pickFirstSearchParam(rawTag)?.trim() ?? '';
-  const headerStore = await headers();
-  const { language, languageMap } = await loadSSRLanguage({
-    cookie: headerStore.get('cookie') ?? '',
-    acceptLanguage: headerStore.get('accept-language') ?? '',
-    query: rawSearchParams,
-  });
-  const { t } = createI18nStore(language, languageMap);
+  const { t } = await loadSSRI18nFromRequest(rawSearchParams);
 
   const courses = await fetchTutoringCatalog();
 

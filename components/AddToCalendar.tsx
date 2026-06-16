@@ -81,7 +81,7 @@ export const AddToCalendar: FC<AddToCalendarProps> = observer(
 
       await fileSave(blob, {
         fileName: `${title}_${startDate}.ics`,
-        description: 'iCalendar file',
+        description: t('calendar.saveDescription'),
         extensions: ['.ics'],
       });
     };

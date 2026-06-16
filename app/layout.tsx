@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { headers } from 'next/headers';
+
 import { type PropsWithChildren } from 'react';
 import Script from 'next/script';
 
-import { loadSSRLanguage } from '@/i18n';
+import { loadSSRI18nFromRequest } from '@/i18n/server';
 import { I18nProvider } from '@/components/I18nProvider';
 import { MainNav } from '@/components/MainNav';
 import './globals.css';
@@ -20,23 +20,22 @@ const fontMono = Inter({
   subsets: ['latin'],
 });
 
-export const metadata: Metadata = {
-  title: 'GoodAction-Hub',
-  description:
-    '追踪公益慈善会议、竞赛和活动重要截止日期的网站，帮助公益从业者、志愿者和爱心人士及时了解最新的公益慈善活动动态，不再错过参与公益事业、奉献爱心和社会服务的机会。',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await loadSSRI18nFromRequest();
+
+  return {
+    title: 'GoodAction-Hub',
+    description: t('metadata.description'),
+  };
+}
 
 export default async function RootLayout({
   children,
 }: Readonly<PropsWithChildren>) {
-  const headerStore = await headers();
-  const { language, languageMap } = await loadSSRLanguage({
-    cookie: headerStore.get('cookie') ?? '',
-    acceptLanguage: headerStore.get('accept-language') ?? '',
-  });
+  const { currentLanguage, currentMap } = await loadSSRI18nFromRequest();
 
   return (
-    <html lang={language}>
+    <html lang={currentLanguage}>
       <head>
         <Script
           src="https://umami.rkd.icu/script.js"
@@ -45,7 +44,7 @@ export default async function RootLayout({
         />
       </head>
       <body className={`${inter.variable} ${fontMono.variable} antialiased`}>
-        <I18nProvider language={language} languageMap={languageMap}>
+        <I18nProvider language={currentLanguage} languageMap={currentMap}>
           <MainNav />
           {children}
         </I18nProvider>

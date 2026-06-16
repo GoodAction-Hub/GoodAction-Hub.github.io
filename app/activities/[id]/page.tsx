@@ -9,10 +9,9 @@ import {
 } from 'lucide-react';
 import { DateTime } from 'luxon';
 import Link from 'next/link';
-import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
-import { createI18nStore, loadSSRLanguage } from '@/i18n';
+import { loadSSRI18nFromRequest } from '@/i18n/server';
 import { ChinaMapWrapper } from '@/components/ChinaMapWrapper';
 import { CommentBox } from '@/components/CommentBox';
 import { TimelineItem } from '@/components/TimelineItem';
@@ -42,12 +41,7 @@ export default async function EventDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const headerStore = await headers();
-  const { language, languageMap } = await loadSSRLanguage({
-    cookie: headerStore.get('cookie') ?? '',
-    acceptLanguage: headerStore.get('accept-language') ?? '',
-  });
-  const { t } = createI18nStore(language, languageMap);
+  const { t } = await loadSSRI18nFromRequest();
 
   const found = await findActivity(id);
   if (!found) notFound();

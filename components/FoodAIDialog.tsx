@@ -80,7 +80,7 @@ export const FoodAIDialog = observer(() => {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button
-            aria-label="AI美食推荐官"
+            aria-label={t('bites.labels.ai_recommend')}
             className="fixed bottom-6 right-6 z-50 shadow-xl"
             onClick={() => setOpen(true)}
           >

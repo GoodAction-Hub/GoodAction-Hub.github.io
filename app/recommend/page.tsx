@@ -3,9 +3,10 @@
 import { DateTime } from 'luxon';
 import Fuse from 'fuse.js';
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { Suspense, useContext, useEffect, useMemo, useState } from 'react';
 
 import { EventCard } from '@/components/EventCard';
+import { I18nContext } from '@/i18n/context';
 
 export interface TimelineEvent {
   deadline: string;
@@ -49,6 +50,7 @@ async function getData(): Promise<DeadlineItem[]> {
 function RecommendPageContent() {
   const searchParams = useSearchParams();
   const keywords = searchParams.get('keywords') || '';
+  const { t } = useContext(I18nContext);
 
   const [allDeadlines, setAllDeadlines] = useState<DeadlineItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -139,19 +141,20 @@ function RecommendPageContent() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">{'events.loading'}</p>
+          <p className="text-slate-600">{t('events.loading')}</p>
         </div>
       </div>
     );
   }
 
-  if (error) {
+  if (error)
     return (
       <div className="min-h-screen p-8">
-        <p className="text-red-600">Failed to load data: {error}</p>
+        <p className="text-red-600">
+          {t('recommend.fetchError')}: {error}
+        </p>
       </div>
     );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 bg-[url('/bg.jpg')] bg-cover bg-center bg-no-repeat">
@@ -167,9 +170,9 @@ function RecommendPageContent() {
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🔍</div>
             <h3 className="text-xl font-semibold text-slate-900 mb-2">
-              {'events.notFound'}
+              {t('events.notFound')}
             </h3>
-            <p className="text-slate-600">{'events.hint'}</p>
+            <p className="text-slate-600">{t('events.hint')}</p>
           </div>
         )}
       </div>
@@ -178,8 +181,10 @@ function RecommendPageContent() {
 }
 
 export default function RecommendPage() {
+  const { t } = useContext(I18nContext);
+
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>{t('events.loading')}</div>}>
       <RecommendPageContent />
     </Suspense>
   );
