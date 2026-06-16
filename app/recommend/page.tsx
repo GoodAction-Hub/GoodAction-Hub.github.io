@@ -81,7 +81,9 @@ async function getRecommendPageData(keywords: string) {
   } catch (error) {
     return {
       recommendations: [] as FlatEvent[],
-      error: error instanceof Error ? error.message : String(error),
+      error: `Failed to fetch activities: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
     };
   }
 }
