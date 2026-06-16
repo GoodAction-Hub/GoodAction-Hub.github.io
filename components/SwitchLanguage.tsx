@@ -44,10 +44,10 @@ export const SwitchLanguage = observer(() => {
       <Select.Portal>
         <Select.Content className="rounded-lg border border-slate-200 bg-white shadow-lg z-50">
           <Select.Viewport className="p-1">
-            {Object.entries(LanguageName).map(([lng, label]) => (
+            {Object.entries(LanguageName).map(([language, label]) => (
               <Select.Item
-                key={lng}
-                value={lng}
+                key={language}
+                value={language}
                 className="relative flex cursor-pointer select-none items-center rounded-md px-3 py-2 text-sm text-slate-900 outline-none hover:bg-slate-100 data-[state=checked]:bg-primary/10"
               >
                 <Select.ItemText>{label}</Select.ItemText>
