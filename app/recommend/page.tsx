@@ -70,7 +70,9 @@ function getRecommendations(flatEvents: FlatEvent[], keywords: string) {
   });
 }
 
-async function getRecommendPageData(keywords: string) {
+async function getRecommendPageData(
+  keywords: string,
+): Promise<{ recommendations: FlatEvent[]; error: string | null }> {
   try {
     const flatEvents = await getFlatEvents();
 
@@ -80,7 +82,7 @@ async function getRecommendPageData(keywords: string) {
     };
   } catch (error) {
     return {
-      recommendations: [] as FlatEvent[],
+      recommendations: [],
       error: `Failed to fetch activities: ${
         error instanceof Error ? error.message : String(error)
       }`,
