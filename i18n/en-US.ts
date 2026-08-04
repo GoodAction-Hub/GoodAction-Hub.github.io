@@ -48,6 +48,8 @@ const BASE_TEXT = {
   'calendar.saveDescription': 'iCalendar file',
   'ui_text.search_placeholder': 'Search ...',
   'ui_text.github_repo': 'GitHub Repo',
+  'mainnav.mobile.open': 'Open navigation menu',
+  'mainnav.mobile.close': 'Close navigation menu',
   'home.selector.title': 'GoodAction Hub Home',
   'home.selector.subtitle':
     'Choose a module to enter: charity activity deadlines, accessible dining guide, or volunteer tutoring courses.',
