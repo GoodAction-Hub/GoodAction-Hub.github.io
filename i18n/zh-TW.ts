@@ -46,6 +46,8 @@ const BASE_TEXT = {
   'calendar.saveDescription': 'iCalendar 檔案',
   'ui_text.search_placeholder': '搜尋...',
   'ui_text.github_repo': 'GitHub 倉庫',
+  'mainnav.mobile.open': '打開導覽選單',
+  'mainnav.mobile.close': '關閉導覽選單',
   'ui.language': '語言',
   'metadata.description':
     '追蹤公益慈善會議、競賽和活動重要截止日期的網站，幫助公益從業者、志工和愛心人士及時了解最新的公益慈善活動動態，不再錯過參與公益事業、奉獻愛心和社會服務的機會。',

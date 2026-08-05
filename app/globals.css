@@ -132,3 +132,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+/*
+ * ShadcnX CLI sets up the source rule for Tailwind CSS to include Git ignored components.
+ * Don't modify this rule if you are not a Tailwind CSS expert.
+ */
+@source "../components/ui/**/*.{js,jsx,ts,tsx,mdx,vue,svelte}";
