@@ -2,8 +2,8 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "goodaction-hub",
   "preview_urls": true,
-  "compatibility_date": "2026-08-04",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_date": "2026-09-11",
+  "compatibility_flags": ["nodejs_compat", "new_module_registry"],
   "main": ".open-next/worker.js",
   "assets": {
     "directory": ".open-next/assets",

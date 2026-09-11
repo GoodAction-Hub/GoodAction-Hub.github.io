@@ -1,6 +1,8 @@
 packages:
   - .
 autoInstallPeers: false
+minimumReleaseAge: 0
+
 allowBuilds:
   core-js: true
   esbuild: true
