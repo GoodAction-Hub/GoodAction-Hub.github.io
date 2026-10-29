@@ -2,7 +2,8 @@ import Fuse from 'fuse.js';
 import { DateTime } from 'luxon';
 import Link from 'next/link';
 
-import { loadSSRI18nFromRequest } from '@/i18n/server';
+import { loadSSRI18n } from '@/i18n/server';
+import type { LanguageCode } from '@/i18n';
 import { EventCard } from '@/components/EventCard';
 import { FilterBar } from '@/components/FilterBar';
 import { GitCodeIcon } from '@/components/icons/GitCodeIcon';
@@ -93,11 +94,16 @@ async function getFlatEvents(): Promise<FlatEvent[]> {
 }
 
 export default async function ActivitiesPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ language: LanguageCode }>;
   searchParams: PageSearchParams;
 }) {
-  const rawSearchParams = await searchParams;
+  const [{ language }, rawSearchParams] = await Promise.all([
+    params,
+    searchParams,
+  ]);
   const {
     pageIndex: rawPageIndex,
     keywords: rawKeywords,
@@ -109,7 +115,7 @@ export default async function ActivitiesPage({
   const selectedCategory = parseCategory(pickFirstSearchParam(rawCategory));
   const selectedTags = parseTags(rawTag);
   const timezone = parseTimezone(pickFirstSearchParam(rawTimezone));
-  const { currentLanguage, t } = await loadSSRI18nFromRequest(rawSearchParams);
+  const { currentLanguage, t } = await loadSSRI18n(language, rawSearchParams);
 
   const flatEvents = await getFlatEvents();
 

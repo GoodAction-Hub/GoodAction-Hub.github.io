@@ -2,7 +2,9 @@ import { ArrowLeft, MapPin, MessageSquare, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { loadSSRI18nFromRequest } from '@/i18n/server';
+import { loadSSRI18n } from '@/i18n/server';
+import type { LanguageCode } from '@/i18n';
+import { localizedPath } from '@/i18n/routing';
 import { ChinaMapWrapper } from '@/components/ChinaMapWrapper';
 import { CommentBox } from '@/components/CommentBox';
 import { fetchBitesCatalog } from '@/lib/bitesCatalog';
@@ -15,10 +17,10 @@ const DATA_EDIT_URL =
 export default async function RestaurantDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; language: LanguageCode }>;
 }) {
-  const { id } = await params;
-  const { t } = await loadSSRI18nFromRequest();
+  const { id, language } = await params;
+  const { t } = await loadSSRI18n(language);
 
   const catalog = await fetchBitesCatalog();
   const restaurant = catalog.find((r) => r.id === id);
@@ -35,7 +37,7 @@ export default async function RestaurantDetailPage({
       <div className="container mx-auto px-4 py-8 relative z-10 max-w-4xl">
         {/* Back + Edit buttons */}
         <div className="flex items-center justify-between mb-6">
-          <Link href="/restaurants">
+          <Link href={localizedPath(language, '/restaurants')}>
             <Button variant="outline" size="sm" className="gap-2">
               <ArrowLeft className="w-4 h-4" />
               {t('restaurants_detail_text_back')}

@@ -1,17 +1,21 @@
 import { Search } from 'lucide-react';
 import type { FC } from 'react';
 
+import type { LanguageCode } from '@/i18n';
+import { localizedPath } from '@/i18n/routing';
+
 type AggregationProps = Record<
   'searchLabel' | 'searchPlaceholder' | 'searchAriaLabel',
   string
->;
+> & { language: LanguageCode };
 
 export const Aggregation: FC<AggregationProps> = ({
+  language,
   searchLabel,
   searchPlaceholder,
   searchAriaLabel,
 }) => (
-  <form className="w-full" action="/recommend">
+  <form className="w-full" action={localizedPath(language, '/recommend')}>
     {/* Search bar — large, rounded, translucent */}
     <div className="mt-50 w-full bg-black/40 backdrop-blur-md rounded-full px-4 py-3 shadow-2xl flex items-center">
       {/* Left label */}

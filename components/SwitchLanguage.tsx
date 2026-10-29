@@ -15,13 +15,9 @@ export const SwitchLanguage = observer(() => {
   const { currentLanguage } = i18n;
   const router = useRouter();
 
-  const handleChange = async (value: LanguageCode) => {
-    try {
-      await i18n.loadLanguages(value);
-      router.refresh();
-    } catch (error) {
-      console.error('Failed to change language:', error);
-    }
+  const handleChange = (value: LanguageCode) => {
+    const pathname = window.location.pathname.replace(/^\/[^/]+/, `/${value}`);
+    router.push(`${pathname}${window.location.search}`);
   };
 
   return (

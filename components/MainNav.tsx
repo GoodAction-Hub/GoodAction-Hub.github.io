@@ -6,6 +6,7 @@ import { Fragment, useContext, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 
 import { I18nContext } from '@/i18n/context';
+import { localizedPath } from '@/i18n/routing';
 import { SwitchLanguage } from '@/components/SwitchLanguage';
 
 const linkClass =
@@ -13,12 +14,21 @@ const linkClass =
 
 export function MainNav() {
   const [open, setOpen] = useState(false);
-  const { t } = useContext(I18nContext);
+  const { currentLanguage, t } = useContext(I18nContext);
 
   const links = [
-    { href: '/activities', label: t('activities_list_text_title') },
-    { href: '/restaurants', label: t('restaurants_list_text_title') },
-    { href: '/tutoring', label: t('tutoring_list_text_title') },
+    {
+      href: localizedPath(currentLanguage, '/activities'),
+      label: t('activities_list_text_title'),
+    },
+    {
+      href: localizedPath(currentLanguage, '/restaurants'),
+      label: t('restaurants_list_text_title'),
+    },
+    {
+      href: localizedPath(currentLanguage, '/tutoring'),
+      label: t('tutoring_list_text_title'),
+    },
   ];
 
   return (
@@ -26,7 +36,7 @@ export function MainNav() {
       <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-3">
         {/* Logo */}
         <Link
-          href="/"
+          href={localizedPath(currentLanguage, '/')}
           className="inline-flex items-center gap-2 shrink-0 group"
           aria-label="GoodActionHub"
           onClick={() => setOpen(false)}

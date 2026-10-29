@@ -13,13 +13,48 @@ const nextConfig: NextConfig = {
   experimental: {},
   redirects: async () => [
     {
+      source: '/',
+      destination: '/zh-CN',
+      permanent: false,
+    },
+    {
       source: '/deadlines',
-      destination: '/activities',
+      destination: '/zh-CN/activities',
       permanent: true,
     },
     {
       source: '/Barrier-Free-Bites',
-      destination: '/restaurants',
+      destination: '/zh-CN/restaurants',
+      permanent: true,
+    },
+    {
+      source: '/activities/:path*',
+      destination: '/zh-CN/activities/:path*',
+      permanent: true,
+    },
+    {
+      source: '/restaurants/:path*',
+      destination: '/zh-CN/restaurants/:path*',
+      permanent: true,
+    },
+    {
+      source: '/tutoring/:path*',
+      destination: '/zh-CN/tutoring/:path*',
+      permanent: true,
+    },
+    {
+      source: '/recommend',
+      destination: '/zh-CN/recommend',
+      permanent: true,
+    },
+    {
+      source: '/home',
+      destination: '/zh-CN/home',
+      permanent: true,
+    },
+    {
+      source: '/origin',
+      destination: '/zh-CN/origin',
       permanent: true,
     },
   ],

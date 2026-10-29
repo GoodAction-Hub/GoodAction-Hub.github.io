@@ -9,6 +9,8 @@ import { type FC, useContext, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { I18nContext } from '@/i18n/context';
+import type { LanguageCode } from '@/i18n';
+import { localizedPath } from '@/i18n/routing';
 import { TimezoneSelector } from './TimezoneSelector';
 
 const DEFAULT_TIMEZONE = 'Asia/Shanghai';
@@ -26,6 +28,7 @@ interface FilterBarProps {
 }
 
 type FilterBarState = {
+  language: LanguageCode;
   keywords?: string;
   category?: ActivityCategory | null;
   tags?: string[];
@@ -33,6 +36,7 @@ type FilterBarState = {
 };
 
 const buildHref = ({
+  language,
   keywords,
   category,
   tags = [],
@@ -48,7 +52,8 @@ const buildHref = ({
 
   const query = params.toString();
 
-  return query ? `/activities?${query}` : '/activities';
+  const path = localizedPath(language, '/activities');
+  return query ? `${path}?${query}` : path;
 };
 
 const toggleTag = (selectedTags: string[], tag: string) =>
@@ -58,7 +63,7 @@ const toggleTag = (selectedTags: string[], tag: string) =>
 
 export const FilterBar: FC<FilterBarProps> = observer(
   ({ keywords, selectedCategory, selectedTags, allTags, timezone }) => {
-    const { t } = useContext(I18nContext);
+    const { currentLanguage, t } = useContext(I18nContext);
     const router = useRouter();
     const [selectedTimezone, setSelectedTimezone] = useState(timezone);
 
@@ -66,7 +71,11 @@ export const FilterBar: FC<FilterBarProps> = observer(
 
     return (
       <div className="space-y-5">
-        <form action="/activities" method="get" className="space-y-4">
+        <form
+          action={localizedPath(currentLanguage, '/activities')}
+          method="get"
+          className="space-y-4"
+        >
           <div className="relative group">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="relative bg-white rounded-xl shadow-lg border-2 border-gray-200 hover:border-blue-400 focus-within:border-blue-500 transition-all duration-300 hover:shadow-xl focus-within:shadow-2xl">
@@ -97,7 +106,12 @@ export const FilterBar: FC<FilterBarProps> = observer(
                 {t('activities_list_text_search_button')}
               </Button>
               <Button variant="outline" className="rounded-xl" asChild>
-                <Link href={buildHref({ timezone: selectedTimezone })}>
+                <Link
+                  href={buildHref({
+                    language: currentLanguage,
+                    timezone: selectedTimezone,
+                  })}
+                >
                   {t('activities_list_text_filter_reset')}
                 </Link>
               </Button>
@@ -109,6 +123,7 @@ export const FilterBar: FC<FilterBarProps> = observer(
                 setSelectedTimezone(nextTimezone);
                 router.push(
                   buildHref({
+                    language: currentLanguage,
                     keywords,
                     category: selectedCategory,
                     tags: selectedTags,
@@ -127,6 +142,7 @@ export const FilterBar: FC<FilterBarProps> = observer(
           <div className="flex flex-wrap gap-2">
             <Link
               href={buildHref({
+                language: currentLanguage,
                 keywords,
                 tags: selectedTags,
                 timezone: selectedTimezone,
@@ -143,6 +159,7 @@ export const FilterBar: FC<FilterBarProps> = observer(
               <Link
                 key={category}
                 href={buildHref({
+                  language: currentLanguage,
                   keywords,
                   category: selectedCategory === category ? null : category,
                   tags: selectedTags,
@@ -174,6 +191,7 @@ export const FilterBar: FC<FilterBarProps> = observer(
                   <Link
                     key={tag}
                     href={buildHref({
+                      language: currentLanguage,
                       keywords,
                       category: selectedCategory,
                       tags: nextTags,
