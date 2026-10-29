@@ -7,7 +7,9 @@ import {
   Search,
 } from 'lucide-react';
 
-import { loadSSRI18nFromRequest } from '@/i18n/server';
+import { loadSSRI18n } from '@/i18n/server';
+import type { LanguageCode } from '@/i18n';
+import { localizedPath } from '@/i18n/routing';
 import { Pager } from '@/components/ui/mobx-restful-shadcn/pager';
 import { parsePage, pickFirstSearchParam } from '@/lib/pagination';
 import { fetchTutoringCatalog } from '@/lib/tutoring';
@@ -20,20 +22,30 @@ type PageSearchParams = Promise<{
   tag?: string | string[];
 }>;
 
-function buildTagHref(nextTag: string, keywords: string): string {
+function buildTagHref(
+  language: LanguageCode,
+  nextTag: string,
+  keywords: string,
+): string {
   const params = new URLSearchParams();
   if (keywords) params.set('keywords', keywords);
   if (nextTag) params.set('tag', nextTag);
   const queryString = params.toString();
-  return queryString ? `/tutoring?${queryString}` : '/tutoring';
+  const path = localizedPath(language, '/tutoring');
+  return queryString ? `${path}?${queryString}` : path;
 }
 
 export default async function TutoringPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ language: LanguageCode }>;
   searchParams: PageSearchParams;
 }) {
-  const rawSearchParams = await searchParams;
+  const [{ language }, rawSearchParams] = await Promise.all([
+    params,
+    searchParams,
+  ]);
   const {
     pageIndex: rawPageIndex,
     keywords: rawKeywords,
@@ -41,7 +53,7 @@ export default async function TutoringPage({
   } = rawSearchParams;
   const keywords = pickFirstSearchParam(rawKeywords)?.trim() ?? '';
   const selectedTag = pickFirstSearchParam(rawTag)?.trim() ?? '';
-  const { t } = await loadSSRI18nFromRequest(rawSearchParams);
+  const { t } = await loadSSRI18n(language, rawSearchParams);
 
   const courses = await fetchTutoringCatalog();
 
@@ -93,7 +105,7 @@ export default async function TutoringPage({
         </div>
 
         <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 mb-8">
-          <form action="/tutoring" method="get">
+          <form action={localizedPath(language, '/tutoring')} method="get">
             <div className="flex items-center gap-2 mb-4">
               <Search className="w-4 h-4 text-gray-500" />
               <input
@@ -118,7 +130,7 @@ export default async function TutoringPage({
           {allTags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               <Link
-                href={buildTagHref('', keywords)}
+                href={buildTagHref(language, '', keywords)}
                 className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
                   !selectedTag
                     ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow'
@@ -130,7 +142,11 @@ export default async function TutoringPage({
               {allTags.map((tag) => (
                 <Link
                   key={tag}
-                  href={buildTagHref(tag === selectedTag ? '' : tag, keywords)}
+                  href={buildTagHref(
+                    language,
+                    tag === selectedTag ? '' : tag,
+                    keywords,
+                  )}
                   className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
                     tag === selectedTag
                       ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow'
@@ -157,7 +173,7 @@ export default async function TutoringPage({
             {pagedCourses.map((course) => (
               <Link
                 key={course.slug}
-                href={`/tutoring/${course.slug}`}
+                href={localizedPath(language, `/tutoring/${course.slug}`)}
                 className="group bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col"
               >
                 {course.cover && (

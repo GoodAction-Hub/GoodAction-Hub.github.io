@@ -1,8 +1,14 @@
 import { Aggregation } from '@/components/Aggregation';
-import { loadSSRI18nFromRequest } from '@/i18n/server';
+import { loadSSRI18n } from '@/i18n/server';
+import type { LanguageCode } from '@/i18n';
 
-export default async function OriginPage() {
-  const { t } = await loadSSRI18nFromRequest();
+export default async function OriginPage({
+  params,
+}: {
+  params: Promise<{ language: LanguageCode }>;
+}) {
+  const { language } = await params;
+  const { t } = await loadSSRI18n(language);
 
   return (
     <div
@@ -18,6 +24,7 @@ export default async function OriginPage() {
         </header>
 
         <Aggregation
+          language={language}
           searchLabel={t('home.search.label')}
           searchPlaceholder={t('ui_text.search_placeholder')}
           searchAriaLabel={t('home.search.aria')}

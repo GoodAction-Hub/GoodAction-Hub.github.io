@@ -13,7 +13,9 @@ import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-import { loadSSRI18nFromRequest } from '@/i18n/server';
+import { loadSSRI18n } from '@/i18n/server';
+import type { LanguageCode } from '@/i18n';
+import { localizedPath } from '@/i18n/routing';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { fetchTutoringBody, fetchTutoringCatalog } from '@/lib/tutoring';
@@ -25,10 +27,10 @@ const DATA_EDIT_URL =
 export default async function TutoringDetailPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; language: LanguageCode }>;
 }) {
-  const { slug } = await params;
-  const { t } = await loadSSRI18nFromRequest();
+  const { slug, language } = await params;
+  const { t } = await loadSSRI18n(language);
 
   const catalog = await fetchTutoringCatalog();
   const course = catalog.find((c) => c.slug === slug);
@@ -45,7 +47,7 @@ export default async function TutoringDetailPage({
 
       <div className="container mx-auto px-4 py-8 relative z-10 max-w-4xl">
         <div className="flex items-center justify-between mb-6">
-          <Link href="/tutoring">
+          <Link href={localizedPath(language, '/tutoring')}>
             <Button variant="outline" size="sm" className="gap-2">
               <ArrowLeft className="w-4 h-4" />
               {t('tutoring_detail_text_back_to_list')}

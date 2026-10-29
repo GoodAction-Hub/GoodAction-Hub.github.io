@@ -1,7 +1,9 @@
 import { ArrowRight, MapPin } from 'lucide-react';
 import Link from 'next/link';
 
-import { loadSSRI18nFromRequest } from '@/i18n/server';
+import { loadSSRI18n } from '@/i18n/server';
+import type { LanguageCode } from '@/i18n';
+import { localizedPath } from '@/i18n/routing';
 import { FoodAIDialog } from '@/components/FoodAIDialog';
 import { Pager } from '@/components/ui/mobx-restful-shadcn/pager';
 import { fetchBitesCatalog, BitesRestaurant } from '@/lib/bitesCatalog';
@@ -35,13 +37,18 @@ function getAccessibilityTypes(r: BitesRestaurant): FilterType[] {
   return types;
 }
 
-function buildFilterHref(nextFilter: FilterType, keywords: string) {
+function buildFilterHref(
+  language: LanguageCode,
+  nextFilter: FilterType,
+  keywords: string,
+) {
   const params = new URLSearchParams();
 
   if (keywords) params.set('keywords', keywords);
   if (nextFilter !== 'all') params.set('filter', nextFilter);
 
-  return params + '' ? `/restaurants?${params}` : '/restaurants';
+  const path = localizedPath(language, '/restaurants');
+  return params + '' ? `${path}?${params}` : path;
 }
 
 const isFilterType = (value: string): value is FilterType =>
@@ -53,11 +60,16 @@ function parseFilter(rawFilter?: string): FilterType {
 }
 
 export default async function BarrierFreeBitesPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ language: LanguageCode }>;
   searchParams: PageSearchParams;
 }) {
-  const rawSearchParams = await searchParams;
+  const [{ language }, rawSearchParams] = await Promise.all([
+    params,
+    searchParams,
+  ]);
   const {
     pageIndex: rawPageIndex,
     keywords: rawKeywords,
@@ -65,7 +77,7 @@ export default async function BarrierFreeBitesPage({
   } = rawSearchParams;
   const keywords = pickFirstSearchParam(rawKeywords)?.trim() ?? '';
   const filter = parseFilter(pickFirstSearchParam(rawFilter));
-  const { t } = await loadSSRI18nFromRequest(rawSearchParams);
+  const { t } = await loadSSRI18n(language, rawSearchParams);
 
   const restaurants = await fetchBitesCatalog();
 
@@ -117,7 +129,11 @@ export default async function BarrierFreeBitesPage({
             </div>
           </header>
 
-          <form action="/restaurants" method="get" className="mb-4">
+          <form
+            action={localizedPath(language, '/restaurants')}
+            method="get"
+            className="mb-4"
+          >
             <div className="flex items-center gap-2">
               <input
                 type="text"
@@ -142,7 +158,7 @@ export default async function BarrierFreeBitesPage({
             {FILTER_OPTIONS.map((item) => (
               <Link
                 key={item}
-                href={buildFilterHref(item, keywords)}
+                href={buildFilterHref(language, item, keywords)}
                 className={`${styles.filterBtn} ${filter === item ? styles.filterBtnActive : ''}`}
               >
                 {t(`restaurants_list_text_filters_${item}`)}
@@ -240,7 +256,10 @@ export default async function BarrierFreeBitesPage({
                       </div>
                       <div className={styles.detailButtonWrap}>
                         <Link
-                          href={`/restaurants/${restaurant.id}`}
+                          href={localizedPath(
+                            language,
+                            `/restaurants/${restaurant.id}`,
+                          )}
                           className={styles.detailButton}
                           title={t('restaurants_list_text_view_details_title')}
                         >

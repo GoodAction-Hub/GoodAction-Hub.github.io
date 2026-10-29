@@ -2,7 +2,8 @@ import Fuse from 'fuse.js';
 import { DateTime } from 'luxon';
 
 import { EventCard } from '@/components/EventCard';
-import { loadSSRI18nFromRequest } from '@/i18n/server';
+import { loadSSRI18n } from '@/i18n/server';
+import type { LanguageCode } from '@/i18n';
 import { fetchActivitiesCatalog, transformItem } from '@/lib/activities';
 import { DeadlineItem, EventData } from '@/lib/data';
 import { pickFirstSearchParam } from '@/lib/pagination';
@@ -91,13 +92,18 @@ async function getRecommendPageData(
 }
 
 export default async function RecommendPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ language: LanguageCode }>;
   searchParams: PageSearchParams;
 }) {
-  const rawSearchParams = await searchParams;
+  const [{ language }, rawSearchParams] = await Promise.all([
+    params,
+    searchParams,
+  ]);
   const keywords = pickFirstSearchParam(rawSearchParams.keywords)?.trim() ?? '';
-  const { t } = await loadSSRI18nFromRequest(rawSearchParams);
+  const { t } = await loadSSRI18n(language, rawSearchParams);
   const { recommendations, error } = await getRecommendPageData(keywords);
 
   if (error)

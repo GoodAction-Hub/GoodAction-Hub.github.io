@@ -2,6 +2,7 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "goodaction-hub",
   "preview_urls": true,
+  "previews": {},
   "compatibility_date": "2026-09-11",
   "compatibility_flags": ["nodejs_compat", "new_module_registry"],
   "main": ".open-next/worker.js",

@@ -3,10 +3,17 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { loadSSRI18nFromRequest } from '@/i18n/server';
+import { loadSSRI18n } from '@/i18n/server';
+import { localizedPath } from '@/i18n/routing';
+import type { LanguageCode } from '@/i18n';
 
-export default async function HomeSelectorPage() {
-  const { t } = await loadSSRI18nFromRequest();
+export default async function HomeSelectorPage({
+  params,
+}: {
+  params: Promise<{ language: LanguageCode }>;
+}) {
+  const { language } = await params;
+  const { t } = await loadSSRI18n(language);
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-pink-100 via-white to-purple-100">
@@ -21,7 +28,10 @@ export default async function HomeSelectorPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-          <Link href="/activities" className="group block h-full">
+          <Link
+            href={localizedPath(language, '/activities')}
+            className="group block h-full"
+          >
             <Card className="h-full min-h-[200px] overflow-hidden border-pink-200 hover:border-pink-400 transition-colors">
               <CardContent className="p-6 h-full">
                 <div className="flex items-center gap-4">
@@ -41,7 +51,10 @@ export default async function HomeSelectorPage() {
             </Card>
           </Link>
 
-          <Link href="/restaurants" className="group block h-full">
+          <Link
+            href={localizedPath(language, '/restaurants')}
+            className="group block h-full"
+          >
             <Card className="h-full min-h-[200px] overflow-hidden border-purple-200 hover:border-purple-400 transition-colors">
               <CardContent className="p-6 h-full">
                 <div className="flex items-center gap-4">
@@ -61,7 +74,10 @@ export default async function HomeSelectorPage() {
             </Card>
           </Link>
 
-          <Link href="/tutoring" className="group block h-full">
+          <Link
+            href={localizedPath(language, '/tutoring')}
+            className="group block h-full"
+          >
             <Card className="h-full min-h-[200px] overflow-hidden border-cyan-200 hover:border-cyan-400 transition-colors">
               <CardContent className="p-6 h-full">
                 <div className="flex items-center gap-4">
