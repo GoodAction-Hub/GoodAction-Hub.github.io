@@ -88,3 +88,5 @@ __pycache__/
 
 # Shadcn UI components
 components/ui/*
+/dist/
+.vinext/

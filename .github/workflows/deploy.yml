@@ -43,12 +43,12 @@ jobs:
             PREVIEW_ALIAS="b-${BRANCH_SLUG}"
             PREVIEW_SUMMARY_FILE="cloudflare-preview-summary.md"
 
-            echo "Building OpenNext bundle for preview URLs"
-            npx opennextjs-cloudflare build
+            echo "Building ViNext bundle for preview URLs"
+            pnpm build
 
             echo "Uploading Worker version with preview alias: $PREVIEW_ALIAS"
             npx wrangler versions upload \
-              --config wrangler.jsonc \
+              --config dist/server/wrangler.json \
               --preview-alias "$PREVIEW_ALIAS" \
               --message "Preview for $GITHUB_REF_NAME @ $GITHUB_SHA" | \
               tee wrangler-preview-output.log
