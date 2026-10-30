@@ -81,7 +81,9 @@ let _catalogCache: BitesRestaurant[] | null = null;
 export async function fetchBitesCatalog(): Promise<BitesRestaurant[]> {
   if (_catalogCache) return _catalogCache;
   try {
-    const res = await fetch(RESTAURANTS_API_URL, { cache: 'force-cache' });
+    const res = await fetch(RESTAURANTS_API_URL, {
+      next: { revalidate: false },
+    });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = (await res.json()) as ExternalRestaurant[];
     _catalogCache = data.map(transformRestaurant);

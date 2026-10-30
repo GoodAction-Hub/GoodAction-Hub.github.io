@@ -5,9 +5,10 @@
   "previews": {},
   "compatibility_date": "2026-09-11",
   "compatibility_flags": ["nodejs_compat", "new_module_registry"],
-  "main": ".open-next/worker.js",
+  "main": "vinext/server/fetch-handler",
   "assets": {
-    "directory": ".open-next/assets",
-    "binding": "ASSETS"
-  }
+    "directory": "./dist/client",
+    "binding": "ASSETS",
+    "run_worker_first": ["/_vinext/static-cache/*"],
+  },
 }

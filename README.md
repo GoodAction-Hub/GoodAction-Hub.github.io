@@ -66,7 +66,7 @@ GoodAction Hub 是一个聚合公益活动信息与无障碍餐饮指南的开�
 
 ### 环境准备
 
-**Bun**: 本项目使用 [Bun][8] 作为包管理器和运行时。
+本项目使用 PNPM 管理依赖，使用 [ViNext][14] 在 Vite 和 Cloudflare Workers 上运行 Next.js App router。Node.js 和 PNPM 版本请与 [部署工作流](.github/workflows/deploy.yml) 保持一致。
 
 ### 本地启动
 
@@ -80,35 +80,51 @@ GoodAction Hub 是一个聚合公益活动信息与无障碍餐饮指南的开�
 2. **安装依赖**
 
    ```bash
-   bun install
+   pnpm install
    ```
 
 3. **激活 Git Hook（此步骤会在安装依赖后自动执行）**
 
    ```bash
-   bun run prepare
+   pnpm run prepare
    ```
 
 4. **启动开发服务器**
 
    ```bash
-   bun run dev
+   pnpm dev
    ```
 
 5. **（可选）剪枝**
 
    ```bash
-   bun run knip
+   pnpm knip
    ```
 
-现在，在浏览器中打开 http://localhost:3000 即可看到项目页面。
+在浏览器中打开 Vite 输出的本地地址即可看到项目页面。语言路径为
+`/zh-CN/`、`/zh-TW/` 和 `/en-US/`；搜索、筛选和分页仍由服务端渲染。
 
 ### 部署与运维
 
-- 推荐平台：Netlify（已集成 `@netlify/plugin-nextjs`）
-  - 构建命令：`npm run build`
-  - 如遇到路由大小写或缓存相关问题，建议在 Netlify 后台执行 “Clear cache and deploy site” 重新构建
-- 也可选择 GitHub Pages 或华为云部署（参考仓库根目录的相关文档与脚本）
+- 构建：`pnpm build`，生成 ViNext 客户端资源和 Cloudflare worker。
+- 本地验证生产 worker：`npm start`；构建并预览：`pnpm preview`。
+- 类型检查：`npm test`。
+- 构建并部署：`pnpm deploy`。
+- Cloudflare GitHub app 构建命令：`pnpm build`。
+- Cloudflare GitHub app 生产部署命令：
+  `pnpm exec wrangler deploy --config dist/server/wrangler.json`。
+- Cloudflare GitHub app 非生产分支部署命令：
+  `pnpm exec wrangler versions upload --config dist/server/wrangler.json`。
+
+GitHub actions 默认分支部署生产版本，其他分支上传带别名的预览版本。
+部署必须使用构建生成的 `dist/server/wrangler.json`，不要部署源码配置中的入口。
+不要同时启用两个集成的生产自动部署，以免重复构建与相互覆盖。
+
+静态 JS、CSS、图片和字体由 `dist/client` 资源层优先处理。ViNext 的静态资源缓存
+适配器会打包可预渲染页面；`run_worker_first` 仅针对内部
+`/_vinext/static-cache/*` 路径，避免绕过适配器的缓存访问检查，并非全站 worker 优先。
+搜索页、API 和未预渲染的详情页仍需要 worker；迁移框架不代表这些请求不再消耗额度。
+未配置额外付费缓存存储或 Cloudflare images 绑定，图片保持原样提供。
 
 ### 反馈与支持
 
@@ -118,7 +134,7 @@ GoodAction Hub 是一个聚合公益活动信息与无障碍餐饮指南的开�
 
 ### 技术栈
 
-- **框架**: [Next.js][9]
+- **框架**: [ViNext][14] / Vite，兼容 [Next.js App router][9]
 - **UI**: [Tailwind CSS][10] & [shadcn/ui][11]
 - **状态管理**: [Zustand][12]
 - **搜索**: [Fuse.js][13]
@@ -136,3 +152,4 @@ GoodAction Hub 是一个聚合公益活动信息与无障碍餐饮指南的开�
 [11]: https://ui.shadcn.com/
 [12]: https://github.com/pmndrs/zustand
 [13]: https://github.com/krisk/fuse
+[14]: https://github.com/cloudflare/vinext
